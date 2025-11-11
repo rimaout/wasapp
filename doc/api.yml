@@ -1,21 +1,25 @@
 openapi: 3.0.0
 
 info:
-  title: API documentation for the Wasapp service.
+  title: Wasapp Service API Documentation
   description: |
     API for interacting with Wasapp, a messaging service.
   version: 1.0.0
 
+# ================================================================
+
 paths:
 
+  # -------------------- LOGIN --------------------
   /session:
     post:
-      tags: ["login"]
-      summary: Logs in the user
+      tags: ["login", "user-management"]
+      summary: Log in a user
       description: |
-        If the user does not exist, it will be created, and an identifier is returned.
-        If the user exists, the user identifier is returned.
+        If the user does not exist, a new user will be created and both the user identifier and an authentication token will be returned.
+        If the user already exists, the user identifier and an authentication token will be returned.
       operationId: doLogin
+      security: []    # This operation does not require authentication
       requestBody:
         description: User details
         required: true
@@ -24,35 +28,34 @@ paths:
             schema:
               $ref: '#/components/schemas/LoginRequest'
       responses:
-        '201':
-          description: User created, and User log-in action successful
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Identifier'
         '200':
-          description: User log-in action successful
+          description: Login successful.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Identifier'
+                $ref: "#/components/schemas/AuthResponse"
+        '201':
+          description: User created and logged in successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
         '400':
-          description: Bad request
+          description: Bad request – invalid username.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /user/{userID}/username:
+  # -------------------- USERNAME UPDATE --------------------
+  /users/{userID}/username:
     parameters:
-      - $ref: "#/components/parameters/UserID"
+      - $ref: '#/components/parameters/UserID'
       
     patch:
-      tags: ["profile-management"]
-      summary: "Update user's name"
+      tags: ["user-management"]
+      summary: Update user's username
       operationId: setMyUserName
-      security:
-        - bearerAuth: []
       requestBody:
         required: true
         content:
@@ -61,106 +64,130 @@ paths:
               type: object
               properties:
                 userName:
-                  $ref: "#/components/schemas/UserName"
+                  $ref: '#/components/schemas/UserName'
       responses:
         "200":
-          description: Successfully updated user name
+          description: Username updated successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/User"
+                $ref: '#/components/schemas/User'
         "400":
-          description: Invalid username (too short/too long)
+          description: Invalid username (too short or too long or invalid chars).
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed
+          description: Authentication required or failed.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden—changing another user's name is not allowed
+          description: Forbidden — You can only change your own username, not another user's.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "404":
-          description: User not found
+          description: User not found.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
         "409":
-          description: Username already in use
+          description: Username already in use.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
+                $ref: '#/components/schemas/Error'
+
+
+# ================================================================
+
+# By default, all operations require authentication.
+# Add "security: []" to an operation to specify that it does not require authentication
+security:
+  - BearerAuth: []
 
 components:
   parameters:
-
     UserID:
       name: userID
       in: path
-      description: A user's unique id
+      description: A user's unique identifier.
       required: true
-      schema:
-        $ref: "#/components/schemas/UserID"
+      schema: { $ref: '#/components/schemas/UserID' }
+  
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: "JWT"
+
+  # ================================================================
 
   schemas:
+    # -------------------- BASE COMPONENTS --------------------
+    # Basic components used in various schemas
     
     BaseID:
-      type: integer
-      format: int64 
+      type: string
+      format: uuid
       readOnly: true
-      example: 12345
-    
-    UserID:
-      allOf:
-        - $ref: '#/components/schemas/BaseID'
-        - description: Unique identifier for the user assigned by the server.
+      example: "550e8400-e29b-41d4-a716-446655440000"
 
-    LoginRequest:
-      type: object
-      required: [userName]
-      properties:
-        userName:
-          $ref: '#/components/schemas/UserName'
+    BaseName:
+      type: string
+      pattern: '^[A-Za-z0-9]+$'
+      minLength: 3
+      maxLength: 16
 
-    Identifier:
-      type: object
-      properties:
-        identifier:
-          $ref: '#/components/schemas/UserID'
-    
+    # -------------------- USER -------------------- 
     User:
       type: object
       description: Represents a user of the platform.
       required: [userID, userName]
       properties:
-        userID:
-          $ref: '#/components/schemas/UserID'
-        userName:
-          $ref: '#/components/schemas/UserName'
-        profilePic:
-          $ref: '#/components/schemas/ProfilePic'
+        userID:     { $ref: '#/components/schemas/UserID' }
+        userName:   { $ref: '#/components/schemas/UserName' }
+
+    UserID:
+      allOf:
+        - $ref: '#/components/schemas/BaseID'
+        - description: Unique identifier assigned to the user by the server.
 
     UserName:
-      type: string
-      pattern: '^.*?$'
-      minLength: 3
-      maxLength: 16
-      example: Feldspar
+      allOf:
+        - $ref: '#/components/schemas/BaseName'
+        - description: Unique username visible to other users.
+        - example: Feldspar 
+    
+    # -------------------- LOGIN --------------------
+    LoginRequest:
+      type: object
+      required: [userName]
+      properties:
+        userName: { $ref: '#/components/schemas/UserName' }
 
-    ProfilePic:
+    BearerToken:
+      description: |
+        Token used to fullfil the Bearer Authentication standard.
       type: string
-      format: uri
-      description: URL to the user's profile image
+      pattern: ^Bearer\s[A-Za-z0-9-._~+/]+={0,2}$
+      example: Bearer JhdkEN7QWidlYDjRTH8I~n99YJfqCC==
 
+    AuthResponse:
+      type: object
+      readOnly: true
+      properties:
+        identifier:
+          { $ref: "#/components/schemas/UserID" }
+        token:
+          { $ref: "#/components/schemas/BearerToken" }
+
+    # -------------------- ERRORS --------------------
     Error:
       type: object
       properties:
