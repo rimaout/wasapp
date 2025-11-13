@@ -2,7 +2,7 @@ openapi: 3.0.0
 
 info:
   title: Wasapp Service API Documentation
-  description: |
+  description: |-
     API for interacting with Wasapp, a messaging service.
   version: 1.0.0
 
@@ -20,9 +20,9 @@ paths:
   # -------------------- LOGIN --------------------
   /session:
     post:
-      tags: ["Login", "User Management"]
+      tags: ["Login"]
       summary: Log in a user
-      description: >
+      description: >-
         If the user does not exist, a new user will be created and both the user identifier and an authentication token will be returned.
         If the user already exists, the user identifier and an authentication token will be returned.
       operationId: doLogin
@@ -95,19 +95,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # -------------------- CHATS --------------------
+  # -------------------- CHATS PREVIEWS --------------------
   /chats:
     get:
       tags: ["Chats"]
       summary: Get chat previews for the logged-in user
-      description: >
+      description: >-
         Retrieve a list of chat previews belonging to the authenticated user.
         The chats are returned in order, sorted by the time of the last sent message (most recent first).
-      security: [ BearerAuth: [] ]
       operationId: getMyConversations
+      security: [ BearerAuth: [] ]
       responses:
         "200":
-          description: >
+          description: >-
             Chats returned successfully. 
             The chat previews array is ordered by the last message sent time, from most recent to oldest.
           content:
@@ -189,7 +189,7 @@ components:
       pattern: "^(?=.*[A-Za-z0-9_-])[A-Za-z0-9 _-]{3,24}$"
       minLength: 3
       maxLength: 24
-      description: >
+      description: >-
         The name must be 3 to 24 characters long. 
         Allowed characters are letters, numbers, spaces, underscores (_), and hyphens (-).
         The name needs at least one alpha-numeric character.
@@ -236,6 +236,7 @@ components:
     AuthResponse:
       type: object
       readOnly: true
+      required: [identifier, token]
       properties:
         identifier: { $ref: '#/components/schemas/UserID'      }
         token:      { $ref: '#/components/schemas/BearerToken' }
@@ -255,7 +256,7 @@ components:
 
     ChatPreview:
       type: object
-      description: > 
+      description: >-
         Represents a chat. Standard chats include two users; 
         group chats can be created with the group flag.
       required: [id, displayName]
@@ -268,7 +269,7 @@ components:
     ChatDisplayName:
       allOf:
         - $ref: '#/components/schemas/ChatName'
-        - description: |
+        - description: |-
             The name displayed in the chat preview.
               - For 1-on-1 chats: the name of the other user is displayed.
               - For group chats: the group name is displayed.
@@ -276,13 +277,13 @@ components:
     IsGroupChat:
       type: boolean
       readOnly: true
-      description: >
+      description: >-
         Indicates if it's a group chat. Used by the client to determine when to display additional group info.
         For example, if is a group chat, the client can show in the last message preview the sender's name.
 
     ChatLastMessage:
       type: object
-      description: >
+      description: >-
         Preview of the last message sent in the chat.
         It can be composed by a text or by an image or both in this case the text is used as caption.
       anyOf:
@@ -299,7 +300,7 @@ components:
     MessageStatus:
       type: string
       enum: [delivered, received, read] 
-      description: | 
+      description: |-
         Message read status:
           - 'delivered' means the message has been delivered to the server (default)
           - 'received' means the message has been received by all recipients (all participants except the sender)
@@ -307,7 +308,7 @@ components:
         This info is only useful when the requesting user sent the message, so the app can show in the preview of the chat if others have received/read your message.
     
     MessageContent:
-      description: >
+      description: >-
         Generic message content: only text, only image, or both 
         (in this case, the text is used as a caption for the image).
       oneOf:
@@ -332,7 +333,7 @@ components:
       minLength: 1
       maxLength: 3000
       pattern: '^/[\S\s]+[\S]+/'
-      description: >
+      description: >-
         The message text. Must contain at least one non-whitespace character.
         Cannot be made up only of spaces or other whitespace characters.
 
