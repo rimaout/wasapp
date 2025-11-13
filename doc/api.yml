@@ -8,18 +8,24 @@ info:
 
 # ================================================================
 
-paths:
+tags:
+  - name: Login
+    description: Endpoints for authentication
+  - name: User Management
+    description: Endpoints for user profile management of the logged user
+  - name: Chats
+    description: Endpoints for interacting with the chats of the logged user
 
+paths:
   # -------------------- LOGIN --------------------
   /session:
     post:
-      tags: ["login", "user-management"]
+      tags: ["Login", "User Management"]
       summary: Log in a user
-      description: |
+      description: >
         If the user does not exist, a new user will be created and both the user identifier and an authentication token will be returned.
         If the user already exists, the user identifier and an authentication token will be returned.
       operationId: doLogin
-      security: []    # This operation does not require authentication
       requestBody:
         description: User details
         required: true
@@ -33,15 +39,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthResponse"
+                $ref: '#/components/schemas/AuthResponse'
         '201':
           description: User created and logged in successfully.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthResponse"
+                $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Bad request – invalid username.
+          description: Bad request - invalid username.
           content:
             application/json:
               schema:
@@ -53,9 +59,10 @@ paths:
       - $ref: '#/components/parameters/UserID'
       
     patch:
-      tags: ["user-management"]
+      tags: ["User Management"]
       summary: Update user's username
       operationId: setMyUserName
+      security: [ BearerAuth: [] ]
       requestBody:
         required: true
         content:
@@ -106,11 +113,12 @@ paths:
   # -------------------- CHATS --------------------
   /users/{userID}/chats:
     get:
-      tags: ["chat"]
+      tags: ["Chats"]
       summary: Get chat previews for the logged-in user
       description: >
         Retrieve a list of chat previews belonging to the authenticated user.
         The chats are returned in order, sorted by the time of the last sent message (most recent first).
+      security: [ BearerAuth: [] ]
       operationId: getMyConversations
       responses:
         "200":
@@ -143,11 +151,6 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 # ================================================================
-
-# By default, all operations require authentication.
-# Add "security: []" to an operation to specify that it does not require authentication
-security:
-  - BearerAuth: []
 
 components:
   parameters:
@@ -182,14 +185,20 @@ components:
       minLength: 3
       maxLength: 16
 
+    BaseDateTime:
+      type: string
+      format: date-time
+      description: ISO 8601 timestamp
+      example: "2025-11-11T09:59:00Z"
+
     # -------------------- USER -------------------- 
     User:
       type: object
       description: Represents a user of the platform.
-      required: [userID, userName]
+      required: [id, name]
       properties:
-        userID:     { $ref: '#/components/schemas/UserID' }
-        userName:   { $ref: '#/components/schemas/UserName' }
+        id:     { $ref: '#/components/schemas/UserID'   }
+        name:   { $ref: '#/components/schemas/UserName' }
 
     UserID:
       allOf:
@@ -210,20 +219,17 @@ components:
         userName: { $ref: '#/components/schemas/UserName' }
 
     BearerToken:
-      description: |
-        Token used to fullfil the Bearer Authentication standard.
+      description: Token used to fullfil the Bearer Authentication standard.
       type: string
       pattern: ^Bearer\s[A-Za-z0-9-._~+/]+={0,2}$
-      example: Bearer JhdkEN7QWidlYDjRTH8I~n99YJfqCC==
+      example: "Bearer JhdkEN7QWidlYDjRTH8I~n99YJfqCC=="
 
     AuthResponse:
       type: object
       readOnly: true
       properties:
-        identifier:
-          { $ref: "#/components/schemas/UserID" }
-        token:
-          { $ref: "#/components/schemas/BearerToken" }
+        identifier: { $ref: '#/components/schemas/UserID'      }
+        token:      { $ref: '#/components/schemas/BearerToken' }
 
     # -------------------- CHAT -------------------- 
 
@@ -245,9 +251,9 @@ components:
         group chats can be created with the group flag.
       required: [id, displayName]
       properties:
-        id:           { $ref: '#/components/schemas/ChatID' }
+        id:           { $ref: '#/components/schemas/ChatID'          }
         displayName:  { $ref: '#/components/schemas/ChatDisplayName' }
-        isChatGroup:  { $ref: '#/components/schemas/IsGroupChat' }
+        isChatGroup:  { $ref: '#/components/schemas/IsGroupChat'     }
         lastMessage:  { $ref: '#/components/schemas/ChatLastMessage' }
 
     ChatDisplayName:
@@ -279,8 +285,8 @@ components:
         sendTime:   { $ref: '#/components/schemas/BaseDateTime'}
         senderName: { $ref: '#/components/schemas/UserName' }
 
+    
     # -------------------- MESSAGE -------------------- 
-
     MessageStatus:
       type: string
       enum: [received, read] #aggiungi sent
