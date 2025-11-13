@@ -123,11 +123,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # -------------------- USER SEARCH -------------------- 
+  /users:
+    get:
+      tags: ["Search"]
+      summary: List or search users on the platform
+      description: |-
+        Returns a list of users.
+          - If a 'username' query parameter is provided, returns users whose usernames most closely match the query (ordered by similarity).
+          - Otherwise, returns all users, ordered alphabetically by username.
+      parameters:
+        - name: username
+          in: query
+          description: Filter users whose username is similar to the provided value.
+          required: false
+          schema:
+            $ref: '#/components/schemas/UserName'
+      responses:
+        "200":
+          description: Users list returned successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 # ================================================================
 
 components:
   parameters:
-    UserID:
+    UserID: #TODO: for now it's not used
       name: userID
       in: path
       description: A user's unique identifier.
