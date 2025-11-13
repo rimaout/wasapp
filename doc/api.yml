@@ -103,6 +103,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # -------------------- CHATS --------------------
+  /users/{userID}/chats:
+    get:
+      tags: ["chat"]
+      summary: Get chat previews for the logged-in user
+      description: >
+        Retrieve a list of chat previews belonging to the authenticated user.
+        The chats are returned in order, sorted by the time of the last sent message (most recent first).
+      operationId: getMyConversations
+      responses:
+        "200":
+          description: >
+            Chats returned successfully. 
+            The chat previews array is ordered by the last message sent time, from most recent to oldest.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ChatPreview'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden, you can only access chats belonging to your own user account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: User not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 # ================================================================
 
@@ -186,6 +224,85 @@ components:
           { $ref: "#/components/schemas/UserID" }
         token:
           { $ref: "#/components/schemas/BearerToken" }
+
+    # -------------------- CHAT -------------------- 
+
+    ChatID:
+      allOf:
+        - $ref: '#/components/schemas/BaseID'
+        - description: Unique identifier assigned to the chat by the server.
+
+    ChatName:
+      allOf:
+        - $ref: '#/components/schemas/BaseName'
+        - description: Name of the chat
+        - example: Marco34
+
+    ChatPreview:
+      type: object
+      description: > 
+        Represents a chat. Standard chats include two users; 
+        group chats can be created with the group flag.
+      required: [id, displayName]
+      properties:
+        id:           { $ref: '#/components/schemas/ChatID' }
+        displayName:  { $ref: '#/components/schemas/ChatDisplayName' }
+        isChatGroup:  { $ref: '#/components/schemas/IsGroupChat' }
+        lastMessage:  { $ref: '#/components/schemas/ChatLastMessage' }
+
+    ChatDisplayName:
+      allOf:
+        - $ref: '#/components/schemas/ChatName'
+        - description: |
+            The name displayed in the chat preview.
+              - For 1-on-1 chats: the name of the other user is displayed.
+              - For group chats: the group name is displayed.
+
+    IsGroupChat:
+      type: boolean
+      readOnly: true
+      description: >
+        Indicates if it's a group chat. Used by the client to determine when to display additional group info.
+        For example, if is a group chat, the client can show in the last message preview the sender's name.
+
+    ChatLastMessage:
+      type: object
+      description: Preview of the last message sent in the chat.
+      anyOf:
+        - required: [text]
+        - required: [image]
+      required: [sendTime, senderName]
+      properties:
+        text:       { $ref: '#/components/schemas/MessageText' }
+        image:      { $ref: '#/components/schemas/MessageImage' }
+        status:     { $ref: '#/components/schemas/MessageStatus' }
+        sendTime:   { $ref: '#/components/schemas/BaseDateTime'}
+        senderName: { $ref: '#/components/schemas/UserName' }
+
+    # -------------------- MESSAGE -------------------- 
+
+    MessageStatus:
+      type: string
+      enum: [received, read] #aggiungi sent
+      description: | 
+        Message read status:
+          - For single chats: indicates if the message was received or read.
+          - For group chats: 'received' if at least 80% of group members have read it; 'read' if all have.
+        This info is only useful when the requesting user sent the message, so the app can show if others have received/read it.
+    
+    MessageText:
+      type: string
+      minLength: 1
+      maxLength: 3000
+      pattern: '^/[\S\s]+[\S]+/'
+      description: >
+        The message text. Must contain at least one non-whitespace character.
+        Cannot be made up only of spaces or other whitespace characters.
+
+    MessageImage:
+      type: string
+      format: binary
+      # TODO: for now I will leave it like this, but i still haven't decided how do images
 
     # -------------------- ERRORS --------------------
     Error:
