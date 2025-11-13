@@ -54,13 +54,10 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- USERNAME UPDATE --------------------
-  /users/{userID}/username:
-    parameters:
-      - $ref: '#/components/parameters/UserID'
-      
+  /username: 
     patch:
       tags: ["User Management"]
-      summary: Update user's username
+      summary: Update the username of the logged-in user
       operationId: setMyUserName
       security: [ BearerAuth: [] ]
       requestBody:
@@ -91,18 +88,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        "403":
-          description: Forbidden — You can only change your own username, not another user's.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: User not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
         "409":
           description: Username already in use.
           content:
@@ -111,7 +96,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- CHATS --------------------
-  /users/{userID}/chats:
+  /chats:
     get:
       tags: ["Chats"]
       summary: Get chat previews for the logged-in user
@@ -133,18 +118,6 @@ paths:
                   $ref: '#/components/schemas/ChatPreview'
         "401":
           description: Authentication required or failed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "403":
-          description: Forbidden, you can only access chats belonging to your own user account.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: User not found.
           content:
             application/json:
               schema:
