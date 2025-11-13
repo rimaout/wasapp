@@ -181,9 +181,13 @@ components:
 
     BaseName:
       type: string
-      pattern: '^[A-Za-z0-9]+$'
+      pattern: "^(?=.*[A-Za-z0-9_-])[A-Za-z0-9 _-]{3,24}$"
       minLength: 3
-      maxLength: 16
+      maxLength: 24
+      description: >
+        The name must be 3 to 24 characters long. 
+        Allowed characters are letters, numbers, spaces, underscores (_), and hyphens (-).
+        The name needs at least one alpha-numeric character.
 
     BaseDateTime:
       type: string
@@ -273,29 +277,51 @@ components:
 
     ChatLastMessage:
       type: object
-      description: Preview of the last message sent in the chat.
+      description: >
+        Preview of the last message sent in the chat.
+        It can be composed by a text or by an image or both in this case the text is used as caption.
       anyOf:
         - required: [text]
         - required: [image]
-      required: [sendTime, senderName]
+      required: [content, status, sendTime, senderName]
       properties:
-        text:       { $ref: '#/components/schemas/MessageText' }
-        image:      { $ref: '#/components/schemas/MessageImage' }
-        status:     { $ref: '#/components/schemas/MessageStatus' }
-        sendTime:   { $ref: '#/components/schemas/BaseDateTime'}
-        senderName: { $ref: '#/components/schemas/UserName' }
-
+        status:     { $ref: '#/components/schemas/MessageStatus'   }
+        content:    { $ref: '#/components/schemas/MessageContent'  }
+        sendTime:   { $ref: '#/components/schemas/BaseDateTime'    }
+        senderName: { $ref: '#/components/schemas/UserName'        }
     
     # -------------------- MESSAGE -------------------- 
     MessageStatus:
       type: string
-      enum: [received, read] #aggiungi sent
+      enum: [delivered, received, read] 
       description: | 
         Message read status:
-          - For single chats: indicates if the message was received or read.
-          - For group chats: 'received' if at least 80% of group members have read it; 'read' if all have.
-        This info is only useful when the requesting user sent the message, so the app can show if others have received/read it.
+          - 'delivered' means the message has been delivered to the server (default)
+          - 'received' means the message has been received by all recipients (all participants except the sender)
+          - 'read' means the message has been read by all recipients (all participants except the sender)
+        This info is only useful when the requesting user sent the message, so the app can show in the preview of the chat if others have received/read your message.
     
+    MessageContent:
+      description: >
+        Generic message content: only text, only image, or both 
+        (in this case, the text is used as a caption for the image).
+      oneOf:
+        - type: object
+          required: [text]
+          properties:
+            text: { $ref: '#/components/schemas/MessageText' }
+        #--------------------------
+        - type: object
+          required: [image]
+          properties:
+            image: { $ref: '#/components/schemas/MessageImage' }  
+        #--------------------------
+        - type: object
+          required: [text, image]
+          properties:
+            text:   { $ref: '#/components/schemas/MessageText'  }
+            image:  { $ref: '#/components/schemas/MessageImage' }
+
     MessageText:
       type: string
       minLength: 1
