@@ -145,9 +145,47 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-# ================================================================
+  # -------------------- CHATS MESSAGES --------------------
+  /chats/{chatID}/messages:
+    get:
+      parameters: [ $ref: '#/components/parameters/ChatID' ]
+      tags: ["Chats"]
+      summary: Retrieve all messages for a specific chat    
+      description: >- #TODO: updated description when paging is implemented 
+        Returns all messages belonging to the specified chat. 
+      operationId: getConversation
+      security: [ BearerAuth: [] ]
+      responses:
+        "200":
+          description: >-
+            Chat messages returned successfully. 
+            The messages array is ordered by the last message sent time, from most recent to oldest.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessagesListResponse'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 
 components:
+  
+  # ================================================================
+  
+  parameters:
+    ChatID:
+      name: chatID
+      in: path
+      description: A chat unique identifier.
+      required: true
+      schema: { $ref: '#/components/schemas/ChatID' }
+  
+  # ================================================================
+  
   securitySchemes:
     BearerAuth:
       type: http
@@ -304,6 +342,7 @@ components:
         sender:        { $ref: '#/components/schemas/User'                 }
         receiversList: { $ref: '#/components/schemas/MessageReceiversList' }
         viewersList:   { $ref: '#/components/schemas/MessageViewersList'   }
+        #TODO: add reactions, forward, comment, delete
 
     MessageID:
       allOf:
@@ -344,6 +383,33 @@ components:
       type: string
       format: binary
       # TODO: for now I will leave it like this, but i still haven't decided how do images
+
+    MessageReceiversList:
+      type: array
+      description: List of the users who received the message.
+      items:
+        $ref: '#/components/schemas/User'
+
+    MessageViewersList:
+      type: array
+      description: List of the users who viewed the message.
+      items:
+        $ref: '#/components/schemas/User'
+
+    MessageStatus:
+      type: string
+      enum: [delivered, received, read] 
+      description: |-
+        Message read status:
+          - 'delivered' means the message has been delivered to the server (default)
+          - 'received' means the message has been received by all recipients (all participants except the sender)
+          - 'read' means the message has been read by all recipients (all participants except the sender)
+        This info is only useful when the requesting user sent the message, so the app can show in the preview of the chat if others have received/read your message.
+    
+    MessagesListResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/Message'
 
     # -------------------- ERRORS --------------------
     Error:
