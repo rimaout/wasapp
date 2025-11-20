@@ -352,6 +352,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden - you do not have access to the specified chat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Chat not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    # -------------------- SEND CHAT MESSAGE --------------------
+    post:
+      tags: ["Chat Operations"]
+      summary: Send a message in the specified chat
+      operationId: sendMessage
+      security: [ BearerAuth: [] ]
+      requestBody:
+        description: The new message to send in the specified chat.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewMessageRequest' 
+      responses:
+        "201":
+          description: Message created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "400":
+          description: Bad request - invalid message content or missing required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden - you are not allowed to send messages in this chat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         "404":
           description: Chat not found.
           content:
@@ -599,6 +650,14 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/User'
+
+    NewMessageRequest:
+      type: object
+      description: List of the users who viewed the message.
+      required: [content, sendTime]
+      properties:
+        content:       { $ref: '#/components/schemas/MessageContent'       }
+        sendTime:      { $ref: '#/components/schemas/BaseDateTime'         }
 
     # -------------------- GROUPS --------------------
 
