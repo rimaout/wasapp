@@ -498,9 +498,6 @@ components:
       description: >-
         Preview of the last message sent in the chat.
         It can be composed by a text or by an image or both in this case the text is used as caption.
-      anyOf:
-        - required: [text]
-        - required: [image]
       required: [content, status, sendTime, senderName]
       properties:
         status:     { $ref: '#/components/schemas/MessageStatus'   }
@@ -520,7 +517,7 @@ components:
       description: >- 
         Represents a message in a chat,
         includes all the need information to display the massage in a chat
-      required: [content]
+      required: [id, chatID, content, sendTime, sender, receiversList, viewersList]
       properties:
         id:            { $ref: '#/components/schemas/MessageID'            }
         chatID:        { $ref: '#/components/schemas/ChatID'               }
