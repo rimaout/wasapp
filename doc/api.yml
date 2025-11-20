@@ -75,7 +75,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/UsersListResponse'
+                properties:
+                  usersList:
+                    $ref: '#/components/schemas/UsersListResponse'
 
   # -------------------- USERNAME UPDATE --------------------
   /username: 
@@ -85,6 +87,7 @@ paths:
       operationId: setMyUserName
       security: [ BearerAuth: [] ]
       requestBody:
+        description: The new name for the logged-in user.
         required: true
         content:
           application/json:
@@ -137,7 +140,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatsPreviewListRespose' 
+                properties:
+                  chatsPreviewList: 
+                    $ref: '#/components/schemas/ChatsPreviewListRespose' 
         "401":
           description: Authentication required or failed.
           content:
@@ -146,6 +151,8 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /chats/{chatID}/members:
+    parameters: [ $ref: '#/components/parameters/ChatID' ]
+    
     # -------------------- CHAT GET USERS --------------------
     get:
       tags: ["Chat Operations"]
@@ -153,7 +160,6 @@ paths:
       description: >
         Returns the list of users who are members in the specified chat.
         Each item includes the user ID and username.
-      parameters: [ $ref: '#/components/parameters/ChatID' ]
       security: [ BearerAuth: [] ]
       responses:
         "200":
@@ -163,7 +169,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatUsersListResponse'
+                properties:
+                  membersList:
+                    $ref: '#/components/schemas/ChatUsersListResponse'
         "401":
           description: Authentication required or failed.
           content:
@@ -184,7 +192,6 @@ paths:
       description: >
         Adds the user associated with the given user ID to the group identified by the specified chat ID.
         To add a user to the group, you must already be a member.
-      parameters: [ $ref: '#/components/parameters/ChatID' ]
       security: [ BearerAuth: [] ]
       operationId: addToGroup
       requestBody:
@@ -200,7 +207,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatUsersListResponse'
+                properties:
+                  membersList:
+                    $ref: '#/components/schemas/ChatUsersListResponse'
         '400':
           description: Bad request - invalid UserID.
           content:
@@ -237,7 +246,6 @@ paths:
       tags: ["Chat Operations"]
       summary: Leave the group
       description: Removes the logged-in user from the group identified by the specified chat ID.
-      parameters: [ $ref: '#/components/parameters/ChatID' ]
       security: [ BearerAuth: [] ]
       operationId: leaveGroup
       responses:
@@ -264,7 +272,9 @@ paths:
     
   # -------------------- CHANGE GROUP NAME --------------------    
   /chats/{chatID}/name:
-   patch:
+    parameters: [ $ref: '#/components/parameters/ChatID' ]
+    
+    patch:
       tags: ["Chat Operations"]
       summary: Change the name of the specified group
       description: >-
@@ -314,12 +324,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # -------------------- CHAT MESSAGES --------------------
   /chats/{chatID}/messages:
+    parameters: [ $ref: '#/components/parameters/ChatID' ]
+
+    # -------------------- CHAT MESSAGES --------------------
     get:
-      parameters: [ $ref: '#/components/parameters/ChatID' ]
       tags: ["Chat Operations"]
-      summary: Retrieve all messages for a specific chat    
+      summary: Retrieve all messages for the specified chat    
       description: >- #TODO: updated description when paging is implemented 
         Returns all messages belonging to the specified chat. 
       operationId: getConversation
@@ -332,7 +343,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/MessagesListResponse'
+                properties:
+                  messageList:
+                    $ref: '#/components/schemas/MessagesListResponse'
         "401":
           description: Authentication required or failed.
           content:
