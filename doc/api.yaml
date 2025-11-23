@@ -327,7 +327,7 @@ paths:
   /chats/{chatID}/messages:
     parameters: [ $ref: '#/components/parameters/ChatID' ]
 
-    # -------------------- CHAT MESSAGES --------------------
+    # -------------------- GET CHAT MESSAGES --------------------
     get:
       tags: ["Chat Operations"]
       summary: Retrieve all messages for the specified chat    
@@ -409,10 +409,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-
-components:
   
-  # ================================================================
+  # -------------------- DELETE CHAT MESSAGE --------------------
+  /chats/{chatID}/messages/{messageID}:
+    parameters: 
+      - $ref: '#/components/parameters/ChatID'
+      - $ref: '#/components/parameters/MessageID' 
+    
+    delete:
+      tags: ["Chat Operations"]
+      summary: Delete a specific message from the specified chat
+      description: |-
+        Deletes the message identified by messageID from the chat identified by chatID. 
+        The authenticated user must be the same user that sent the message.
+          - Subsequent reads of this message will return it with 'isDeleted' set to true and 'content' set to null, so clients can display it as a deleted message.
+      operationId: deleteMessage
+      security: [ BearerAuth: [] ] 
+      responses:
+        "204":
+          description: Message marked as deleted successfully. No content is returned.
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden - you are not allowed to delete this message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Chat or message not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+# ================================================================
+components:  
   
   parameters:
     ChatID:
@@ -421,6 +457,13 @@ components:
       description: A chat unique identifier.
       required: true
       schema: { $ref: '#/components/schemas/ChatID' }
+    
+    MessageID:
+      name: messageID
+      in: path
+      description: The messagge ID that uniquely identifies the message within its chat.
+      required: true
+      schema: { $ref: '#/components/schemas/MessageID' }
   
   # ================================================================
   
@@ -565,24 +608,32 @@ components:
 
     Message:
       type: object
-      description: >- 
-        Represents a message in a chat,
-        includes all the need information to display the massage in a chat
-      required: [id, chatID, content, sendTime, sender, receiversList, viewersList]
+      description: |- 
+        Represents a message in a chat and includes all the information needed to display it.
+          - If the 'isDeleted' flag is true, the message content will not be returned by the server (content will be null), and the client should render it as a deleted message.
+
+      required: [id, chatID, sendTime, sender, receiversList, viewersList, isDeleted, content]
       properties:
         id:            { $ref: '#/components/schemas/MessageID'            }
         chatID:        { $ref: '#/components/schemas/ChatID'               }
-        content:       { $ref: '#/components/schemas/MessageContent'       }
         sendTime:      { $ref: '#/components/schemas/BaseDateTime'         }
         sender:        { $ref: '#/components/schemas/User'                 }
         receiversList: { $ref: '#/components/schemas/MessageReceiversList' }
         viewersList:   { $ref: '#/components/schemas/MessageViewersList'   }
-        #TODO: add reactions, forward, comment, delete
+        isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }        
+        content:
+          $ref: '#/components/schemas/MessageContent'
+          nullable: true
+
+        #TODO: add reactions, forward, comment, 
+        #   maybe remove receiversList and viewersList and use just a status flag (just like in ChatLastMessage)
 
     MessageID:
       allOf:
         - $ref: '#/components/schemas/BaseID'
-        - description: Unique identifier assigned to the message by the server.
+        - description: >-
+            Unique identifier assigned to the message by the server.
+            A MessageID uniquely identifies a message only within its chat.
 
     MessageContent:
       description: >-
@@ -630,6 +681,13 @@ components:
       description: List of the users who viewed the message.
       items:
         $ref: '#/components/schemas/User'
+
+    MessageIsDeletedFlag:
+      type: boolean
+      description: >-
+        Indicates whether the message content has been deleted.
+        If true, the message content is not returned by the server,
+        and the client should display this message as deleted.
 
     MessageStatus:
       type: string
