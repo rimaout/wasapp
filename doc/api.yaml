@@ -365,7 +365,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     
-    # -------------------- SEND CHAT MESSAGE --------------------
+    # -------------------- SEND MESSAGE --------------------
     post:
       tags: ["Chat Operations"]
       summary: Send a message in the specified chat
@@ -410,12 +410,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
   
-  # -------------------- DELETE CHAT MESSAGE --------------------
+  # -------------------- DELETE MESSAGE --------------------
   /chats/{chatID}/messages/{messageID}:
     parameters: 
       - $ref: '#/components/parameters/ChatID'
       - $ref: '#/components/parameters/MessageID' 
-    
+      
     delete:
       tags: ["Chat Operations"]
       summary: Delete a specific message from the specified chat
@@ -442,6 +442,59 @@ paths:
                 $ref: '#/components/schemas/Error'
         "404":
           description: Chat or message not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              
+  # -------------------- REPLY MESSAGE --------------------
+  /chats/{chatID}/messages/{messageID}/replies:
+    parameters:
+      - $ref: '#/components/parameters/ChatID'
+      - $ref: '#/components/parameters/MessageID'
+
+    post:
+      tags: ["Chat Operations"]
+      summary: Add a comment replying to a specific message
+      description: >
+        Creates a new message in the specified chat that replies to
+        the message identified by messageID.
+      operationId: replyMessage
+      security: [ BearerAuth: [] ]
+      requestBody:
+        description: The new message sent as a reply to the specified message.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewMessageRequest' 
+      responses:
+        "201":
+          description: Reply message created successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "400":
+          description: Bad request - invalid message content or missing required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden - you are not allowed to send messages in this chat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Chat or referenced message not found.
           content:
             application/json:
               schema:
@@ -611,8 +664,8 @@ components:
       description: |- 
         Represents a message in a chat and includes all the information needed to display it.
           - If the 'isDeleted' flag is true, the message content will not be returned by the server (content will be null), and the client should render it as a deleted message.
-
-      required: [id, chatID, sendTime, sender, receiversList, viewersList, isDeleted, content]
+          - If 'replyTo' is null, this message is not a reply. If it is not null, it contains the ID of the message in the same chat that this message is replying to.
+      required: [id, chatID, sendTime, sender, receiversList, viewersList, isDeleted, replyTo, content]
       properties:
         id:            { $ref: '#/components/schemas/MessageID'            }
         chatID:        { $ref: '#/components/schemas/ChatID'               }
@@ -620,7 +673,10 @@ components:
         sender:        { $ref: '#/components/schemas/User'                 }
         receiversList: { $ref: '#/components/schemas/MessageReceiversList' }
         viewersList:   { $ref: '#/components/schemas/MessageViewersList'   }
-        isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }        
+        isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }
+        replyTo:
+          $ref: '#/components/schemas/ReplyToMessageID'
+          nullable: true
         content:
           $ref: '#/components/schemas/MessageContent'
           nullable: true
@@ -699,6 +755,12 @@ components:
           - 'read' means the message has been read by all recipients (all participants except the sender)
         This info is only useful when the requesting user sent the message, so the app can show in the preview of the chat if others have received/read your message.
     
+    ReplyToMessageID:
+      $ref: '#/components/schemas/MessageID'
+      description: >
+        Identifier of the message in the same chat that this message is replying to.
+        If absent, this message is not a reply.
+
     MessagesListResponse:
       type: array
       items:
@@ -714,8 +776,8 @@ components:
       description: List of the users who viewed the message.
       required: [content, sendTime]
       properties:
-        content:       { $ref: '#/components/schemas/MessageContent'       }
-        sendTime:      { $ref: '#/components/schemas/BaseDateTime'         }
+        content:  { $ref: '#/components/schemas/MessageContent' }
+        sendTime: { $ref: '#/components/schemas/BaseDateTime'   }
 
     # -------------------- GROUPS --------------------
 
