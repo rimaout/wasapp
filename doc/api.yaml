@@ -426,8 +426,12 @@ paths:
       operationId: deleteMessage
       security: [ BearerAuth: [] ] 
       responses:
-        "204":
-          description: Message marked as deleted successfully. No content is returned.
+        "200":
+          description: Message marked as deleted successfully. Returns the updated message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
         "401":
           description: Authentication required or failed.
           content:
@@ -752,14 +756,13 @@ components:
         Represents a message in a chat and includes all the information needed to display it.
           - If the 'isDeleted' flag is true, the message content will not be returned by the server (content will be null), and the client should render it as a deleted message.
           - If 'replyTo' is null, this message is not a reply. If it is not null, it contains the ID of the message in the same chat that this message is replying to.
-      required: [id, chatID, sendTime, sender, receiversList, viewersList, isDeleted, reactionsList, replyTo, content]
+      required: [id, chatID, sendTime, sender, status, isDeleted, reactionsList, replyTo, content]
       properties:
         id:            { $ref: '#/components/schemas/MessageID'            }
         chatID:        { $ref: '#/components/schemas/ChatID'               }
         sendTime:      { $ref: '#/components/schemas/BaseDateTime'         }
         sender:        { $ref: '#/components/schemas/User'                 }
-        receiversList: { $ref: '#/components/schemas/MessageReceiversList' }
-        viewersList:   { $ref: '#/components/schemas/MessageViewersList'   }
+        status:        { $ref: '#/components/schemas/MessageStatus'   }
         isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }
         reactionsList: { $ref: '#/components/schemas/EmojiReactionsList'   }
         replyTo:
@@ -770,7 +773,6 @@ components:
           nullable: true
 
         #TODO: forward
-        #   maybe remove receiversList and viewersList and use just a status flag (just like in ChatLastMessage)
 
     MessageID:
       allOf:
@@ -813,18 +815,6 @@ components:
       type: string
       format: binary
       # TODO: for now I will leave it like this, but i still haven't decided how do images
-
-    MessageReceiversList:
-      type: array
-      description: List of the users who received the message.
-      items:
-        $ref: '#/components/schemas/User'
-
-    MessageViewersList:
-      type: array
-      description: List of the users who viewed the message.
-      items:
-        $ref: '#/components/schemas/User'
 
     MessageIsDeletedFlag:
       type: boolean
@@ -909,6 +899,7 @@ components:
         userID: { $ref: '#/components/schemas/UserID' }
 
     # -------------------- ERRORS --------------------
+
     Error:
       type: object
       properties:
