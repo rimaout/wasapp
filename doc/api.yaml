@@ -500,6 +500,93 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # -------------------- ADD REACTION TO MESSAGE --------------------
+  /chats/{chatID}/messages/{messageID}/reactions:
+    parameters:
+      - $ref: '#/components/parameters/ChatID'
+      - $ref: '#/components/parameters/MessageID'
+
+    post:
+      tags: ["Chat Operations"]
+      summary: Add an emoji reaction to a specific message
+      description: >-
+        Lets the user react to the specified message with an emoji. If the user has
+        already reacted to this message, the existing reaction is replaced with the new one.
+      operationId: commentMessage
+      security: [ BearerAuth: [] ]
+      requestBody:
+        description: The emoji to use as a reaction.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmojiReactionRequest'
+      responses:
+        "201":
+          description: Reaction added or updated for the message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "400":
+          description: Bad request - invalid emojiID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden - you are not allowed to access this chat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Chat or referenced message not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
+    delete:
+      tags: ["Chat Operations"]
+      summary: Remove the logged-in user's reaction from the specified message
+      description: >
+        Lets the logged-in user remove their reaction from the specified message.
+      operationId: uncommentMessage
+      security: [ BearerAuth: [] ]
+      responses:
+        "200":
+          description: Reaction removed successfully. Returns the updated message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden - you are not allowed to access this chat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Chat, message, or reaction not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
 # ================================================================
 components:  
   
@@ -665,7 +752,7 @@ components:
         Represents a message in a chat and includes all the information needed to display it.
           - If the 'isDeleted' flag is true, the message content will not be returned by the server (content will be null), and the client should render it as a deleted message.
           - If 'replyTo' is null, this message is not a reply. If it is not null, it contains the ID of the message in the same chat that this message is replying to.
-      required: [id, chatID, sendTime, sender, receiversList, viewersList, isDeleted, replyTo, content]
+      required: [id, chatID, sendTime, sender, receiversList, viewersList, isDeleted, reactionsList, replyTo, content]
       properties:
         id:            { $ref: '#/components/schemas/MessageID'            }
         chatID:        { $ref: '#/components/schemas/ChatID'               }
@@ -674,6 +761,7 @@ components:
         receiversList: { $ref: '#/components/schemas/MessageReceiversList' }
         viewersList:   { $ref: '#/components/schemas/MessageViewersList'   }
         isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }
+        reactionsList: { $ref: '#/components/schemas/EmojiReactionsList'   }
         replyTo:
           $ref: '#/components/schemas/ReplyToMessageID'
           nullable: true
@@ -681,7 +769,7 @@ components:
           $ref: '#/components/schemas/MessageContent'
           nullable: true
 
-        #TODO: add reactions, forward, comment, 
+        #TODO: forward
         #   maybe remove receiversList and viewersList and use just a status flag (just like in ChatLastMessage)
 
     MessageID:
@@ -778,6 +866,39 @@ components:
       properties:
         content:  { $ref: '#/components/schemas/MessageContent' }
         sendTime: { $ref: '#/components/schemas/BaseDateTime'   }
+
+    # -------------------- EMOJI REACTIONS --------------------
+
+    EmojiID:
+      type: integer
+      description: >-
+        Numeric identifier of the emoji used as a reaction. The mapping
+        between emojiID and actual emojis is defined in the documentation.
+      minimum: 1
+      maximum: 5
+
+    EmojiReaction:
+      type: object
+      description: >-
+        Represents a reaction to a message, including the user who 
+        reacted and the emoji they used.
+      required: [userID, emojiID]
+      properties:
+        userID:  { '#/components/schemas/UserID'  }
+        emojiID: { '#/components/schemas/EmojiID' }
+
+    EmojiReactionsList:
+      description: List of emoji reactions associated with the message. 
+      type: array
+      items:
+        - $ref: '#/components/schemas/EmojiReactionRequest'
+
+    EmojiReactionRequest:
+      type: object
+      description: Represents a reaction to a message made by the logged-in user.
+      required: [userID]
+      properties:
+        userID:  { '#/components/schemas/UserID'  }  
 
     # -------------------- GROUPS --------------------
 
