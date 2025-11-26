@@ -11,6 +11,8 @@ info:
 tags:
   - name: Login
     description: Endpoints for authentication
+  - name: Search
+    description: Endpoints for searching users
   - name: User Management
     description: Endpoints for user profile management of the logged user
   - name: Chat Operations
@@ -372,7 +374,9 @@ paths:
       operationId: sendMessage
       security: [ BearerAuth: [] ]
       requestBody:
-        description: The new message to send in the specified chat.
+        description: >-
+          The message content and sent time used to create the 
+          new message in the specified chat.
         required: true
         content:
           application/json:
@@ -557,6 +561,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     
+    # -------------------- REMOVE REACTION TO MESSAGE --------------------
     delete:
       tags: ["Chat Operations"]
       summary: Remove the logged-in user's reaction from the specified message
@@ -599,7 +604,7 @@ paths:
     post:
       tags: ["Chat Operations"]
       summary: Forward the specified message.
-      description: >- #todo
+      description: >-
         Allows the user to forward the selected message to another chat.
         The ID of the destination chat must be specified in the request body.
       operationId: forwardMessage
@@ -818,7 +823,7 @@ components:
         chatID:        { $ref: '#/components/schemas/ChatID'               }
         sendTime:      { $ref: '#/components/schemas/BaseDateTime'         }
         sender:        { $ref: '#/components/schemas/User'                 }
-        status:        { $ref: '#/components/schemas/MessageStatus'   }
+        status:        { $ref: '#/components/schemas/MessageStatus'        }
         isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }
         reactionsList: { $ref: '#/components/schemas/EmojiReactionsList'   }
         forwardedFrom:
@@ -891,10 +896,11 @@ components:
         This info is only useful when the requesting user sent the message, so the app can show in the preview of the chat if others have received/read your message.
     
     ReplyToMessageID:
-      $ref: '#/components/schemas/MessageID'
-      description: >
-        Identifier of the message in the same chat that this message is replying to.
-        If absent, this message is not a reply.
+      allOf:
+        - $ref: '#/components/schemas/MessageID'
+        - description: >-
+            Identifier of the message in the same chat that this message is replying to.
+            If absent, this message is not a reply.
 
     ForwardedFromInfo:
       type: object
@@ -916,7 +922,6 @@ components:
 
     NewMessageRequest:
       type: object
-      description: List of the users who viewed the message.
       required: [content, sendTime]
       properties:
         content:  { $ref: '#/components/schemas/MessageContent' }
@@ -953,7 +958,7 @@ components:
       description: List of emoji reactions associated with the message. 
       type: array
       items:
-        - $ref: '#/components/schemas/EmojiReactionRequest'
+        $ref: '#/components/schemas/EmojiReactionRequest'
 
     EmojiReactionRequest:
       type: object
