@@ -827,14 +827,17 @@ components:
         isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }
         reactionsList: { $ref: '#/components/schemas/EmojiReactionsList'   }
         forwardedFrom:
-          $ref: '#/components/schemas/ForwardedFromInfo'
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ForwardedFromInfo'
+            - nullable: true
         replyTo:
-          $ref: '#/components/schemas/ReplyToMessageID'
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/ReplyToMessageID'
+            - nullable: true
         content:
-          $ref: '#/components/schemas/MessageContent'
-          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/MessageContent'
+            - nullable: true
 
     MessageID:
       allOf:
@@ -906,9 +909,9 @@ components:
       type: object
       description: Information about the original message this one was forwarded from.     
       required: [chatID, messageID]
-      parameters:
-        - chatID:    { $ref: '#/components/schemas/ChatID' }
-        - messageID: { $ref: '#/components/schemas/ChatID' } 
+      properties:
+        chatID:    { $ref: '#/components/schemas/ChatID' }
+        messageID: { $ref: '#/components/schemas/MessageID' } 
     
     MessagesListResponse:
       type: array
@@ -929,7 +932,7 @@ components:
 
     ForwardMessageRequest:
       type: object 
-      required: [chaID, sendTime]
+      required: [forwardTo, sendTime]
       properties:
         forwardTo: { $ref: '#/components/schemas/ChatID'       }
         sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
@@ -951,8 +954,8 @@ components:
         reacted and the emoji they used.
       required: [userID, emojiID]
       properties:
-        userID:  { '#/components/schemas/UserID'  }
-        emojiID: { '#/components/schemas/EmojiID' }
+        userID:  { $ref: '#/components/schemas/UserID'  }
+        emojiID: { $ref: '#/components/schemas/EmojiID' }
 
     EmojiReactionsList:
       description: List of emoji reactions associated with the message. 
@@ -965,7 +968,7 @@ components:
       description: Represents a reaction to a message made by the logged-in user.
       required: [userID]
       properties:
-        userID:  { '#/components/schemas/UserID'  }  
+        userID:  { $ref: '#/components/schemas/UserID'  }  
 
     # -------------------- GROUPS --------------------
 
