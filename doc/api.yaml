@@ -590,7 +590,63 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # -------------------- FORWARD MESSAGE --------------------
+  /chats/{chatID}/messages/{messageID}/forwards:
+    parameters:
+      - $ref: '#/components/parameters/ChatID'
+      - $ref: '#/components/parameters/MessageID'
 
+    post:
+      tags: ["Chat Operations"]
+      summary: Forward the specified message.
+      description: >- #todo
+        Allows the user to forward the selected message to another chat.
+        The ID of the destination chat must be specified in the request body.
+      operationId: forwardMessage
+      security: [ BearerAuth: [] ]
+      requestBody:
+        description: >- 
+          The chatID and sendTime to use to forward the message in
+          the destination chat.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ForwardMessageRequest'              
+      responses:
+        "201":
+          description: Message forwarded successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        "400":
+          description: Bad request - invalid message sendTime or missing required fields.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: >-
+            Forbidden - you are not allowed to send messages in this chat,
+            or you do not have access to the specified message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Origin chat, message, or destination chat not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    
 # ================================================================
 components:  
   
@@ -756,7 +812,7 @@ components:
         Represents a message in a chat and includes all the information needed to display it.
           - If the 'isDeleted' flag is true, the message content will not be returned by the server (content will be null), and the client should render it as a deleted message.
           - If 'replyTo' is null, this message is not a reply. If it is not null, it contains the ID of the message in the same chat that this message is replying to.
-      required: [id, chatID, sendTime, sender, status, isDeleted, reactionsList, replyTo, content]
+      required: [id, chatID, sendTime, sender, status, isDeleted, reactionsList, forwardedFrom, replyTo, content]
       properties:
         id:            { $ref: '#/components/schemas/MessageID'            }
         chatID:        { $ref: '#/components/schemas/ChatID'               }
@@ -765,14 +821,15 @@ components:
         status:        { $ref: '#/components/schemas/MessageStatus'   }
         isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }
         reactionsList: { $ref: '#/components/schemas/EmojiReactionsList'   }
+        forwardedFrom:
+          $ref: '#/components/schemas/ForwardedFromInfo'
+          nullable: true
         replyTo:
           $ref: '#/components/schemas/ReplyToMessageID'
           nullable: true
         content:
           $ref: '#/components/schemas/MessageContent'
           nullable: true
-
-        #TODO: forward
 
     MessageID:
       allOf:
@@ -839,6 +896,14 @@ components:
         Identifier of the message in the same chat that this message is replying to.
         If absent, this message is not a reply.
 
+    ForwardedFromInfo:
+      type: object
+      description: Information about the original message this one was forwarded from.     
+      required: [chatID, messageID]
+      parameters:
+        - chatID:    { $ref: '#/components/schemas/ChatID' }
+        - messageID: { $ref: '#/components/schemas/ChatID' } 
+    
     MessagesListResponse:
       type: array
       items:
@@ -856,6 +921,13 @@ components:
       properties:
         content:  { $ref: '#/components/schemas/MessageContent' }
         sendTime: { $ref: '#/components/schemas/BaseDateTime'   }
+
+    ForwardMessageRequest:
+      type: object 
+      required: [chaID, sendTime]
+      properties:
+        forwardTo: { $ref: '#/components/schemas/ChatID'       }
+        sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
 
     # -------------------- EMOJI REACTIONS --------------------
 
