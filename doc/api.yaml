@@ -80,7 +80,7 @@ paths:
                 $ref: '#/components/schemas/UsersSearchResponse'
 
   # -------------------- USERNAME UPDATE --------------------
-  /username: 
+  /me/username: 
     patch:
       tags: ["User Management"]
       summary: Update the username of the logged-in user
@@ -120,7 +120,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /chats:
+  /me/chats:
     # -------------------- CHATS PREVIEWS --------------------
     get:
       tags: ["Chat Operations"]
@@ -146,7 +146,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /chats/{chatID}/members:
+  /me/chats/{chatID}/members:
     parameters: [ $ref: '#/components/parameters/ChatID' ]
     
     # -------------------- CHAT GET USERS --------------------
@@ -156,6 +156,7 @@ paths:
       description: >
         Returns the list of users who are members in the specified chat.
         Each item includes the user ID and username.
+      operationId: getChatMembers
       security: [ BearerAuth: [] ]
       responses:
         "200":
@@ -263,7 +264,7 @@ paths:
                 $ref: '#/components/schemas/Error'
     
   # -------------------- CHANGE GROUP NAME --------------------    
-  /chats/{chatID}/name:
+  /me/chats/{chatID}/name:
     parameters: [ $ref: '#/components/parameters/ChatID' ]
     
     patch:
@@ -314,7 +315,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /chats/{chatID}/messages:
+  /me/chats/{chatID}/messages:
     parameters: [ $ref: '#/components/parameters/ChatID' ]
 
     # -------------------- GET CHAT MESSAGES --------------------
@@ -401,7 +402,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   
   # -------------------- DELETE MESSAGE --------------------
-  /chats/{chatID}/messages/{messageID}:
+  /me/chats/{chatID}/messages/{messageID}:
     parameters: 
       - $ref: '#/components/parameters/ChatID'
       - $ref: '#/components/parameters/MessageID' 
@@ -442,7 +443,7 @@ paths:
                 $ref: '#/components/schemas/Error'
               
   # -------------------- REPLY MESSAGE --------------------
-  /chats/{chatID}/messages/{messageID}/replies:
+  /me/chats/{chatID}/messages/{messageID}/replies:
     parameters:
       - $ref: '#/components/parameters/ChatID'
       - $ref: '#/components/parameters/MessageID'
@@ -495,7 +496,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- ADD REACTION TO MESSAGE --------------------
-  /chats/{chatID}/messages/{messageID}/reactions:
+  /me/chats/{chatID}/messages/{messageID}/reactions:
     parameters:
       - $ref: '#/components/parameters/ChatID'
       - $ref: '#/components/parameters/MessageID'
@@ -582,7 +583,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- FORWARD MESSAGE --------------------
-  /chats/{chatID}/messages/{messageID}/forwards:
+  /me/chats/{chatID}/messages/{messageID}/forwards:
     parameters:
       - $ref: '#/components/parameters/ChatID'
       - $ref: '#/components/parameters/MessageID'
