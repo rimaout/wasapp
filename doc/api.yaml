@@ -77,9 +77,7 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  usersList:
-                    $ref: '#/components/schemas/UsersListResponse'
+                $ref: '#/components/schemas/UsersSearchResponse'
 
   # -------------------- USERNAME UPDATE --------------------
   /username: 
@@ -89,15 +87,13 @@ paths:
       operationId: setMyUserName
       security: [ BearerAuth: [] ]
       requestBody:
-        description: The new name for the logged-in user.
+        description: The new username for the logged-in user.
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                userName:
-                  $ref: '#/components/schemas/UserName'
+              $ref: '#/components/schemas/UpdateUserNameRequest'
+
       responses:
         "200":
           description: Username updated successfully.
@@ -142,9 +138,7 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  chatsPreviewList: 
-                    $ref: '#/components/schemas/ChatsPreviewListRespose' 
+                $ref: '#/components/schemas/ChatsPreviewListRespose' 
         "401":
           description: Authentication required or failed.
           content:
@@ -171,9 +165,7 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  membersList:
-                    $ref: '#/components/schemas/ChatUsersListResponse'
+                $ref: '#/components/schemas/ChatMembersListResponse'
         "401":
           description: Authentication required or failed.
           content:
@@ -209,9 +201,7 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  membersList:
-                    $ref: '#/components/schemas/ChatUsersListResponse'
+                $ref: '#/components/schemas/ChatMembersListResponse'
         '400':
           description: Bad request - invalid UserID.
           content:
@@ -290,10 +280,8 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                groupName:
-                  $ref: '#/components/schemas/ChatName'
+              $ref: '#/components/schemas/SetGroupNameRequest'
+
       responses:
         "200":
           description: Group name updated successfully.
@@ -345,8 +333,6 @@ paths:
           content:
             application/json:
               schema:
-                properties:
-                  messageList:
                     $ref: '#/components/schemas/MessagesListResponse'
         "401":
           description: Authentication required or failed.
@@ -381,7 +367,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewMessageRequest' 
+              $ref: '#/components/schemas/NewMessageRequest'
       responses:
         "201":
           description: Message created successfully.
@@ -686,27 +672,29 @@ components:
     
     BaseID:
       type: string
+      description: Base UUID identifier type, used only as a parent for specific ID schemas
       format: uuid
       readOnly: true
       example: "550e8400-e29b-41d4-a716-446655440000"
 
     BaseName:
-      type: string
-      pattern: "^(?=.*[A-Za-z0-9_-])[A-Za-z0-9 _-]{3,24}$"
-      minLength: 3
-      maxLength: 24
       description: >-
         The name must be 3 to 24 characters long. 
         Allowed characters are letters, numbers, spaces, underscores (_), and hyphens (-).
         The name needs at least one alpha-numeric character.
+      type: string
+      pattern: "^(?=.*[A-Za-z0-9_-])[A-Za-z0-9 _-]{3,24}$"
+      minLength: 3
+      maxLength: 24
 
     BaseDateTime:
       type: string
-      format: date-time
       description: ISO 8601 timestamp
+      format: date-time
       example: "2025-11-11T09:59:00Z"
 
     # -------------------- USER -------------------- 
+    
     User:
       type: object
       description: Represents a user of the platform.
@@ -726,32 +714,21 @@ components:
         - description: Unique username visible to other users.
         - example: Feldspar 
     
-    UsersListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/User'
-
     # -------------------- LOGIN --------------------
+    
     LoginRequest:
       type: object
+      description: Request payload containing the username to log in or create a user.
       required: [userName]
       properties:
         userName: { $ref: '#/components/schemas/UserName' }
 
     BearerToken:
-      description: Token used to fullfil the Bearer Authentication standard.
       type: string
+      description: Token used to fullfil the Bearer Authentication standard.
       pattern: ^Bearer\s[A-Za-z0-9-._~+/]+={0,2}$
       example: "Bearer JhdkEN7QWidlYDjRTH8I~n99YJfqCC=="
-
-    AuthResponse:
-      type: object
-      readOnly: true
-      required: [identifier, token]
-      properties:
-        identifier: { $ref: '#/components/schemas/UserID'      }
-        token:      { $ref: '#/components/schemas/BearerToken' }
-
+    
     # -------------------- CHAT -------------------- 
 
     ChatID:
@@ -766,7 +743,7 @@ components:
         - example: Marco34
 
     ChatPreview:
-      type: object
+      type: object  
       description: >-
         Represents a chat. Standard chats include two users; 
         group chats can be created with the group flag.
@@ -787,10 +764,10 @@ components:
 
     IsGroupChat:
       type: boolean
-      readOnly: true
       description: >-
         Indicates if it's a group chat. Used by the client to determine when to display additional group info.
         For example, if is a group chat, the client can show in the last message preview the sender's name.
+      readOnly: true
 
     ChatLastMessage:
       type: object
@@ -803,11 +780,6 @@ components:
         content:    { $ref: '#/components/schemas/MessageContent'  }
         sendTime:   { $ref: '#/components/schemas/BaseDateTime'    }
         senderName: { $ref: '#/components/schemas/UserName'        }
-
-    ChatsPreviewListRespose:
-      type: array
-      items:
-        $ref: '#/components/schemas/ChatPreview'
 
     # -------------------- MESSAGE --------------------
 
@@ -869,16 +841,18 @@ components:
 
     MessageText:
       type: string
-      minLength: 1
-      maxLength: 3000
-      pattern: '^/[\S\s]+[\S]+/'
       description: >-
         The message text. Must contain at least one non-whitespace character.
         Cannot be made up only of spaces or other whitespace characters.
+      minLength: 1
+      maxLength: 3000
+      pattern: '^/[\S\s]+[\S]+/'
 
     MessageImage:
       type: string
       format: binary
+      description: Image file attached to a message, sent as binary data.
+
       # TODO: for now I will leave it like this, but i still haven't decided how do images
 
     MessageIsDeletedFlag:
@@ -897,7 +871,7 @@ components:
           - 'received' means the message has been received by all recipients (all participants except the sender)
           - 'read' means the message has been read by all recipients (all participants except the sender)
         This info is only useful when the requesting user sent the message, so the app can show in the preview of the chat if others have received/read your message.
-    
+
     ReplyToMessageID:
       allOf:
         - $ref: '#/components/schemas/MessageID'
@@ -913,30 +887,6 @@ components:
         chatID:    { $ref: '#/components/schemas/ChatID' }
         messageID: { $ref: '#/components/schemas/MessageID' } 
     
-    MessagesListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/Message'
-
-    ChatUsersListResponse:
-      type: array
-      items:
-        $ref: '#/components/schemas/User'
-
-    NewMessageRequest:
-      type: object
-      required: [content, sendTime]
-      properties:
-        content:  { $ref: '#/components/schemas/MessageContent' }
-        sendTime: { $ref: '#/components/schemas/BaseDateTime'   }
-
-    ForwardMessageRequest:
-      type: object 
-      required: [forwardTo, sendTime]
-      properties:
-        forwardTo: { $ref: '#/components/schemas/ChatID'       }
-        sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
-
     # -------------------- EMOJI REACTIONS --------------------
 
     EmojiID:
@@ -945,7 +895,7 @@ components:
         Numeric identifier of the emoji used as a reaction. The mapping
         between emojiID and actual emojis is defined in the documentation.
       minimum: 1
-      maximum: 5
+      maximum: 100
 
     EmojiReaction:
       type: object
@@ -958,30 +908,111 @@ components:
         emojiID: { $ref: '#/components/schemas/EmojiID' }
 
     EmojiReactionsList:
-      description: List of emoji reactions associated with the message. 
       type: array
+      description: List of emoji reactions associated with the message. 
       items:
         $ref: '#/components/schemas/EmojiReactionRequest'
+
+    # -------------------- REQUESTS --------------------
+    
+    UpdateUserNameRequest:
+      type: object
+      description: Request body for updating the logged-in user's username.
+      required: [userName]
+      properties:
+        userName: { $ref: '#/components/schemas/UserName' }
+
+    SetGroupNameRequest:
+      type: object
+      description: Request body for changing the name of the specified group.
+      required: [groupName]
+      properties:
+        groupName:
+          $ref: '#/components/schemas/ChatName'
+
+    NewMessageRequest:
+      type: object
+      description: Request body for sending a new message.
+      required: [content, sendTime]
+      properties:
+        content:  { $ref: '#/components/schemas/MessageContent' }
+        sendTime: { $ref: '#/components/schemas/BaseDateTime'   }
+
+    ForwardMessageRequest:
+      type: object 
+      description: Request to forward a message to another chat.
+      required: [forwardTo, sendTime]
+      properties:
+        forwardTo: { $ref: '#/components/schemas/ChatID'       }
+        sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
 
     EmojiReactionRequest:
       type: object
       description: Represents a reaction to a message made by the logged-in user.
       required: [userID]
       properties:
-        userID:  { $ref: '#/components/schemas/UserID'  }  
-
-    # -------------------- GROUPS --------------------
+        userID:  { $ref: '#/components/schemas/UserID'  } 
 
     AddUserToGroupRequest:
+      description: Request to add a user to a group chat.
       type: object
       required: [userID]
       properties:
         userID: { $ref: '#/components/schemas/UserID' }
 
+    # -------------------- RESPONSES --------------------
+
+    AuthResponse:
+      type: object
+      description: Authentication result containing the user identifier and bearer token.
+      readOnly: true
+      required: [identifier, token]
+      properties:
+        identifier: { $ref: '#/components/schemas/UserID'      }
+        token:      { $ref: '#/components/schemas/BearerToken' }
+
+    UsersSearchResponse:
+      type: object
+      description: Response containing the list of users matching the search criteria.
+      properties:
+        usersList:
+          type: array
+          items:
+            $ref: '#/components/schemas/User' 
+
+    ChatsPreviewListRespose:
+      type: object
+      description: Response containing the list of chat previews for the logged-in user.
+      properties:
+        chatsPreviewList:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChatPreview'
+
+    MessagesListResponse:
+      type: object
+      description: List of messages returned by the API.
+      properties:
+        chatsPreviewList:
+          type: array 
+          items:
+            $ref: '#/components/schemas/Message'
+
+    ChatMembersListResponse:
+      type: object
+      description: Response containing the list of members in the chat.
+      properties:
+        membersList:
+          type: array
+          description: List of users in a chat, ordered alphabetically by username.
+          items:
+            $ref: '#/components/schemas/User'
+
     # -------------------- ERRORS --------------------
 
     Error:
       type: object
+      description: default error structure
       properties:
         code:
           type: string
