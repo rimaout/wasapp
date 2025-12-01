@@ -678,6 +678,9 @@ components:
       format: uuid
       readOnly: true
       description: Base UUID identifier type, used only as a parent for specific ID schemas
+      pattern: '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$'
+      minLength: 36
+      maxLength: 36
       example: "550e8400-e29b-41d4-a716-446655440000"
 
     BaseName:
@@ -695,6 +698,8 @@ components:
       format: date-time
       description: ISO 8601 timestamp
       example: "2025-11-11T09:59:00Z"
+      minLength: 20
+      maxLength: 30
 
     # -------------------- USER -------------------- 
     
@@ -974,7 +979,7 @@ components:
         identifier: { $ref: '#/components/schemas/UserId'      }
         token:      { $ref: '#/components/schemas/BearerToken' }
 
-    UsersSearchResponse:
+    UsersSearchResponse:  #todo: paging
       type: object
       description: Response containing the list of users matching the search criteria.
       properties:
@@ -983,10 +988,12 @@ components:
           description: >-
             Returns the list of user matching the username query (ordered by similarity), 
             or all users alphabetically if no query is provided.
+          minItems: 0
+          maxItems: 50
           items:
             $ref: '#/components/schemas/User' 
 
-    ChatsPreviewListRespose:
+    ChatsPreviewListRespose: #todo: paging
       type: object
       description: Response containing the list of chat previews for the logged-in user.
       properties:
@@ -995,6 +1002,8 @@ components:
           description: >- 
             Array of chat previews, used for displaying the list of a user's chats.
             The list is ordered by the time of the last message in each chat, from latest to oldest.
+          minItems: 0
+          maxItems: 50
           items:
             $ref: '#/components/schemas/ChatPreview'
 
@@ -1005,6 +1014,8 @@ components:
         messages:
           type: array 
           description: List of messages in cronological order, newest first.
+          minItems: 0
+          maxItems: 50
           items:
             $ref: '#/components/schemas/Message'
 
@@ -1015,6 +1026,8 @@ components:
         membersList:
           type: array
           description: List of users in a chat, ordered alphabetically by username.
+          minItems: 1
+          maxItems: 1024 #max number of alowed members in a group chat
           items:
             $ref: '#/components/schemas/User'
 
