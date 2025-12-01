@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.1.0
 
 info:
   title: Wasapp Service API Documentation
@@ -795,9 +795,10 @@ components:
       type: object
       description: |- 
         Represents a message in a chat and includes all the information needed to display it.
-          - If the 'isDeleted' flag is true, the message content will not be returned by the server (content will be null), and the client should render it as a deleted message.
-          - If 'replyTo' is null, this message is not a reply. If it is not null, it contains the ID of the message in the same chat that this message is replying to.
-      required: [id, chatId, sendTime, sender, status, isDeleted, reactionsList, forwardedFrom, replyTo, content]
+          - If the 'isDeleted' flag is true, the message content will not be returned by the server , and the client shoud render it as a deleted message.
+          - If 'forwardedFrom' is not present, the message was composed in this chat. If present, it contains the identifiers (`chatId` and `messageId`) of the original message from another chat which this message forwards. This allows clients to display context about forwarded messages by referencing their original location.
+          - If 'replyTo' is not present, this message is not a reply. If it is present, it contains the ID of the message in the same chat that this message is replying to.
+      required: [id, chatId, sendTime, sender, status, isDeleted, reactionsList]
       properties:
         id:            { $ref: '#/components/schemas/MessageId'            }
         chatId:        { $ref: '#/components/schemas/ChatId'               }
@@ -806,18 +807,9 @@ components:
         status:        { $ref: '#/components/schemas/MessageStatus'        }
         isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }
         reactionsList: { $ref: '#/components/schemas/EmojiReactionsList'   }
-        forwardedFrom:
-          allOf:
-            - $ref: '#/components/schemas/ForwardedFromInfo'
-            - nullable: true
-        replyTo:
-          allOf:
-            - $ref: '#/components/schemas/ReplyToMessageId'
-            - nullable: true
-        content:
-          allOf:
-            - $ref: '#/components/schemas/MessageContent'
-            - nullable: true
+        forwardedFrom: { $ref: '#/components/schemas/ForwardedFromInfo'    }  #optional
+        replyTo:       { $ref: '#/components/schemas/ReplyToMessageId'     }  #optional
+        content:       { $ref: '#/components/schemas/MessageContent'       }  #optional
 
     MessageId:
       allOf:
