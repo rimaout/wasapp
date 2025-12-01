@@ -64,6 +64,7 @@ paths:
         Returns a list of users.
           - If a 'username' query parameter is provided, returns users whose usernames most closely match the query (ordered by similarity).
           - Otherwise, returns all users, ordered alphabetically by username.
+      operationId: userSearch
       parameters:
         - name: username
           in: query
@@ -84,6 +85,7 @@ paths:
     patch:
       tags: ["User Management"]
       summary: Update the username of the logged-in user
+      description: Updates the username of the logged-in user using the new value provided in the request body.
       operationId: setMyUserName
       security: [ BearerAuth: [] ]
       requestBody:
@@ -146,8 +148,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /me/chats/{chatID}/members:
-    parameters: [ $ref: '#/components/parameters/ChatID' ]
+  /me/chats/{chatId}/members:
+    parameters: [ $ref: '#/components/parameters/ChatId' ]
     
     # -------------------- CHAT GET USERS --------------------
     get:
@@ -190,7 +192,7 @@ paths:
       security: [ BearerAuth: [] ]
       operationId: addToGroup
       requestBody:
-        description: User ID
+        description: User identifier
         required: true
         content:
           application/json:
@@ -204,7 +206,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatMembersListResponse'
         '400':
-          description: Bad request - invalid UserID.
+          description: Bad request - invalid UserId.
           content:
             application/json:
               schema:
@@ -264,9 +266,9 @@ paths:
                 $ref: '#/components/schemas/Error'
     
   # -------------------- CHANGE GROUP NAME --------------------    
-  /me/chats/{chatID}/name:
-    parameters: [ $ref: '#/components/parameters/ChatID' ]
-    
+  /me/chats/{chatId}/name:
+    parameters: [ $ref: '#/components/parameters/ChatId' ]
+
     patch:
       tags: ["Chat Operations"]
       summary: Change the name of the specified group
@@ -315,8 +317,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /me/chats/{chatID}/messages:
-    parameters: [ $ref: '#/components/parameters/ChatID' ]
+  /me/chats/{chatId}/messages:
+    parameters: [ $ref: '#/components/parameters/ChatId' ]
 
     # -------------------- GET CHAT MESSAGES --------------------
     get:
@@ -334,7 +336,7 @@ paths:
           content:
             application/json:
               schema:
-                    $ref: '#/components/schemas/MessagesListResponse'
+                    $ref: '#/components/schemas/ChatMessagesResponse'
         "401":
           description: Authentication required or failed.
           content:
@@ -358,6 +360,8 @@ paths:
     post:
       tags: ["Chat Operations"]
       summary: Send a message in the specified chat
+      description: >-
+        Sends a new message to the specified chat using the content and timestamp provided in the request body.
       operationId: sendMessage
       security: [ BearerAuth: [] ]
       requestBody:
@@ -402,16 +406,16 @@ paths:
                 $ref: '#/components/schemas/Error'
   
   # -------------------- DELETE MESSAGE --------------------
-  /me/chats/{chatID}/messages/{messageID}:
+  /me/chats/{chatId}/messages/{messageId}:
     parameters: 
-      - $ref: '#/components/parameters/ChatID'
-      - $ref: '#/components/parameters/MessageID' 
+      - $ref: '#/components/parameters/ChatId'
+      - $ref: '#/components/parameters/MessageId' 
       
     delete:
       tags: ["Chat Operations"]
       summary: Delete a specific message from the specified chat
       description: |-
-        Deletes the message identified by messageID from the chat identified by chatID. 
+        Deletes the message identified by messageId from the chat identified by chatId. 
         The authenticated user must be the same user that sent the message.
           - Subsequent reads of this message will return it with 'isDeleted' set to true and 'content' set to null, so clients can display it as a deleted message.
       operationId: deleteMessage
@@ -443,17 +447,17 @@ paths:
                 $ref: '#/components/schemas/Error'
               
   # -------------------- REPLY MESSAGE --------------------
-  /me/chats/{chatID}/messages/{messageID}/replies:
+  /me/chats/{chatId}/messages/{messageId}/replies:
     parameters:
-      - $ref: '#/components/parameters/ChatID'
-      - $ref: '#/components/parameters/MessageID'
+      - $ref: '#/components/parameters/ChatId'
+      - $ref: '#/components/parameters/MessageId'
 
     post:
       tags: ["Chat Operations"]
       summary: Add a comment replying to a specific message
       description: >
         Creates a new message in the specified chat that replies to
-        the message identified by messageID.
+        the message identified by messageId.
       operationId: replyMessage
       security: [ BearerAuth: [] ]
       requestBody:
@@ -496,10 +500,10 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- ADD REACTION TO MESSAGE --------------------
-  /me/chats/{chatID}/messages/{messageID}/reactions:
+  /me/chats/{chatId}/messages/{messageId}/reactions:
     parameters:
-      - $ref: '#/components/parameters/ChatID'
-      - $ref: '#/components/parameters/MessageID'
+      - $ref: '#/components/parameters/ChatId'
+      - $ref: '#/components/parameters/MessageId'
 
     post:
       tags: ["Chat Operations"]
@@ -524,7 +528,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "400":
-          description: Bad request - invalid emojiID
+          description: Bad request - invalid emojiId
           content:
             application/json:
               schema:
@@ -583,14 +587,14 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- FORWARD MESSAGE --------------------
-  /me/chats/{chatID}/messages/{messageID}/forwards:
+  /me/chats/{chatId}/messages/{messageId}/forwards:
     parameters:
-      - $ref: '#/components/parameters/ChatID'
-      - $ref: '#/components/parameters/MessageID'
+      - $ref: '#/components/parameters/ChatId'
+      - $ref: '#/components/parameters/MessageId'
 
     post:
       tags: ["Chat Operations"]
-      summary: Forward the specified message.
+      summary: Forward the specified message
       description: >-
         Allows the user to forward the selected message to another chat.
         The ID of the destination chat must be specified in the request body.
@@ -598,7 +602,7 @@ paths:
       security: [ BearerAuth: [] ]
       requestBody:
         description: >- 
-          The chatID and sendTime to use to forward the message in
+          The chatId and sendTime to use to forward the message in
           the destination chat.
         required: true
         content:
@@ -643,19 +647,19 @@ paths:
 components:  
   
   parameters:
-    ChatID:
-      name: chatID
+    ChatId:
+      name: chatId
       in: path
       description: A chat unique identifier.
       required: true
-      schema: { $ref: '#/components/schemas/ChatID' }
+      schema: { $ref: '#/components/schemas/ChatId' }
     
-    MessageID:
-      name: messageID
+    MessageId:
+      name: messageId
       in: path
       description: The messagge ID that uniquely identifies the message within its chat.
       required: true
-      schema: { $ref: '#/components/schemas/MessageID' }
+      schema: { $ref: '#/components/schemas/MessageId' }
   
   # ================================================================
   
@@ -671,11 +675,11 @@ components:
     # -------------------- BASE COMPONENTS --------------------
     # Basic components used in various schemas
     
-    BaseID:
+    BaseId:
       type: string
-      description: Base UUID identifier type, used only as a parent for specific ID schemas
       format: uuid
       readOnly: true
+      description: Base UUID identifier type, used only as a parent for specific ID schemas
       example: "550e8400-e29b-41d4-a716-446655440000"
 
     BaseName:
@@ -690,8 +694,8 @@ components:
 
     BaseDateTime:
       type: string
-      description: ISO 8601 timestamp
       format: date-time
+      description: ISO 8601 timestamp
       example: "2025-11-11T09:59:00Z"
 
     # -------------------- USER -------------------- 
@@ -701,12 +705,12 @@ components:
       description: Represents a user of the platform.
       required: [id, name]
       properties:
-        id:     { $ref: '#/components/schemas/UserID'   }
+        id:     { $ref: '#/components/schemas/UserId'   }
         name:   { $ref: '#/components/schemas/UserName' }
 
-    UserID:
+    UserId:
       allOf:
-        - $ref: '#/components/schemas/BaseID'
+        - $ref: '#/components/schemas/BaseId'
         - description: Unique identifier assigned to the user by the server.
 
     UserName:
@@ -732,9 +736,9 @@ components:
     
     # -------------------- CHAT -------------------- 
 
-    ChatID:
+    ChatId:
       allOf:
-        - $ref: '#/components/schemas/BaseID'
+        - $ref: '#/components/schemas/BaseId'
         - description: Unique identifier assigned to the chat by the server.
 
     ChatName:
@@ -750,7 +754,7 @@ components:
         group chats can be created with the group flag.
       required: [id, displayName]
       properties:
-        id:           { $ref: '#/components/schemas/ChatID'          }
+        id:           { $ref: '#/components/schemas/ChatId'          }
         displayName:  { $ref: '#/components/schemas/ChatDisplayName' }
         isGroupChat:  { $ref: '#/components/schemas/IsGroupChat'     }
         lastMessage:  { $ref: '#/components/schemas/ChatLastMessage' }
@@ -790,10 +794,10 @@ components:
         Represents a message in a chat and includes all the information needed to display it.
           - If the 'isDeleted' flag is true, the message content will not be returned by the server (content will be null), and the client should render it as a deleted message.
           - If 'replyTo' is null, this message is not a reply. If it is not null, it contains the ID of the message in the same chat that this message is replying to.
-      required: [id, chatID, sendTime, sender, status, isDeleted, reactionsList, forwardedFrom, replyTo, content]
+      required: [id, chatId, sendTime, sender, status, isDeleted, reactionsList, forwardedFrom, replyTo, content]
       properties:
-        id:            { $ref: '#/components/schemas/MessageID'            }
-        chatID:        { $ref: '#/components/schemas/ChatID'               }
+        id:            { $ref: '#/components/schemas/MessageId'            }
+        chatId:        { $ref: '#/components/schemas/ChatId'               }
         sendTime:      { $ref: '#/components/schemas/BaseDateTime'         }
         sender:        { $ref: '#/components/schemas/User'                 }
         status:        { $ref: '#/components/schemas/MessageStatus'        }
@@ -805,19 +809,19 @@ components:
             - nullable: true
         replyTo:
           allOf:
-            - $ref: '#/components/schemas/ReplyToMessageID'
+            - $ref: '#/components/schemas/ReplyToMessageId'
             - nullable: true
         content:
           allOf:
             - $ref: '#/components/schemas/MessageContent'
             - nullable: true
 
-    MessageID:
+    MessageId:
       allOf:
-        - $ref: '#/components/schemas/BaseID'
+        - $ref: '#/components/schemas/BaseId'
         - description: >-
             Unique identifier assigned to the message by the server.
-            A MessageID uniquely identifies a message only within its chat.
+            A MessageId uniquely identifies a message only within its chat.
 
     MessageContent:
       description: >-
@@ -873,9 +877,9 @@ components:
           - 'read' means the message has been read by all recipients (all participants except the sender)
         This info is only useful when the requesting user sent the message, so the app can show in the preview of the chat if others have received/read your message.
 
-    ReplyToMessageID:
+    ReplyToMessageId:
       allOf:
-        - $ref: '#/components/schemas/MessageID'
+        - $ref: '#/components/schemas/MessageId'
         - description: >-
             Identifier of the message in the same chat that this message is replying to.
             If absent, this message is not a reply.
@@ -883,18 +887,18 @@ components:
     ForwardedFromInfo:
       type: object
       description: Information about the original message this one was forwarded from.     
-      required: [chatID, messageID]
+      required: [chatId, messageId]
       properties:
-        chatID:    { $ref: '#/components/schemas/ChatID' }
-        messageID: { $ref: '#/components/schemas/MessageID' } 
+        chatId:    { $ref: '#/components/schemas/ChatId' }
+        messageId: { $ref: '#/components/schemas/MessageId' } 
     
     # -------------------- EMOJI REACTIONS --------------------
 
-    EmojiID:
+    EmojiId:
       type: integer
       description: >-
         Numeric identifier of the emoji used as a reaction. The mapping
-        between emojiID and actual emojis is defined in the documentation.
+        between emojiId and actual emojis is defined in the documentation.
       minimum: 1
       maximum: 100
 
@@ -903,30 +907,30 @@ components:
       description: >-
         Represents a reaction to a message, including the user who 
         reacted and the emoji they used.
-      required: [userID, emojiID]
+      required: [userId, emojiId]
       properties:
-        userID:  { $ref: '#/components/schemas/UserID'  }
-        emojiID: { $ref: '#/components/schemas/EmojiID' }
+        userId:  { $ref: '#/components/schemas/UserId'  }
+        emojiId: { $ref: '#/components/schemas/EmojiId' }
 
     EmojiReactionsList:
       type: array
-      description: List of emoji reactions associated with the message. 
+      description: List of emoji reactions associated with the message.
+      minItems: 0
+      maxItems: 1024 #max number of memmbers of a group chat
       items:
-        $ref: '#/components/schemas/EmojiReactionRequest'
+        $ref: '#/components/schemas/EmojiReaction'
 
     # -------------------- REQUESTS --------------------
     
     UpdateUserNameRequest:
       type: object
       description: Request body for updating the logged-in user's username.
-      required: [userName]
       properties:
         userName: { $ref: '#/components/schemas/UserName' }
 
     SetGroupNameRequest:
       type: object
       description: Request body for changing the name of the specified group.
-      required: [groupName]
       properties:
         groupName:
           $ref: '#/components/schemas/ChatName'
@@ -944,22 +948,22 @@ components:
       description: Request to forward a message to another chat.
       required: [forwardTo, sendTime]
       properties:
-        forwardTo: { $ref: '#/components/schemas/ChatID'       }
+        forwardTo: { $ref: '#/components/schemas/ChatId'       }
         sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
 
     EmojiReactionRequest:
       type: object
       description: Represents a reaction to a message made by the logged-in user.
-      required: [userID]
+      required: [userId]
       properties:
-        userID:  { $ref: '#/components/schemas/UserID'  } 
+        userId:  { $ref: '#/components/schemas/UserId'  } 
 
     AddUserToGroupRequest:
       description: Request to add a user to a group chat.
       type: object
-      required: [userID]
+      required: [userId]
       properties:
-        userID: { $ref: '#/components/schemas/UserID' }
+        userId: { $ref: '#/components/schemas/UserId' }
 
     # -------------------- RESPONSES --------------------
 
@@ -969,7 +973,7 @@ components:
       readOnly: true
       required: [identifier, token]
       properties:
-        identifier: { $ref: '#/components/schemas/UserID'      }
+        identifier: { $ref: '#/components/schemas/UserId'      }
         token:      { $ref: '#/components/schemas/BearerToken' }
 
     UsersSearchResponse:
@@ -978,6 +982,9 @@ components:
       properties:
         usersList:
           type: array
+          description: >-
+            Returns the list of user matching the username query (ordered by similarity), 
+            or all users alphabetically if no query is provided.
           items:
             $ref: '#/components/schemas/User' 
 
@@ -987,15 +994,19 @@ components:
       properties:
         chatsPreviewList:
           type: array
+          description: >- 
+            Array of chat previews, used for displaying the list of a user's chats.
+            The list is ordered by the time of the last message in each chat, from latest to oldest.
           items:
             $ref: '#/components/schemas/ChatPreview'
 
-    MessagesListResponse:
+    ChatMessagesResponse: #todo: paging
       type: object
-      description: List of messages returned by the API.
+      description: Response to the request of the messages of a chat.
       properties:
-        chatsPreviewList:
+        messages:
           type: array 
+          description: List of messages in cronological order, newest first.
           items:
             $ref: '#/components/schemas/Message'
 
@@ -1013,10 +1024,12 @@ components:
 
     Error:
       type: object
-      description: default error structure
+      description: Default error structure.
       properties:
         code:
           type: string
+          description: HTTP error code.
         message:
           type: string
+          description: Error information.
       required: [code, message]
