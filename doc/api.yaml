@@ -121,6 +121,59 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+# -------------------- USER PROFILE IMAGE --------------------
+  /profile/image:
+    put:
+      tags: ["User Management"]
+      summary: Upload or replace the profile picture of the logged-in user
+      description: >-
+        Uploads or replaces the profile picture for the authenticated user.
+        The image must be JPEG, PNG or WebP format, maximum 5MB.
+        Returns the updated user object with the new image URL.
+      operationId: setMyPhoto
+      security: [ BearerAuth: [] ]
+      requestBody:
+        description: Image file for user profile picture
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BinaryImageUploadRequest'
+            encoding:
+              binaryImage:
+                contentType: image/jpeg, image/png, image/webp
+      responses:
+        '200':
+          description: Profile picture uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request - invalid image format or too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required or failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "413":
+          description: Image file exceeds maximum size (5MB).
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Error'
+        "415":  
+          description: Unsupported image format. Only JPEG, PNG, WebP allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /chats:
     # -------------------- CHATS PREVIEWS --------------------
     get:
@@ -204,6 +257,82 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+
+  # -------------------- GROUP PROFILE IMAGE --------------------
+  /chats/{chatId}/image:
+    parameters: [ $ref: '#/components/parameters/ChatId' ]
+    put:
+      tags: ["Chat Operations"]
+      summary: Upload or replace the profile picture of the group
+      description: >-
+        Uploads or replace the profile picture for the specified group chat.
+        Only group members can update the image.
+        If the given identifier is not associated with a group chat, an error will be returned.
+        The image must be JPEG, PNG or WebP format, maximum 5MB.
+        Returns the updated chat preview with the new image URL.
+      operationId: setGroupPhoto
+      security: [ BearerAuth: [] ]
+      requestBody:
+        description: Image file for group profile picture
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BinaryImageUploadRequest'
+            encoding:
+              binaryImage:
+                contentType: image/jpeg, image/png, image/webp
+      responses:
+        '200':
+          description: Group picture uploaded successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatPreview'
+        '400':
+          description: Bad request - invalid image format or too large
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required or failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - you are not a member of this group
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Group not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: This is not a group chat, only the profile picture of group chats can be set/changed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "413":
+          description: Image file exceeds maximum size (5MB).
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Error'
+        "415":  
+          description: Unsupported image format. Only JPEG, PNG, WebP allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+
   /chats/{chatId}/members:
     parameters: [ $ref: '#/components/parameters/ChatId' ]
     
@@ -367,18 +496,20 @@ paths:
     # -------------------- SEND MESSAGE --------------------
     post:
       tags: ["Chat Operations"]
-      summary: Send a message in the specified chat
+      summary: Send a message (text OR image OR both) in the specified chat
       description: >-
-        Sends a new message to the specified chat using the content and timestamp provided in the request body.
+        Sends a new message to the specified chat using the content (text OR image OR both)
+        and timestamp provided in the request body.
+        The image must be JPEG, PNG or WebP format, maximum 5MB.
       operationId: sendMessage
       security: [ BearerAuth: [] ]
       requestBody:
         description: >-
-          The message content and sent time used to create the 
+          The message content (text OR image OR both) and sendtime used to create the 
           new message in the specified chat.
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/NewMessageRequest'
       responses:
@@ -408,6 +539,18 @@ paths:
                 $ref: '#/components/schemas/Error'
         "404":
           description: Chat not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "413":
+          description: Image file exceeds maximum size (5MB).
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Error'
+        "415":  
+          description: Unsupported image format. Only JPEG, PNG, WebP allowed.
           content:
             application/json:
               schema:
@@ -711,14 +854,51 @@ components:
       minLength: 20
       maxLength: 30
 
+    # -------------------- BASE IMAGE -------------------- 
+
+    ImageId:
+      type: string
+      format: uuid
+      description: Server-assigned unique identifier for the image
+
+    ImageUrl:
+      type: string
+      format: url
+      description: URL to access the uploaded image
+
+    ImageMimeType:
+      type: string
+      enum: [ image_jpeg, image_png, image_webp ]
+      description: >-
+        ACTUAL file format determined by server content validation.
+        Do NOT rely on URL extension - extensions can be missing or wrong.
+
+    ImageMetadata:
+      type: object
+      description: Metadata for an uploaded image
+      required: [imageId, url, mimeType]
+      properties:
+        imageId:  { $ref: '#/components/schemas/ImageId'       }
+        url:      { $ref: '#/components/schemas/ImageUrl'      }
+        mimeType: { $ref: '#/components/schemas/ImageMimeType' }
+
+    BinaryImage:
+      type: string
+      format: binary
+      minLength: 1
+      maxLength: 5242880 #(5MB in chars, oss: 1 MB as 1,048,576 bytes that's 1,048,576 characters)
+      description: Image file (JPEG, PNG, WebP, max 5MB), used for uploading images.
+
     # -------------------- USER -------------------- 
     
     User:
       type: object
-      required: [id, name]
+      description: User informations.
+      required: [id, name, image]
       properties:
-        id:     { $ref: '#/components/schemas/UserId'   }
-        name:   { $ref: '#/components/schemas/UserName' }
+        id:     { $ref: '#/components/schemas/UserId'        }
+        name:   { $ref: '#/components/schemas/UserName'      }
+        image:  { $ref: '#/components/schemas/ImageMetadata' }
 
     UserId:
       allOf:
@@ -766,10 +946,11 @@ components:
         group chats can be created with the group flag.
       required: [id, displayName]
       properties:
-        id:           { $ref: '#/components/schemas/ChatId'          }
-        displayName:  { $ref: '#/components/schemas/ChatDisplayName' }
-        isGroupChat:  { $ref: '#/components/schemas/IsGroupChat'     }
-        lastMessage:  { $ref: '#/components/schemas/ChatLastMessage' }
+        id:           { $ref: '#/components/schemas/ChatId'           }
+        displayName:  { $ref: '#/components/schemas/ChatDisplayName'  }
+        displayImage: { $ref: '#/components/schemas/ChatDisplayImage' }
+        isGroupChat:  { $ref: '#/components/schemas/IsGroupChat'      }
+        lastMessage:  { $ref: '#/components/schemas/ChatLastMessage'  }
 
     ChatDisplayName:
       allOf:
@@ -778,6 +959,14 @@ components:
             The name displayed in the chat preview.
               - For 1-on-1 chats: the name of the other user is displayed.
               - For group chats: the group name is displayed.
+
+    ChatDisplayImage:
+      allOf:
+        - $ref: '#/components/schemas/ImageMetadata'
+        - description: |-
+            The chat profile image displayed in the chat preview.
+              - For 1-on-1 chats: the profile image of the other user is displayed.
+              - For group chats: the group progile image is displayed
 
     IsGroupChat:
       type: boolean
@@ -838,15 +1027,15 @@ components:
             text: { $ref: '#/components/schemas/MessageText' }
         #--------------------------
         - type: object
-          required: [image]
+          required: [msgImage]
           properties:
-            image: { $ref: '#/components/schemas/MessageImage' }  
+            msgImage: { $ref: '#/components/schemas/MessageImage' }  
         #--------------------------
         - type: object
-          required: [text, image]
+          required: [text, msgImage]
           properties:
-            text:   { $ref: '#/components/schemas/MessageText'  }
-            image:  { $ref: '#/components/schemas/MessageImage' }
+            text:     { $ref: '#/components/schemas/MessageText'  }
+            msgImage: { $ref: '#/components/schemas/MessageImage' }
 
     MessageText:
       type: string
@@ -861,8 +1050,6 @@ components:
       type: string
       format: binary
       description: Image file attached to a message, sent as binary data.
-
-      # TODO: for now I will leave it like this, but i still haven't decided how do images
 
     MessageIsDeletedFlag:
       type: boolean
@@ -940,12 +1127,30 @@ components:
           $ref: '#/components/schemas/ChatName'
 
     NewMessageRequest:
-      type: object
-      description: Request body for sending a new message.
-      required: [content, sendTime]
-      properties:
-        content:  { $ref: '#/components/schemas/MessageContent' }
-        sendTime: { $ref: '#/components/schemas/BaseDateTime'   }
+      type: object 
+      description: >-
+        Request body for sending a new message.
+        The message can contain: only text, only image, or both 
+        (in this case, the text is used as a caption for the image).
+      oneOf:
+        - type: object
+          required: [text, sendTime]
+          properties:
+            text:     { $ref: '#/components/schemas/MessageText'  }
+            sendTime: { $ref: '#/components/schemas/BaseDateTime' }
+        #--------------------------
+        - type: object
+          required: [imageFile, sendTime]
+          properties:
+            imageFile: { $ref: '#/components/schemas/BinaryImage'  }
+            sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
+        #--------------------------
+        - type: object
+          required: [text, imageFile, sendTime]
+          properties:
+            text:      { $ref: '#/components/schemas/MessageText'  }
+            imageFile: { $ref: '#/components/schemas/BinaryImage'  }
+            sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
 
     ForwardMessageRequest:
       type: object 
@@ -968,6 +1173,13 @@ components:
       required: [userId]
       properties:
         userId: { $ref: '#/components/schemas/UserId' }
+
+    BinaryImageUploadRequest:
+      type: object
+      description: Request for uloading a image file (JPEG, PNG, WebP, max 5MB), used for uploading images.
+      required: [binaryImage]
+      properties:
+        binaryImage: { $ref: '#/components/schemas/BinaryImage' }
 
     # -------------------- RESPONSES --------------------
 
