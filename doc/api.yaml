@@ -21,6 +21,9 @@ tags:
     description: Endpoints for interacting with group specific functionalities
   - name: Message Operations
     description: Endpoints for interacting with messages specific functionalities
+  - name: Image Serving
+    description: Endpoints for serving images with appropriate access controls
+
 paths:
   # -------------------- LOGIN --------------------
   /session:
@@ -796,24 +799,121 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    
-# ================================================================
-components:  
   
+  # -------------------- SERVE MESSAGE IMAGE -------------------- 
+  /images/message/{imageId}:
+    parameters:
+        - $ref: '#/components/parameters/ImageId'
+
+    get:
+      tags: ["Image Serving"]
+      summary: Serve message image (chat members only)
+      description: >-
+        Returns the raw image file for display in chat.
+        Authentication required, only chat members can access.
+      operationId: serveMessageImage
+      security: [ BearerAuth: [] ]
+      responses:
+        '200':
+          $ref: '#/components/responses/RawImageFileResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - You are not a chat member
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Image not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  # -------------------- SERVE USER PROFILE IMAGE -------------------- 
+  /images/profile/{imageId}:
+    parameters:
+        - $ref: '#/components/parameters/ImageId'
+
+    get:
+      tags: ["Image Serving"]
+      summary: Serve user profile picture (public access)
+      description: >-
+        Returns the user profile image.
+        Publicly accessible; no authentication required.
+      operationId: serveUserProfileImage
+      responses:
+        '200':
+          $ref: '#/components/responses/RawImageFileResponse'
+        '404':
+          description: Profile image not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  # -------------------- SERVE GROUP PROFILE IMAGE -------------------- 
+  /images/group/{imageId}:
+    parameters:
+      - $ref: '#/components/parameters/ImageId'
+
+    get:
+      tags: ["Image Serving"]
+      summary: Serve group profile picture (group members only)
+      description: >-
+        Returns the group profile image.
+        Authentication required, only group members can access.
+      operationId: serveGroupProfileImage
+      security: [ BearerAuth: [] ]
+      responses:
+        '200':
+          $ref: '#/components/responses/RawImageFileResponse'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - You are not a chat member
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Group profile image not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
   parameters:
     ChatId:
       name: chatId
       in: path
-      description: A chat unique identifier.
+      description: Unique identifier for the chat (UUID).
       required: true
       schema: { $ref: '#/components/schemas/ChatId' }
     
     MessageId:
       name: messageId
       in: path
-      description: The messagge ID that uniquely identifies the message within its chat.
+      description: The messagge ID (UUID) that uniquely identifies the message within its chat.
       required: true
       schema: { $ref: '#/components/schemas/MessageId' }
+
+    ImageId:
+      name: imageId
+      in: path
+      description: Unique identifier for the image (UUID).
+      required: true
+      schema: { $ref: '#/components/schemas/ImageId' }
   
   # ================================================================
   
@@ -860,14 +960,17 @@ components:
     # -------------------- BASE IMAGE -------------------- 
 
     ImageId:
-      type: string
-      format: uuid
-      description: Server-assigned unique identifier for the image
+      allOf:
+        - $ref: '#/components/schemas/BaseId'
+        - description: Server-assigned unique identifier for the image.
 
     ImageUrl:
       type: string
       format: url
-      description: URL to access the uploaded image
+      description: >-
+        URL to access the uploaded image
+        The URL may not include a file extension, image format is indicated by HTTP Content-Type header upon retrieval.
+      example: "https://wasapp.online/v1/images/profile/550e8400-e29b-41d4-a716-446655440000"
 
     ImageMimeType:
       type: string
@@ -1187,6 +1290,18 @@ components:
 
     # -------------------- RESPONSES --------------------
 
+    Error:
+      type: object
+      description: Default error structure.
+      properties:
+        code:
+          type: string
+          description: HTTP error code.
+        message:
+          type: string
+          description: Error information.
+      required: [code, message]
+
     AuthResponse:
       type: object
       description: Authentication result containing the user identifier and bearer token.
@@ -1247,17 +1362,23 @@ components:
           maxItems: 1024 #max number of alowed members in a group chat
           items:
             $ref: '#/components/schemas/User'
-
-    # -------------------- ERRORS --------------------
-
-    Error:
-      type: object
-      description: Default error structure.
-      properties:
-        code:
-          type: string
-          description: HTTP error code.
-        message:
-          type: string
-          description: Error information.
-      required: [code, message]
+  
+  responses:
+    RawImageFileResponse:
+      description: Raw image file returned as binary data
+      content:
+        image/jpeg:
+          schema:
+            type: string
+            format: binary
+            description: JPEG image file (binary data)
+        image/png:
+          schema:
+            type: string
+            format: binary
+            description: PNG image file (binary data)
+        image/webp:
+          schema:
+            type: string
+            format: binary
+            description: WebP image file (binary data)
