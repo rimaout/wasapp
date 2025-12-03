@@ -6,6 +6,8 @@ info:
     API for interacting with Wasapp, a messaging service.
   version: 1.0.0
 
+servers:
+  - url: https://wasapp.online/v1
 # ================================================================
 
 tags:
@@ -1195,10 +1197,19 @@ components:
     EmojiId:
       type: integer
       description: >-
-        Numeric identifier of the emoji used as a reaction. The mapping
-        between emojiId and actual emojis is defined in the documentation.
-      minimum: 1
-      maximum: 100
+        Numeric identifier of the emoji used as a reaction. Mapping:
+          - 0 = 👍
+          - 1 = ❤️
+          - 2 = 😂
+          - 3 = 😮
+          - 4 = 😢
+          - 5 = 🤔
+          - 6 = 👏
+          - 7 = 🙌
+          - 8 = 😡
+          - 9 = 🤯
+      minimum: 0
+      maximum: 9
 
     EmojiReaction:
       type: object
