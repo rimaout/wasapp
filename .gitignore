@@ -66,3 +66,4 @@ go.work
 
 # Created by https://www.toptal.com/developers/gitignore/api/vue
 # Edit at https://www.toptal.com/developers/gitignore?templates=vue
+.spectral.js
