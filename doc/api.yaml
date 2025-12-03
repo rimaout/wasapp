@@ -81,7 +81,7 @@ paths:
                 $ref: '#/components/schemas/UsersSearchResponse'
 
   # -------------------- USERNAME UPDATE --------------------
-  /me/username: 
+  /profile/name: 
     patch:
       tags: ["User Management"]
       summary: Update the username of the logged-in user
@@ -121,7 +121,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /me/chats:
+  /chats:
     # -------------------- CHATS PREVIEWS --------------------
     get:
       tags: ["Chat Operations"]
@@ -147,7 +147,64 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /me/chats/{chatId}/members:
+  # -------------------- CHANGE GROUP NAME --------------------    
+  /chats/{chatId}/name:
+    parameters: [ $ref: '#/components/parameters/ChatId' ]
+
+    patch:
+      tags: ["Chat Operations"]
+      summary: Change the name of the specified group
+      description: >-
+        Changes the name of the group identified by the specified chat ID,
+        using the new name provided in the request body.
+        If the given identifier is not associated with a group chat, an error will be returned.
+      operationId: setGroupName
+      security: [ BearerAuth: [] ]
+      requestBody:
+        description: The new name for the group.
+        required: true
+        content:
+          application/merge-patch+json:
+            schema:
+              $ref: '#/components/schemas/PatchGroupNameRequest'
+      responses:
+        "200":
+          description: Group name updated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatName'
+        "400":
+          description: Bad request - invalid group name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "403":
+          description: Forbidden - you are not authorized to change this group name.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Group not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: This is not a group chat, only the names of group chats can be set/changed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /chats/{chatId}/members:
     parameters: [ $ref: '#/components/parameters/ChatId' ]
     
     # -------------------- CHAT GET USERS --------------------
@@ -236,7 +293,10 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- GROUP LEAVE --------------------
-    delete:
+  /chats/{chatId}/members/me:
+    parameters: [ $ref: '#/components/parameters/ChatId' ]
+
+    delete: 
       tags: ["Chat Operations"]
       summary: Leave the group
       description: Removes the logged-in user from the group identified by the specified chat ID.
@@ -264,58 +324,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     
-  # -------------------- CHANGE GROUP NAME --------------------    
-  /me/chats/{chatId}/name:
-    parameters: [ $ref: '#/components/parameters/ChatId' ]
 
-    patch:
-      tags: ["Chat Operations"]
-      summary: Change the name of the specified group
-      description: >-
-        Changes the name of the group identified by the specified chat ID,
-        using the new name provided in the request body.
-      operationId: setGroupName
-      security: [ BearerAuth: [] ]
-      requestBody:
-        description: The new name for the group.
-        required: true
-        content:
-          application/merge-patch+json:
-            schema:
-              $ref: '#/components/schemas/PatchGroupNameRequest'
-      responses:
-        "200":
-          description: Group name updated successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChatName'
-        "400":
-          description: Bad request - invalid group name.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "401":
-          description: Authentication required or failed.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "403":
-          description: Forbidden - you are not authorized to change this group name.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: Group not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /me/chats/{chatId}/messages:
+  /chats/{chatId}/messages:
     parameters: [ $ref: '#/components/parameters/ChatId' ]
 
     # -------------------- GET CHAT MESSAGES --------------------
@@ -404,7 +414,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   
   # -------------------- DELETE MESSAGE --------------------
-  /me/chats/{chatId}/messages/{messageId}:
+  /chats/{chatId}/messages/{messageId}:
     parameters: 
       - $ref: '#/components/parameters/ChatId'
       - $ref: '#/components/parameters/MessageId' 
@@ -445,7 +455,7 @@ paths:
                 $ref: '#/components/schemas/Error'
               
   # -------------------- REPLY MESSAGE --------------------
-  /me/chats/{chatId}/messages/{messageId}/replies:
+  /chats/{chatId}/messages/{messageId}/replies:
     parameters:
       - $ref: '#/components/parameters/ChatId'
       - $ref: '#/components/parameters/MessageId'
@@ -498,7 +508,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- ADD REACTION TO MESSAGE --------------------
-  /me/chats/{chatId}/messages/{messageId}/reactions:
+  /chats/{chatId}/messages/{messageId}/reactions:
     parameters:
       - $ref: '#/components/parameters/ChatId'
       - $ref: '#/components/parameters/MessageId'
@@ -554,7 +564,7 @@ paths:
     delete:
       tags: ["Chat Operations"]
       summary: Remove the logged-in user's reaction from the specified message
-      description: >
+      description: >-
         Lets the logged-in user remove their reaction from the specified message.
       operationId: uncommentMessage
       security: [ BearerAuth: [] ]
@@ -585,7 +595,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- FORWARD MESSAGE --------------------
-  /me/chats/{chatId}/messages/{messageId}/forwards:
+  /chats/{chatId}/messages/{messageId}/forwards:
     parameters:
       - $ref: '#/components/parameters/ChatId'
       - $ref: '#/components/parameters/MessageId'
@@ -705,7 +715,6 @@ components:
     
     User:
       type: object
-      description: Represents a user of the platform.
       required: [id, name]
       properties:
         id:     { $ref: '#/components/schemas/UserId'   }
@@ -884,7 +893,7 @@ components:
       description: Information about the original message this one was forwarded from.     
       required: [chatId, messageId]
       properties:
-        chatId:    { $ref: '#/components/schemas/ChatId' }
+        chatId:    { $ref: '#/components/schemas/ChatId'    }
         messageId: { $ref: '#/components/schemas/MessageId' } 
     
     # -------------------- EMOJI REACTIONS --------------------
