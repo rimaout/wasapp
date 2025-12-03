@@ -17,7 +17,10 @@ tags:
     description: Endpoints for user profile management of the logged user
   - name: Chat Operations
     description: Endpoints for interacting with the chats of the logged user
-
+  - name: Group Operations
+    description: Endpoints for interacting with group specific functionalities
+  - name: Message Operations
+    description: Endpoints for interacting with messages specific functionalities
 paths:
   # -------------------- LOGIN --------------------
   /session:
@@ -205,7 +208,7 @@ paths:
     parameters: [ $ref: '#/components/parameters/ChatId' ]
 
     patch:
-      tags: ["Chat Operations"]
+      tags: ["Group Operations"]
       summary: Change the name of the specified group
       description: >-
         Changes the name of the group identified by the specified chat ID,
@@ -262,7 +265,7 @@ paths:
   /chats/{chatId}/image:
     parameters: [ $ref: '#/components/parameters/ChatId' ]
     put:
-      tags: ["Chat Operations"]
+      tags: ["Group Operations"]
       summary: Upload or replace the profile picture of the group
       description: >-
         Uploads or replace the profile picture for the specified group chat.
@@ -369,7 +372,7 @@ paths:
 
     # -------------------- GROUP ADD USERS --------------------
     post:
-      tags: ["Chat Operations"]
+      tags: ["Group Operations"]
       summary: Add a specified user to the group
       description: >
         Adds the user associated with the given user ID to the group identified by the specified chat ID.
@@ -426,7 +429,7 @@ paths:
     parameters: [ $ref: '#/components/parameters/ChatId' ]
 
     delete: 
-      tags: ["Chat Operations"]
+      tags: ["Group Operations"]
       summary: Leave the group
       description: Removes the logged-in user from the group identified by the specified chat ID.
       security: [ BearerAuth: [] ]
@@ -563,7 +566,7 @@ paths:
       - $ref: '#/components/parameters/MessageId' 
       
     delete:
-      tags: ["Chat Operations"]
+      tags: ["Message Operations"]
       summary: Delete a specific message from the specified chat
       description: |-
         Deletes the message identified by messageId from the chat identified by chatId. 
@@ -604,7 +607,7 @@ paths:
       - $ref: '#/components/parameters/MessageId'
 
     post:
-      tags: ["Chat Operations"]
+      tags: ["Message Operations"]
       summary: Add a comment replying to a specific message
       description: >
         Creates a new message in the specified chat that replies to
@@ -657,7 +660,7 @@ paths:
       - $ref: '#/components/parameters/MessageId'
 
     post:
-      tags: ["Chat Operations"]
+      tags: ["Message Operations"]
       summary: Add an emoji reaction to a specific message
       description: >-
         Lets the user react to the specified message with an emoji. If the user has
@@ -705,7 +708,7 @@ paths:
     
     # -------------------- REMOVE REACTION TO MESSAGE --------------------
     delete:
-      tags: ["Chat Operations"]
+      tags: ["Message Operations"]
       summary: Remove the logged-in user's reaction from the specified message
       description: >-
         Lets the logged-in user remove their reaction from the specified message.
@@ -744,7 +747,7 @@ paths:
       - $ref: '#/components/parameters/MessageId'
 
     post:
-      tags: ["Chat Operations"]
+      tags: ["Message Operations"]
       summary: Forward the specified message
       description: >-
         Allows the user to forward the selected message to another chat.
@@ -871,7 +874,7 @@ components:
       enum: [ image_jpeg, image_png, image_webp ]
       description: >-
         ACTUAL file format determined by server content validation.
-        Do NOT rely on URL extension - extensions can be missing or wrong.
+        Do NOT rely on URL extension, extensions can be missing or wrong.
 
     ImageMetadata:
       type: object
@@ -1022,6 +1025,12 @@ components:
         (in this case, the text is used as a caption for the image).
       oneOf:
         - type: object
+          required: [text, msgImage]
+          properties:
+            text:     { $ref: '#/components/schemas/MessageText'  }
+            msgImage: { $ref: '#/components/schemas/MessageImage' }
+        #--------------------------
+        - type: object
           required: [text]
           properties:
             text: { $ref: '#/components/schemas/MessageText' }
@@ -1030,12 +1039,6 @@ components:
           required: [msgImage]
           properties:
             msgImage: { $ref: '#/components/schemas/MessageImage' }  
-        #--------------------------
-        - type: object
-          required: [text, msgImage]
-          properties:
-            text:     { $ref: '#/components/schemas/MessageText'  }
-            msgImage: { $ref: '#/components/schemas/MessageImage' }
 
     MessageText:
       type: string
@@ -1045,6 +1048,7 @@ components:
       minLength: 1
       maxLength: 3000
       pattern: '^/[\S\s]+[\S]+/'
+      example: "Hello World!!"
 
     MessageImage:
       type: string
