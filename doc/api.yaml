@@ -1133,7 +1133,7 @@ components:
           required: [text, msgImage]
           properties:
             text:     { $ref: '#/components/schemas/MessageText'  }
-            msgImage: { $ref: '#/components/schemas/MessageImage' }
+            msgImage: { $ref: '#/components/schemas/ImageMetadata' }
         #--------------------------
         - type: object
           required: [text]
@@ -1143,7 +1143,7 @@ components:
         - type: object
           required: [msgImage]
           properties:
-            msgImage: { $ref: '#/components/schemas/MessageImage' }  
+            msgImage: { $ref: '#/components/schemas/ImageMetadata' }  
 
     MessageText:
       type: string
@@ -1154,11 +1154,6 @@ components:
       maxLength: 3000
       pattern: '^/[\S\s]+[\S]+/'
       example: "Hello World!!"
-
-    MessageImage:
-      type: string
-      format: binary
-      description: Image file attached to a message, sent as binary data.
 
     MessageIsDeletedFlag:
       type: boolean
@@ -1252,10 +1247,11 @@ components:
         (in this case, the text is used as a caption for the image).
       oneOf:
         - type: object
-          required: [text, sendTime]
+          required: [text, imageFile, sendTime]
           properties:
-            text:     { $ref: '#/components/schemas/MessageText'  }
-            sendTime: { $ref: '#/components/schemas/BaseDateTime' }
+            text:      { $ref: '#/components/schemas/MessageText'  }
+            imageFile: { $ref: '#/components/schemas/BinaryImage'  }
+            sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
         #--------------------------
         - type: object
           required: [imageFile, sendTime]
@@ -1264,11 +1260,10 @@ components:
             sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
         #--------------------------
         - type: object
-          required: [text, imageFile, sendTime]
+          required: [text, sendTime]
           properties:
-            text:      { $ref: '#/components/schemas/MessageText'  }
-            imageFile: { $ref: '#/components/schemas/BinaryImage'  }
-            sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
+            text:     { $ref: '#/components/schemas/MessageText'  }
+            sendTime: { $ref: '#/components/schemas/BaseDateTime' }
 
     ForwardMessageRequest:
       type: object 
