@@ -1145,7 +1145,7 @@ components:
       description: >-
         Represents a chat. Standard chats include two users; 
         group chats can be created with the group flag.
-      required: [id, displayName]
+      required: [id, displayName, lastMessage]
       properties:
         id:           { $ref: '#/components/schemas/ChatId'           }
         displayName:  { $ref: '#/components/schemas/ChatDisplayName'  }
@@ -1216,6 +1216,7 @@ components:
           - If the 'isDeleted' flag is true, the message content will not be returned by the server , and the client shoud render it as a deleted message.
           - If 'forwardedFrom' is not present, the message was composed in this chat. If present, it contains the identifiers (`chatId` and `messageId`) of the original message from another chat which this message forwards. This allows clients to display context about forwarded messages by referencing their original location.
           - If 'replyTo' is not present, this message is not a reply. If it is present, it contains the ID of the message in the same chat that this message is replying to.
+      required: [id, chatId, sendTime, sender, status, isDeleted, isInitMessage, reactionsList]
       properties:
         id:            { $ref: '#/components/schemas/MessageId'            }
         chatId:        { $ref: '#/components/schemas/ChatId'               }
@@ -1264,7 +1265,7 @@ components:
         Cannot be made up only of spaces or other whitespace characters.
       minLength: 1
       maxLength: 3000
-      pattern: '^/[\S\s]+[\S]+/'
+      pattern: '^(?!\s*$).+'
       example: "Hello World!!"
 
     MessageIsDeletedFlag:
@@ -1427,6 +1428,7 @@ components:
     Error:
       type: object
       description: Default error structure.
+      required: [code, message]
       properties:
         code:
           type: string
@@ -1434,7 +1436,6 @@ components:
         message:
           type: string
           description: Error information.
-      required: [code, message]
 
     AuthResponse:
       type: object
@@ -1448,6 +1449,7 @@ components:
     UsersSearchResponse:  #todo: paging
       type: object
       description: Response containing the list of users matching the search criteria.
+      required: [usersList]
       properties:
         usersList:
           type: array
@@ -1462,6 +1464,7 @@ components:
     ChatsPreviewListRespose: #todo: paging
       type: object
       description: Response containing the list of chat previews for the logged-in user.
+      required: [chatsPreviewList]
       properties:
         chatsPreviewList:
           type: array
@@ -1476,6 +1479,7 @@ components:
     ChatMessagesResponse: #todo: paging
       type: object
       description: Response to the request of the messages of a chat.
+      required: [messages]
       properties:
         messages:
           type: array 
@@ -1488,6 +1492,7 @@ components:
     ChatMembersListResponse:
       type: object
       description: Response containing the list of members in the chat.
+      required: [membersList]
       properties:
         membersList:
           $ref: '#/components/schemas/ChatMembersList'
