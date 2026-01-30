@@ -8,7 +8,8 @@ info:
 
 servers:
   - url: https://wasapp.online/v1
-# ================================================================
+
+# ================================================================
 
 tags:
   - name: Login
@@ -97,7 +98,7 @@ paths:
       summary: Update the username of the logged-in user
       description: Updates the username of the logged-in user using the new value provided in the request body.
       operationId: setMyUserName
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       requestBody:
         description: The new username for the logged-in user.
         required: true
@@ -141,7 +142,7 @@ paths:
         The image must be JPEG, PNG or WebP format, maximum 5MB.
         Returns the updated user object with the new image URL.
       operationId: setMyPhoto
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       requestBody:
         description: Image file for user profile picture
         required: true
@@ -194,7 +195,7 @@ paths:
         Create a group chat with the users specified in the request as members. The chat is automatically created by the server with an initial message.
         The welcome message has the following characteristics: the sender is the user who created the chat, the content is empty, and it has isInitMessage = true.
       operationId: createGroupChat
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       requestBody:
         description: Group details.
         required: true
@@ -229,7 +230,8 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /user/{userId}/chats: # CREATE A DIRECT CHAT
-    parameters: [ $ref: '#/components/parameters/UserId' ]
+    parameters:
+      - $ref: '#/components/parameters/UserId'
 
     post:
       tags: ["Chat Creation"]
@@ -238,7 +240,7 @@ paths:
         Create a direct chat with the specified user. The chat is automatically created by the server with an initial message.
         The welcome message has the following characteristics: the sender is the user who created the chat, the content is empty, and it has isInitMessage = true.
       operationId: createDirectChat
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       responses:
         '201':
           description: Direct chat created successfully.
@@ -274,7 +276,7 @@ paths:
         Retrieve a list of chat previews belonging to the authenticated user.
         The chats are returned in order, sorted by the time of the last sent message (most recent first).
       operationId: getMyConversations
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       responses:
         "200":
           description: >-
@@ -283,7 +285,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatsPreviewListRespose' 
+                $ref: '#/components/schemas/ChatsPreviewListResponse'
         "401":
           description: Authentication required or failed.
           content:
@@ -293,7 +295,8 @@ paths:
 
   # -------------------- CHANGE GROUP NAME --------------------    
   /chats/{chatId}/name:
-    parameters: [ $ref: '#/components/parameters/ChatId' ]
+    parameters:
+      - $ref: '#/components/parameters/ChatId'
 
     patch:
       tags: ["Group Operations"]
@@ -303,7 +306,7 @@ paths:
         using the new name provided in the request body.
         If the given identifier is not associated with a group chat, an error will be returned.
       operationId: setGroupName
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       requestBody:
         description: The new name for the group.
         required: true
@@ -351,7 +354,8 @@ paths:
 
   # -------------------- GROUP PROFILE IMAGE --------------------
   /chats/{chatId}/image:
-    parameters: [ $ref: '#/components/parameters/ChatId' ]
+    parameters:
+      - $ref: '#/components/parameters/ChatId'
     put:
       tags: ["Group Operations"]
       summary: Upload or replace the profile picture of the group
@@ -362,7 +366,7 @@ paths:
         The image must be JPEG, PNG or WebP format, maximum 5MB.
         Returns the updated chat preview with the new image URL.
       operationId: setGroupPhoto
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       requestBody:
         description: Image file for group profile picture
         required: true
@@ -424,7 +428,8 @@ paths:
                 $ref: '#/components/schemas/Error'
   
   /chats/{chatId}/members:
-    parameters: [ $ref: '#/components/parameters/ChatId' ]
+    parameters:
+      - $ref: '#/components/parameters/ChatId'
     
     # -------------------- CHAT GET USERS --------------------
     get:
@@ -434,7 +439,7 @@ paths:
         Returns the list of users who are members in the specified chat.
         Each item includes the user ID and username.
       operationId: getChatMembers
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       responses:
         "200":
           description: >-
@@ -464,7 +469,7 @@ paths:
       description: >
         Adds the user associated with the given user ID to the group identified by the specified chat ID.
         To add a user to the group, you must already be a member.
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       operationId: addToGroup
       requestBody:
         description: User identifier
@@ -513,13 +518,14 @@ paths:
 
   # -------------------- GROUP LEAVE --------------------
   /chats/{chatId}/members/me:
-    parameters: [ $ref: '#/components/parameters/ChatId' ]
+    parameters:
+      - $ref: '#/components/parameters/ChatId'
 
     delete: 
       tags: ["Group Operations"]
       summary: Leave the group
       description: Removes the logged-in user from the group identified by the specified chat ID.
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       operationId: leaveGroup
       responses:
         "204":
@@ -544,7 +550,8 @@ paths:
                 $ref: '#/components/schemas/Error'
     
   /chats/{chatId}/messages:
-    parameters: [ $ref: '#/components/parameters/ChatId' ]
+    parameters:
+      - $ref: '#/components/parameters/ChatId'
 
     # -------------------- GET CHAT MESSAGES --------------------
     get:
@@ -553,7 +560,7 @@ paths:
       description: >- #TODO: updated description when paging is implemented 
         Returns all messages belonging to the specified chat. 
       operationId: getConversation
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       responses:
         "200":
           description: >-
@@ -591,7 +598,7 @@ paths:
         and timestamp provided in the request body.
         The image must be JPEG, PNG or WebP format, maximum 5MB.
       operationId: sendMessage
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       requestBody:
         description: >-
           The message content (text OR image OR both) and sendtime used to create the 
@@ -660,7 +667,7 @@ paths:
           - Subsequent reads of this message will return it with 'isDeleted' set to true and 'content' set to null, so clients can display it as a deleted message.
           - A message with the `InitMessage` flag set to true cannot be deleted.
       operationId: deleteMessage
-      security: [ BearerAuth: [] ] 
+      security: [ { BearerAuth: [] } ]
       responses:
         "200":
           description: Message marked as deleted successfully. Returns the updated message.
@@ -702,7 +709,7 @@ paths:
         Creates a new message in the specified chat that replies to
         the message identified by messageId.
       operationId: replyMessage
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       requestBody:
         description: The new message sent as a reply to the specified message.
         required: true
@@ -755,7 +762,7 @@ paths:
         Lets the user react to the specified message with an emoji. If the user has
         already reacted to this message, the existing reaction is replaced with the new one.
       operationId: commentMessage
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       requestBody:
         description: The emoji to use as a reaction.
         required: true
@@ -802,7 +809,7 @@ paths:
       description: >-
         Lets the logged-in user remove their reaction from the specified message.
       operationId: uncommentMessage
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       responses:
         "200":
           description: Reaction removed successfully. Returns the updated message.
@@ -842,7 +849,7 @@ paths:
         Allows the user to forward the selected message to another chat.
         The ID of the destination chat must be specified in the request body.
       operationId: forwardMessage
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       requestBody:
         description: >- 
           The chatId and sendTime to use to forward the message in
@@ -898,7 +905,7 @@ paths:
         Returns the raw image file for display in chat.
         Authentication required, only chat members can access.
       operationId: serveMessageImage
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       responses:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
@@ -955,7 +962,7 @@ paths:
         Returns the group profile image.
         Authentication required, only group members can access.
       operationId: serveGroupProfileImage
-      security: [ BearerAuth: [] ]
+      security: [ { BearerAuth: [] } ]
       responses:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
@@ -997,7 +1004,7 @@ components:
     MessageId:
       name: messageId
       in: path
-      description: The messagge ID (UUID) that uniquely identifies the message within its chat.
+      description: The message ID (UUID) that uniquely identifies the message within its chat.
       required: true
       schema: { $ref: '#/components/schemas/MessageId' }
 
@@ -1092,7 +1099,7 @@ components:
     
     User:
       type: object
-      description: User informations.
+      description: User information.
       required: [id, name, image]
       properties:
         id:     { $ref: '#/components/schemas/UserId'        }
@@ -1121,7 +1128,7 @@ components:
 
     BearerToken:
       type: string
-      description: Token used to fullfil the Bearer Authentication standard.
+      description: Token used to fulfill the Bearer Authentication standard.
       pattern: ^Bearer\s[A-Za-z0-9-._~+/]+={0,2}$
       example: "Bearer JhdkEN7QWidlYDjRTH8I~n99YJfqCC=="
     
@@ -1165,7 +1172,7 @@ components:
         - description: |-
             The chat profile image displayed in the chat preview.
               - For 1-on-1 chats: the profile image of the other user is displayed.
-              - For group chats: the group progile image is displayed
+              - For group chats: the group profile image is displayed
 
     IsGroupChat:
       type: boolean
@@ -1178,8 +1185,8 @@ components:
       type: object
       description: |-
         Preview of the last message sent in the chat. It can be composed by a text or by an image or both in this case the text is used as caption.
-        - If the 'isDeleted' flag is true, the message content will not be returned by the server, and the client shoud render it as a deleted message.
-        - If the 'isInitMessage' flag is true, the message content will not be returned by the server, and the client shoud render it as a "welcome" message.
+        - If the 'isDeleted' flag is true, the message content will not be returned by the server, and the client should render it as a deleted message.
+        - If the 'isInitMessage' flag is true, the message content will not be returned by the server, and the client should render it as a "welcome" message.
       required: [status, sendTime, senderName, isDeleted, isInitMessage]
       properties:
         status:        { $ref: '#/components/schemas/MessageStatus'        }
@@ -1193,7 +1200,7 @@ components:
       type: array
       description: List of users in a chat, ordered alphabetically by username.
       minItems: 1
-      maxItems: 1024 #max number of alowed members in a group chat
+      maxItems: 1024 #max number of allowed members in a group chat
       items:
         $ref: '#/components/schemas/User'
     
@@ -1201,7 +1208,7 @@ components:
       type: array
       description: List of users in a chat, ordered alphabetically by username.
       minItems: 1
-      maxItems: 1024 #max number of alowed members in a group chat
+      maxItems: 1024 #max number of allowed members in a group chat
       items:
         $ref: '#/components/schemas/UserId'
 
@@ -1211,7 +1218,7 @@ components:
       type: object
       description: |- 
         Represents a message in a chat and includes all the information needed to display it.
-          - If the 'isDeleted' flag is true, the message content will not be returned by the server , and the client shoud render it as a deleted message.
+          - If the 'isDeleted' flag is true, the message content will not be returned by the server , and the client should render it as a deleted message.
           - If 'forwardedFrom' is not present, the message was composed in this chat. If present, it contains the identifiers (`chatId` and `messageId`) of the original message from another chat which this message forwards. This allows clients to display context about forwarded messages by referencing their original location.
           - If 'replyTo' is not present, this message is not a reply. If it is present, it contains the ID of the message in the same chat that this message is replying to.
       required: [id, chatId, sendTime, sender, status, isDeleted, isInitMessage, reactionsList]
@@ -1263,7 +1270,7 @@ components:
         Cannot be made up only of spaces or other whitespace characters.
       minLength: 1
       maxLength: 3000
-      pattern: '^/[\S\s]+[\S]+/'
+      pattern: '^(?!\s*$).+'
       example: "Hello World!!"
 
     MessageIsDeletedFlag:
@@ -1279,7 +1286,7 @@ components:
         Indicates whether the message is the default message generated by the server when a new chat is created.
         When this flag is true, the message content should be empty and ignored by the client.
         The client should render the message as a welcome message like "This group was created by {senderOfTheMessage}"
-        or "{senderOfTheMessage} started a direct chat with you". A message with the IsInitMessageFlag set to true can't be deleat.
+        or "{senderOfTheMessage} started a direct chat with you". A message with the IsInitMessageFlag set to true can't be deleted
 
     MessageStatus:
       type: string
@@ -1339,7 +1346,7 @@ components:
       type: array
       description: List of emoji reactions associated with the message.
       minItems: 0
-      maxItems: 1024 #max number of memmbers of a group chat
+      maxItems: 1024 #max number of members of a group chat
       items:
         $ref: '#/components/schemas/EmojiReaction'
 
@@ -1421,7 +1428,7 @@ components:
 
     BinaryImageUploadRequest:
       type: object
-      description: Request for uloading a image file (JPEG, PNG, WebP, max 5MB), used for uploading images.
+      description: Request for uploading a image file (JPEG, PNG, WebP, max 5MB), used for uploading images.
       required: [binaryImage]
       properties:
         binaryImage: { $ref: '#/components/schemas/BinaryImage' }
@@ -1464,7 +1471,7 @@ components:
           items:
             $ref: '#/components/schemas/User' 
 
-    ChatsPreviewListRespose: #todo: paging
+    ChatsPreviewListResponse: #todo: paging
       type: object
       description: Response containing the list of chat previews for the logged-in user.
       required: [chatsPreviewList]
@@ -1486,7 +1493,7 @@ components:
       properties:
         messages:
           type: array 
-          description: List of messages in cronological order, newest first.
+          description: List of messages in chronological order, newest first.
           minItems: 0
           maxItems: 50
           items:
