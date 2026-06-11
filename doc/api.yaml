@@ -1339,6 +1339,7 @@ components:
 
     EmojiId:
       type: integer
+      format: int32
       description: |-
         Numeric identifier of the emoji used as a reaction. Mapping:
           - 0 = 👍
@@ -1437,9 +1438,9 @@ components:
     EmojiReactionRequest:
       type: object
       description: Represents a reaction to a message made by the logged-in user.
-      required: [userId]
+      required: [emojiId]
       properties:
-        userId:  { $ref: '#/components/schemas/UserId'  } 
+        emojiId: { $ref: '#/components/schemas/EmojiId' }
 
     AddUserToGroupRequest:
       description: Request to add a user to a group chat.
