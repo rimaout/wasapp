@@ -185,6 +185,28 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  # -------------------- GET OWN PROFILE --------------------
+  /profile:
+    get:
+      tags: ["User Management"]
+      summary: Get the profile of the logged-in user
+      description: Returns the User object for the currently authenticated user.
+      operationId: getMyProfile
+      security: [ { BearerAuth: [] } ]
+      responses:
+        "200":
+          description: User profile returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "401":
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   # -------------------- CREATE CHATS --------------------
    
   /chats/groups:  # CREATE GROUP
