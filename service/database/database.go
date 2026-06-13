@@ -40,6 +40,8 @@ import (
 type AppDatabase interface {
 	GetName() (string, error)
 	SetName(name string) error
+	CreateUser(name string) (string, error)
+	GetUserByName(name string) (string, error)
 
 	Ping() error
 }
@@ -55,15 +57,29 @@ func New(db *sql.DB) (AppDatabase, error) {
 		return nil, errors.New("database is required when building a AppDatabase")
 	}
 
-	// Check if table exists. If not, the database is empty, and we need to create the structure
+	// Enable Foreign Keys
+	_, err := db.Exec("PRAGMA foreign_keys = ON;")
+	if err != nil {
+		return nil, fmt.Errorf("error enabling foreign keys: %w", err)
+	}
+
+	// Check if a Table exists. If not, the database is empty, and we need to create the structure
 	var tableName string
-	err := db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='example_table';`).Scan(&tableName)
+	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
-		sqlStmt := `CREATE TABLE example_table (id INTEGER NOT NULL PRIMARY KEY, name TEXT);`
-		_, err = db.Exec(sqlStmt)
-		if err != nil {
-			return nil, fmt.Errorf("error creating database structure: %w", err)
-		}
+
+		// --- Create the users table
+        usersStmt := `CREATE TABLE users (
+            id TEXT NOT NULL PRIMARY KEY,
+            name TEXT NOT NULL UNIQUE
+        );`
+        _, err = db.Exec(usersStmt)
+        if err != nil {
+            return nil, fmt.Errorf("error creating users table: %w", err)
+        }
+
+		// --- Create the other tables here as needed
+
 	}
 
 	return &appdbimpl{
