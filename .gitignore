@@ -187,4 +187,7 @@ fabric.properties
 
 
 # Manualy added:
+.golangci.yml
 .spectral.js
+webapi
+node_modules/
