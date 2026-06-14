@@ -13,7 +13,8 @@ type loginRequest struct {
 }
 
 type loginResponse struct {
-	Identifier string `json:"identifier"`
+	UserId string `json:"userId"`
+	Token  string `json:"token"`
 }
 
 func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
@@ -32,7 +33,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	}
 
 	// Check if the user already exists in the database
-	userId, err := rt.db.GetUserByName(req.UserName)
+	userId, err := rt.db.GetUserIdByName(req.UserName)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error looking up user")
 		http.Error(w, `{"code":"500","message":"internal server error"}`, http.StatusInternalServerError)
@@ -51,8 +52,19 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 		status = http.StatusCreated // Set status to 201 Created if a new user was created
 	}
 
-	// Respond with the user identifier in JSON format
+	// Generate Session (Bearer) Token
+	token, err := rt.db.GenerateUserSessionToken(userId)
+    if err != nil {
+        ctx.Logger.WithError(err).Error("error generating session token")
+        http.Error(w, `{"code":"500","message":"internal server error"}`, http.StatusInternalServerError)
+        return
+    }
+
+	// Respond with the user identifier and token in JSON format
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(loginResponse{Identifier: userId})
+	json.NewEncoder(w).Encode(loginResponse{
+		UserId: userId,
+		Token:  "Bearer " + token,
+	})
 }

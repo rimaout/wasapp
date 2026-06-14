@@ -38,9 +38,9 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
-	CreateUser(name string) (string, error)
-	GetUserByName(name string) (string, error)
-
+	CreateUser(userName string) (string, error)
+	GetUserIdByName(userName string) (string, error)
+	GenerateUserSessionToken(userId string) (string, error)
 	Ping() error
 }
 
@@ -76,8 +76,16 @@ func New(db *sql.DB) (AppDatabase, error) {
             return nil, fmt.Errorf("error creating users table: %w", err)
         }
 
-		// --- Create the other tables here as needed
-
+		tokensStmt := `CREATE TABLE tokens (
+			token TEXT NOT NULL PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			expires_at DATETIME NOT NULL,
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		)`
+		_, err = db.Exec(tokensStmt)
+        if err != nil {
+            return nil, fmt.Errorf("error creating tokens table: %w", err)
+        }
 	}
 
 	return &appdbimpl{
