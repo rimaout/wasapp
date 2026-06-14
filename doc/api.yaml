@@ -65,8 +65,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
-  # -------------------- USER SEARCH -------------------- 
+  # -------------------- USER SEARCH --------------------
   /users:
     get:
       tags: ["Search"]
@@ -92,7 +98,7 @@ paths:
                 $ref: '#/components/schemas/UsersSearchResponse'
 
   # -------------------- USERNAME UPDATE --------------------
-  /profile/name: 
+  /profile/name:
     patch:
       tags: ["User Management"]
       summary: Update the username of the logged-in user
@@ -176,9 +182,9 @@ paths:
           description: Image file exceeds maximum size (5MB).
           content:
             application/json:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/Error'
-        "415":  
+        "415":
           description: Unsupported image format. Only JPEG, PNG, WebP allowed.
           content:
             application/json:
@@ -208,7 +214,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   # -------------------- CREATE CHATS --------------------
-   
+
   /chats/groups:  # CREATE GROUP
     post:
       tags: ["Chat Creation"]
@@ -245,7 +251,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         "409":
-          description: Conflict - 1 or more UserID is repeated 
+          description: Conflict - 1 or more UserID is repeated
           content:
             application/json:
               schema:
@@ -258,7 +264,7 @@ paths:
     post:
       tags: ["Chat Creation"]
       summary: Create a direct chat with a user
-      description: >- 
+      description: >-
         Create a direct chat with the specified user. The chat is automatically created by the server with an initial message.
         The welcome message has the following characteristics: the sender is the user who created the chat, the content is empty, and it has isInitMessage = true.
       operationId: createDirectChat
@@ -302,7 +308,7 @@ paths:
       responses:
         "200":
           description: >-
-            Chats returned successfully. 
+            Chats returned successfully.
             The chat previews array is ordered by the last message sent time, from most recent to oldest.
           content:
             application/json:
@@ -315,7 +321,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # -------------------- CHANGE GROUP NAME --------------------    
+  # -------------------- CHANGE GROUP NAME --------------------
   /chats/{chatId}/name:
     parameters:
       - $ref: '#/components/parameters/ChatId'
@@ -440,19 +446,19 @@ paths:
           description: Image file exceeds maximum size (5MB).
           content:
             application/json:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/Error'
-        "415":  
+        "415":
           description: Unsupported image format. Only JPEG, PNG, WebP allowed.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  
+
   /chats/{chatId}/members:
     parameters:
       - $ref: '#/components/parameters/ChatId'
-    
+
     # -------------------- CHAT GET USERS --------------------
     get:
       tags: ["Chat Operations"]
@@ -465,7 +471,7 @@ paths:
       responses:
         "200":
           description: >-
-            User list returned successfully. 
+            User list returned successfully.
             The list contains the ID and name of each user in the chat.
           content:
             application/json:
@@ -543,7 +549,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/ChatId'
 
-    delete: 
+    delete:
       tags: ["Group Operations"]
       summary: Leave the group
       description: Removes the logged-in user from the group identified by the specified chat ID.
@@ -570,7 +576,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    
+
   /chats/{chatId}/messages:
     parameters:
       - $ref: '#/components/parameters/ChatId'
@@ -578,15 +584,15 @@ paths:
     # -------------------- GET CHAT MESSAGES --------------------
     get:
       tags: ["Chat Operations"]
-      summary: Retrieve all messages for the specified chat    
-      description: >- #TODO: updated description when paging is implemented 
-        Returns all messages belonging to the specified chat. 
+      summary: Retrieve all messages for the specified chat
+      description: >- #TODO: updated description when paging is implemented
+        Returns all messages belonging to the specified chat.
       operationId: getConversation
       security: [ { BearerAuth: [] } ]
       responses:
         "200":
           description: >-
-            Chat messages returned successfully. 
+            Chat messages returned successfully.
             The messages array is ordered by the last message sent time, from most recent to oldest.
           content:
             application/json:
@@ -610,7 +616,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    
+
     # -------------------- SEND MESSAGE --------------------
     post:
       tags: ["Chat Operations"]
@@ -623,7 +629,7 @@ paths:
       security: [ { BearerAuth: [] } ]
       requestBody:
         description: >-
-          The message content (text OR image OR both) and sendtime used to create the 
+          The message content (text OR image OR both) and sendtime used to create the
           new message in the specified chat.
         required: true
         content:
@@ -665,26 +671,26 @@ paths:
           description: Image file exceeds maximum size (5MB).
           content:
             application/json:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/Error'
-        "415":  
+        "415":
           description: Unsupported image format. Only JPEG, PNG, WebP allowed.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  
+
   # -------------------- DELETE MESSAGE --------------------
   /chats/{chatId}/messages/{messageId}:
-    parameters: 
+    parameters:
       - $ref: '#/components/parameters/ChatId'
-      - $ref: '#/components/parameters/MessageId' 
-      
+      - $ref: '#/components/parameters/MessageId'
+
     delete:
       tags: ["Message Operations"]
       summary: Delete a specific message from the specified chat
       description: |-
-        Deletes the message identified by messageId from the chat identified by chatId. 
+        Deletes the message identified by messageId from the chat identified by chatId.
         The authenticated user must be the same user that sent the message.
           - Subsequent reads of this message will return it with 'isDeleted' set to true and 'content' set to null, so clients can display it as a deleted message.
           - A message with the `InitMessage` flag set to true cannot be deleted.
@@ -704,7 +710,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: >- 
+          description: >-
             Forbidden - You are not allowed to delete this message because you are not the sender of the message
             or the message you are trying to delete is an initial message (isInitMessage=true)
           content:
@@ -717,7 +723,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-              
+
   # -------------------- REPLY MESSAGE --------------------
   /chats/{chatId}/messages/{messageId}/replies:
     parameters:
@@ -738,7 +744,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/NewMessageRequest' 
+              $ref: '#/components/schemas/NewMessageRequest'
       responses:
         "201":
           description: Reply message created successfully.
@@ -823,7 +829,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    
+
     # -------------------- REMOVE REACTION TO MESSAGE --------------------
     delete:
       tags: ["Message Operations"]
@@ -873,14 +879,14 @@ paths:
       operationId: forwardMessage
       security: [ { BearerAuth: [] } ]
       requestBody:
-        description: >- 
+        description: >-
           The chatId and sendTime to use to forward the message in
           the destination chat.
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ForwardMessageRequest'              
+              $ref: '#/components/schemas/ForwardMessageRequest'
       responses:
         "201":
           description: Message forwarded successfully.
@@ -914,8 +920,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  
-  # -------------------- SERVE MESSAGE IMAGE -------------------- 
+
+  # -------------------- SERVE MESSAGE IMAGE --------------------
   /images/message/{imageId}:
     parameters:
         - $ref: '#/components/parameters/ImageId'
@@ -949,8 +955,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  
-  # -------------------- SERVE USER PROFILE IMAGE -------------------- 
+
+  # -------------------- SERVE USER PROFILE IMAGE --------------------
   /images/profile/{imageId}:
     parameters:
         - $ref: '#/components/parameters/ImageId'
@@ -971,8 +977,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  
-  # -------------------- SERVE GROUP PROFILE IMAGE -------------------- 
+
+  # -------------------- SERVE GROUP PROFILE IMAGE --------------------
   /images/group/{imageId}:
     parameters:
       - $ref: '#/components/parameters/ImageId'
@@ -1015,14 +1021,14 @@ components:
       description: Unique identifier for the user (UUID).
       required: true
       schema: { $ref: '#/components/schemas/UserId' }
-  
+
     ChatId:
       name: chatId
       in: path
       description: Unique identifier for the chat (UUID).
       required: true
       schema: { $ref: '#/components/schemas/ChatId' }
-    
+
     MessageId:
       name: messageId
       in: path
@@ -1036,9 +1042,9 @@ components:
       description: Unique identifier for the image (UUID).
       required: true
       schema: { $ref: '#/components/schemas/ImageId' }
-  
+
   # ================================================================
-  
+
   securitySchemes:
     BearerAuth:
       type: http
@@ -1050,7 +1056,7 @@ components:
   schemas:
     # -------------------- BASE COMPONENTS --------------------
     # Basic components used in various schemas
-    
+
     BaseId:
       type: string
       format: uuid
@@ -1063,7 +1069,7 @@ components:
 
     BaseName:
       description: >-
-        The name must be 3 to 24 characters long. 
+        The name must be 3 to 24 characters long.
         Allowed characters are letters, numbers, spaces, underscores (_), and hyphens (-).
         The name needs at least one alpha-numeric character.
       type: string
@@ -1079,7 +1085,7 @@ components:
       minLength: 20
       maxLength: 30
 
-    # -------------------- BASE IMAGE -------------------- 
+    # -------------------- BASE IMAGE --------------------
 
     ImageId:
       allOf:
@@ -1117,8 +1123,8 @@ components:
       maxLength: 5242880 #(5MB in chars, oss: 1 MB as 1,048,576 bytes that's 1,048,576 characters)
       description: Image file (JPEG, PNG, WebP, max 5MB), used for uploading images.
 
-    # -------------------- USER -------------------- 
-    
+    # -------------------- USER --------------------
+
     User:
       type: object
       description: User information.
@@ -1137,10 +1143,10 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseName'
         - description: Unique username visible to other users.
-        - example: Feldspar 
-    
+        - example: Feldspar
+
     # -------------------- LOGIN --------------------
-    
+
     LoginRequest:
       type: object
       description: Request payload containing the username to log in or create a user.
@@ -1153,8 +1159,8 @@ components:
       description: Token used to fulfill the Bearer Authentication standard.
       pattern: ^Bearer\s[A-Za-z0-9-._~+/]+={0,2}$
       example: "Bearer JhdkEN7QWidlYDjRTH8I~n99YJfqCC=="
-    
-    # -------------------- CHAT -------------------- 
+
+    # -------------------- CHAT --------------------
 
     ChatId:
       allOf:
@@ -1168,9 +1174,9 @@ components:
         - example: Marco34
 
     ChatPreview:
-      type: object  
+      type: object
       description: >-
-        Represents a chat. Standard chats include two users; 
+        Represents a chat. Standard chats include two users;
         group chats can be created with the group flag.
       required: [id, displayName, lastMessage]
       properties:
@@ -1225,7 +1231,7 @@ components:
       maxItems: 1024 #max number of allowed members in a group chat
       items:
         $ref: '#/components/schemas/User'
-    
+
     ChatMembersListIdOnly:
       type: array
       description: List of users in a chat, ordered alphabetically by username.
@@ -1238,7 +1244,7 @@ components:
 
     Message:
       type: object
-      description: |- 
+      description: |-
         Represents a message in a chat and includes all the information needed to display it.
           - If the 'isDeleted' flag is true, the message content will not be returned by the server , and the client should render it as a deleted message.
           - If 'forwardedFrom' is not present, the message was composed in this chat. If present, it contains the identifiers (`chatId` and `messageId`) of the original message from another chat which this message forwards. This allows clients to display context about forwarded messages by referencing their original location.
@@ -1266,7 +1272,7 @@ components:
 
     MessageContent:
       description: >-
-        Generic message content: only text, only image, or both 
+        Generic message content: only text, only image, or both
         (in this case, the text is used as a caption for the image).
       oneOf:
         - type: object
@@ -1283,7 +1289,7 @@ components:
         - type: object
           required: [msgImage]
           properties:
-            msgImage: { $ref: '#/components/schemas/ImageMetadata' }  
+            msgImage: { $ref: '#/components/schemas/ImageMetadata' }
 
     MessageText:
       type: string
@@ -1312,7 +1318,7 @@ components:
 
     MessageStatus:
       type: string
-      enum: [delivered, received, read] 
+      enum: [delivered, received, read]
       description: |-
         Message read status:
           - 'delivered' means the message has been delivered to the server (default)
@@ -1329,12 +1335,12 @@ components:
 
     ForwardedFromInfo:
       type: object
-      description: Information about the original message this one was forwarded from.     
+      description: Information about the original message this one was forwarded from.
       required: [chatId, messageId]
       properties:
         chatId:    { $ref: '#/components/schemas/ChatId'    }
-        messageId: { $ref: '#/components/schemas/MessageId' } 
-    
+        messageId: { $ref: '#/components/schemas/MessageId' }
+
     # -------------------- EMOJI REACTIONS --------------------
 
     EmojiId:
@@ -1358,7 +1364,7 @@ components:
     EmojiReaction:
       type: object
       description: >-
-        Represents a reaction to a message, including the user who 
+        Represents a reaction to a message, including the user who
         reacted and the emoji they used.
       required: [userId, emojiId]
       properties:
@@ -1374,18 +1380,16 @@ components:
         $ref: '#/components/schemas/EmojiReaction'
 
     # -------------------- REQUESTS --------------------
-    
+
     PatchUserNameRequest:
       type: object
       description: Request body for updating the logged-in user's username.
-      required: [userName]
       properties:
         userName: { $ref: '#/components/schemas/UserName' }
 
     PatchGroupNameRequest:
       type: object
       description: Request body for changing the name of the specified group.
-      required: [groupName]
       properties:
         groupName:
           $ref: '#/components/schemas/ChatName'
@@ -1394,7 +1398,7 @@ components:
       type: object
       description: >-
         Details necessary for the creation of the new group chat.
-        The list should not include the user who is creating the chat, 
+        The list should not include the user who is creating the chat,
         since they are implicitly added to the users of a group.
       required: [groupName, membersList]
       properties:
@@ -1402,10 +1406,10 @@ components:
         membersList: { $ref: '#/components/schemas/ChatMembersListIdOnly' }
 
     NewMessageRequest:
-      type: object 
+      type: object
       description: >-
         Request body for sending a new message.
-        The message can contain: only text, only image, or both 
+        The message can contain: only text, only image, or both
         (in this case, the text is used as a caption for the image).
       oneOf:
         - type: object
@@ -1428,7 +1432,7 @@ components:
             sendTime: { $ref: '#/components/schemas/BaseDateTime' }
 
     ForwardMessageRequest:
-      type: object 
+      type: object
       description: Request to forward a message to another chat.
       required: [forwardTo, sendTime]
       properties:
@@ -1487,12 +1491,12 @@ components:
         usersList:
           type: array
           description: >-
-            Returns the list of user matching the username query (ordered by similarity), 
+            Returns the list of user matching the username query (ordered by similarity),
             or all users alphabetically if no query is provided.
           minItems: 0
           maxItems: 50
           items:
-            $ref: '#/components/schemas/User' 
+            $ref: '#/components/schemas/User'
 
     ChatsPreviewListResponse: #todo: paging
       type: object
@@ -1501,7 +1505,7 @@ components:
       properties:
         chatsPreviewList:
           type: array
-          description: >- 
+          description: >-
             Array of chat previews, used for displaying the list of a user's chats.
             The list is ordered by the time of the last message in each chat, from latest to oldest.
           minItems: 0
@@ -1515,7 +1519,7 @@ components:
       required: [messages]
       properties:
         messages:
-          type: array 
+          type: array
           description: List of messages in chronological order, newest first.
           minItems: 0
           maxItems: 50
@@ -1529,7 +1533,7 @@ components:
       properties:
         membersList:
           $ref: '#/components/schemas/ChatMembersList'
-  
+
   responses:
     RawImageFileResponse:
       description: Raw image file returned as binary data
