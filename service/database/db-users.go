@@ -46,6 +46,25 @@ func (db *appdbimpl) GetUserIdByName(userName string) (string, error) {
 	return userId, nil
 }
 
+func (db *appdbimpl) GetUserNameById(userId string) (string, error) {
+	var userName string
+	err := db.c.QueryRow("SELECT name FROM users WHERE id = ?", userId).Scan(&userName)
+
+	// If no user is found with the given id, return an empty string and no error
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", nil
+	}
+
+	// If any other error occurs, return it
+	if err != nil {
+		return "", fmt.Errorf("querying user: %w", err)
+	}
+
+	// If a user is found, return the user name
+	return userName, nil
+}
+
+
 // GenerateUserSessionToken creates a new session token for the given user,
 // saves it to the database, and returns the plain token string.
 //
@@ -72,4 +91,22 @@ func (db *appdbimpl) GenerateUserSessionToken(userId string) (string, error) {
     }
 
     return token, nil
+}
+
+// GetUserIDByToken checks if the given token represents a live session.
+// Returns the associated user ID if the token exists and has not yet expired.
+// Returns an empty string (and no error) if the token is expired or invalid.
+func (db *appdbimpl) GetUserIDByToken(token string) (string, error) {
+	var userId string
+	err := db.c.QueryRow("SELECT user_id FROM tokens WHERE token = ? AND expires_at > datetime('now')", token).Scan(&userId)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", nil // no match: token invalid or expired
+	}
+
+	if err != nil {
+		return "", fmt.Errorf("querying token: %w", err) // DB error
+	}
+
+	return userId, nil
 }

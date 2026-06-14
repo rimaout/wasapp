@@ -13,6 +13,9 @@ func (rt *_router) Handler() http.Handler {
 	// Login
 	rt.router.POST("/session", rt.wrap(rt.doLogin))
 
+	// Authenticated routes (require Bearer token)
+	rt.router.GET("/profile", rt.wrapAuthenticated(rt.getMyProfile))
+
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)
 
