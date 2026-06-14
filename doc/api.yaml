@@ -65,14 +65,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '500':
-          description: Internal server error.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
 
-  # -------------------- USER SEARCH --------------------
+  # -------------------- USER SEARCH -------------------- 
   /users:
     get:
       tags: ["Search"]
