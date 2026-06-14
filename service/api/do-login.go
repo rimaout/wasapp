@@ -22,13 +22,13 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	// Decode the request body into a loginRequest struct
 	var req loginRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, `{"code":"400","message":"invalid request body"}`, http.StatusBadRequest)
+		rt.respondWithError(w, http.StatusBadRequest, "400", "invalid request body")
 		return
 	}
 
 	// Validate the userName length
 	if len(req.UserName) < 3 || len(req.UserName) > 24 {
-		http.Error(w, `{"code":"400","message":"userName must be 3-24 characters"}`, http.StatusBadRequest)
+		rt.respondWithError(w, http.StatusBadRequest, "400", "userName must be 3-24 characters")
 		return
 	}
 
@@ -36,7 +36,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	userId, err := rt.db.GetUserIdByName(req.UserName)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error looking up user")
-		http.Error(w, `{"code":"500","message":"internal server error"}`, http.StatusInternalServerError)
+		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
 		return
 	}
 	status := http.StatusOK	// Default status is 200 OK
@@ -46,7 +46,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 		userId, err = rt.db.CreateUser(req.UserName)
 		if err != nil {
 			ctx.Logger.WithError(err).Error("error creating user")
-			http.Error(w, `{"code":"500","message":"internal server error"}`, http.StatusInternalServerError)
+			rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
 			return
 		}
 		status = http.StatusCreated // Set status to 201 Created if a new user was created
@@ -56,7 +56,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	token, err := rt.db.GenerateUserSessionToken(userId)
     if err != nil {
         ctx.Logger.WithError(err).Error("error generating session token")
-        http.Error(w, `{"code":"500","message":"internal server error"}`, http.StatusInternalServerError)
+		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
         return
     }
 
