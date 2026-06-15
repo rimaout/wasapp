@@ -26,8 +26,6 @@ tags:
     description: Endpoints for interacting with group specific functionalities
   - name: Message Operations
     description: Endpoints for interacting with messages specific functionalities
-  - name: Image Serving
-    description: Endpoints for serving images with appropriate access controls
 
 paths:
   # -------------------- LOGIN --------------------
@@ -284,6 +282,28 @@ paths:
                 $ref: '#/components/schemas/Error'
         "409":
           description: You already have a direct chat with this user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  # -------------------- USER PROFILE IMAGE --------------------
+  /users/{userId}/profile-image:
+    parameters:
+      - $ref: '#/components/parameters/UserId'
+
+    get:
+      tags: ["User Management"]
+      summary: Serve the profile picture of a user
+      description: >-
+        Returns the profile image of the specified user.
+        Publicly accessible; no authentication required.
+      operationId: serveUserProfileImage
+      responses:
+        '200':
+          $ref: '#/components/responses/RawImageFileResponse'
+        '404':
+          description: User not found.
           content:
             application/json:
               schema:
@@ -915,16 +935,17 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # -------------------- SERVE MESSAGE IMAGE --------------------
-  /images/message/{imageId}:
+  # -------------------- SERVE CHAT MESSAGE IMAGE --------------------
+  /chats/{chatId}/images/{imageId}:
     parameters:
-        - $ref: '#/components/parameters/ImageId'
+      - $ref: '#/components/parameters/ChatId'
+      - $ref: '#/components/parameters/ImageId'
 
     get:
-      tags: ["Image Serving"]
-      summary: Serve message image (chat members only)
+      tags: ["Chat Operations"]
+      summary: Serve an image from a chat message
       description: >-
-        Returns the raw image file for display in chat.
+        Returns the raw image file attached to a message in the specified chat.
         Authentication required, only chat members can access.
       operationId: serveMessageImage
       security: [ { BearerAuth: [] } ]
@@ -932,76 +953,56 @@ paths:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
         '401':
-          description: Authentication required
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Forbidden - You are not a chat member
+          description: Forbidden - you are not a member of this chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Image not found
+          description: Chat or image not found.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # -------------------- SERVE USER PROFILE IMAGE --------------------
-  /images/profile/{imageId}:
+  # -------------------- SERVE CHAT/GROUP PROFILE IMAGE --------------------
+  /chats/{chatId}/profile-image:
     parameters:
-        - $ref: '#/components/parameters/ImageId'
+      - $ref: '#/components/parameters/ChatId'
 
     get:
-      tags: ["Image Serving"]
-      summary: Serve user profile picture (public access)
+      tags: ["Chat Operations"]
+      summary: Serve the profile picture of a chat or group
       description: >-
-        Returns the user profile image.
-        Publicly accessible; no authentication required.
-      operationId: serveUserProfileImage
-      responses:
-        '200':
-          $ref: '#/components/responses/RawImageFileResponse'
-        '404':
-          description: Profile image not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  # -------------------- SERVE GROUP PROFILE IMAGE --------------------
-  /images/group/{imageId}:
-    parameters:
-      - $ref: '#/components/parameters/ImageId'
-
-    get:
-      tags: ["Image Serving"]
-      summary: Serve group profile picture (group members only)
-      description: >-
-        Returns the group profile image.
-        Authentication required, only group members can access.
-      operationId: serveGroupProfileImage
+        Returns the profile image of the specified chat.
+        For 1-on-1 chats, returns the other user's profile picture.
+        For group chats, returns the group profile picture.
+        Authentication required, only chat members can access.
+      operationId: serveChatProfileImage
       security: [ { BearerAuth: [] } ]
       responses:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
         '401':
-          description: Authentication required
+          description: Authentication required.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Forbidden - You are not a chat member
+          description: Forbidden - you are not a member of this chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Group profile image not found
+          description: Chat not found or no profile image set.
           content:
             application/json:
               schema:
@@ -1090,31 +1091,14 @@ components:
       type: string
       format: url
       description: >-
-        URL to access the uploaded image
-        The URL may not include a file extension, image format is indicated by HTTP Content-Type header upon retrieval.
-      example: "https://wasapp.online/v1/images/profile/550e8400-e29b-41d4-a716-446655440000"
-
-    ImageMimeType:
-      type: string
-      enum: [ image_jpeg, image_png, image_webp ]
-      description: >-
-        ACTUAL file format determined by server content validation.
-        Do NOT rely on URL extension, extensions can be missing or wrong.
-
-    ImageMetadata:
-      type: object
-      description: Metadata for an uploaded image
-      required: [imageId, url, mimeType]
-      properties:
-        imageId:  { $ref: '#/components/schemas/ImageId'       }
-        url:      { $ref: '#/components/schemas/ImageUrl'      }
-        mimeType: { $ref: '#/components/schemas/ImageMimeType' }
+        URL to access a message image. Image format is indicated by the HTTP Content-Type header upon retrieval.
+      example: "https://wasapp.online/v1/chats/550e8400-e29b-41d4-a716-446655440000/images/660e8400-e29b-41d4-a716-446655440000"
 
     BinaryImage:
       type: string
       format: binary
       minLength: 1
-      maxLength: 5242880 #(5MB in chars, oss: 1 MB as 1,048,576 bytes that's 1,048,576 characters)
+      maxLength: 5242880
       description: Image file (JPEG, PNG, WebP, max 5MB), used for uploading images.
 
     # -------------------- USER --------------------
@@ -1122,11 +1106,10 @@ components:
     User:
       type: object
       description: User information.
-      required: [id, name, image]
+      required: [id, name]
       properties:
-        id:     { $ref: '#/components/schemas/UserId'        }
-        name:   { $ref: '#/components/schemas/UserName'      }
-        image:  { $ref: '#/components/schemas/ImageMetadata' }
+        id:     { $ref: '#/components/schemas/UserId'   }
+        name:   { $ref: '#/components/schemas/UserName' }
 
     UserId:
       allOf:
@@ -1174,11 +1157,10 @@ components:
         group chats can be created with the group flag.
       required: [id, displayName, lastMessage]
       properties:
-        id:           { $ref: '#/components/schemas/ChatId'           }
-        displayName:  { $ref: '#/components/schemas/ChatDisplayName'  }
-        displayImage: { $ref: '#/components/schemas/ChatDisplayImage' }
-        isGroupChat:  { $ref: '#/components/schemas/IsGroupChat'      }
-        lastMessage:  { $ref: '#/components/schemas/ChatLastMessage'  }
+        id:           { $ref: '#/components/schemas/ChatId'          }
+        displayName:  { $ref: '#/components/schemas/ChatDisplayName' }
+        isGroupChat:  { $ref: '#/components/schemas/IsGroupChat'     }
+        lastMessage:  { $ref: '#/components/schemas/ChatLastMessage' }
 
     ChatDisplayName:
       allOf:
@@ -1187,14 +1169,6 @@ components:
             The name displayed in the chat preview.
               - For 1-on-1 chats: the name of the other user is displayed.
               - For group chats: the group name is displayed.
-
-    ChatDisplayImage:
-      allOf:
-        - $ref: '#/components/schemas/ImageMetadata'
-        - description: |-
-            The chat profile image displayed in the chat preview.
-              - For 1-on-1 chats: the profile image of the other user is displayed.
-              - For group chats: the group profile image is displayed
 
     IsGroupChat:
       type: boolean
@@ -1270,10 +1244,10 @@ components:
         (in this case, the text is used as a caption for the image).
       oneOf:
         - type: object
-          required: [text, msgImage]
+          required: [text, msgImageUrl]
           properties:
-            text:     { $ref: '#/components/schemas/MessageText'   }
-            msgImage: { $ref: '#/components/schemas/ImageMetadata' }
+            text:        { $ref: '#/components/schemas/MessageText' }
+            msgImageUrl: { $ref: '#/components/schemas/ImageUrl'    }
         #--------------------------
         - type: object
           required: [text]
@@ -1281,9 +1255,9 @@ components:
             text: { $ref: '#/components/schemas/MessageText' }
         #--------------------------
         - type: object
-          required: [msgImage]
+          required: [msgImageUrl]
           properties:
-            msgImage: { $ref: '#/components/schemas/ImageMetadata' }
+            msgImageUrl: { $ref: '#/components/schemas/ImageUrl' }
 
     MessageText:
       type: string
