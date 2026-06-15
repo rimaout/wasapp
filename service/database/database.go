@@ -41,6 +41,7 @@ type AppDatabase interface {
 	CreateUser(userName string) (string, error)
 	GetUserIdByName(userName string) (string, error)
 	GetUserNameById(userId string) (string, error)
+	SetUserName(userId string, newName string) error
 	GenerateUserSessionToken(userId string) (string, error)
 	GetUserIDByToken(token string) (string, error)
 	Ping() error

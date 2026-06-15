@@ -15,6 +15,7 @@ func (rt *_router) Handler() http.Handler {
 
 	// Authenticated routes (require Bearer token)
 	rt.router.GET("/profile", rt.wrapAuthenticated(rt.getMyProfile))
+	rt.router.PATCH("/profile/name", rt.wrapAuthenticated(rt.setMyUserName))
 
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)

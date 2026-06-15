@@ -60,13 +60,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Bad request - invalid username.
+          description: Bad request - invalid username (too short or too long or invalid chars).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # -------------------- USER SEARCH -------------------- 
+  # -------------------- USER SEARCH --------------------
   /users:
     get:
       tags: ["Search"]

@@ -64,6 +64,14 @@ func (db *appdbimpl) GetUserNameById(userId string) (string, error) {
 	return userName, nil
 }
 
+func (db *appdbimpl) SetUserName(userId string, newName string) error {
+	_, err := db.c.Exec("UPDATE users SET name = ? WHERE id = ?", newName, userId)
+	if err != nil {
+		return fmt.Errorf("updating user name: %w", err)
+	}
+	return nil
+}
+
 
 // GenerateUserSessionToken creates a new session token for the given user,
 // saves it to the database, and returns the plain token string.
