@@ -192,3 +192,4 @@ fabric.properties
 webapi
 node_modules/
 /.idea
+uploads/
