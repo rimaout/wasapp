@@ -193,3 +193,8 @@ webapi
 node_modules/
 /.idea
 uploads/
+my-doc.md
+TODO.md
+project-requests/wasaText.md
+project-requests/project.md
+wasapp.code-workspace
