@@ -17,7 +17,7 @@ tags:
   - name: Search
     description: Endpoints for searching users
   - name: User Management
-    description: Endpoints for user profile management of the logged user
+    description: Endpoints for user management of the logged user
   - name: Chat Creation
     description: Endpoints for creating new chats (direct chats or groups)
   - name: Chat Operations
@@ -90,7 +90,7 @@ paths:
                 $ref: '#/components/schemas/UsersSearchResponse'
 
   # -------------------- USERNAME UPDATE --------------------
-  /profile/name:
+  /me/name:
     patch:
       tags: ["User Management"]
       summary: Update the username of the logged-in user
@@ -131,7 +131,7 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 # -------------------- USER AVATAR IMAGE --------------------
-  /profile/avatar:
+  /me/avatar:
     put:
       tags: ["User Management"]
       summary: Upload or replace the avatar of the logged-in user

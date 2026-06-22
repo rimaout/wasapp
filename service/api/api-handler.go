@@ -14,8 +14,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/session", rt.wrap(rt.doLogin))
 
 	// Authenticated routes (require Bearer token)
-	rt.router.PATCH("/profile/name", rt.wrapAuthenticated(rt.setMyUserName))
-	rt.router.PUT("/profile/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
+	rt.router.PATCH("/me/name", rt.wrapAuthenticated(rt.setMyUserName))
+	rt.router.PUT("/me/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
 
 	// Public image serving (no auth needed)
 	rt.router.GET("/users/:userId/avatar", rt.wrap(rt.getUserAvatar))

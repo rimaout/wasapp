@@ -8,7 +8,7 @@ import (
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
-const profileUploadDir = "uploads/profile-avatars/"
+const userAvatarUploadDir = "uploads/users/avatars/"
 
 func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// Get the current avatar image path
@@ -21,7 +21,7 @@ func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps ht
 	}
 
 	// Extract and save the new image
-	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", profileUploadDir)
+	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", userAvatarUploadDir)
 	if !ok {
 		// can emit: 400 (invalid form / missing file),
 		// 413 (too large), 415 (bad format), 500 (disk error).
