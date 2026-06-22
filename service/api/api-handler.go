@@ -14,7 +14,6 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/session", rt.wrap(rt.doLogin))
 
 	// Authenticated routes (require Bearer token)
-	rt.router.GET("/profile", rt.wrapAuthenticated(rt.getMyProfile))
 	rt.router.PATCH("/profile/name", rt.wrapAuthenticated(rt.setMyUserName))
 	rt.router.PUT("/profile/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
 

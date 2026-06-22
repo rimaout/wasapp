@@ -12,6 +12,11 @@ type patchUserNameRequest struct {
 	UserName string `json:"userName"`
 }
 
+type userResponse struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
 func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
 	// Read request
@@ -56,7 +61,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 
 	// Return userId and userName (TODO: add retuen profile image)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(profileResponse{
+	json.NewEncoder(w).Encode(userResponse{
 		Id:   ctx.UserID,
 		Name: newName,
 	})
