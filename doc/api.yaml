@@ -130,19 +130,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-# -------------------- USER PROFILE IMAGE --------------------
-  /profile/image:
+# -------------------- USER AVATAR IMAGE --------------------
+  /profile/avatar:
     put:
       tags: ["User Management"]
-      summary: Upload or replace the profile picture of the logged-in user
+      summary: Upload or replace the avatar of the logged-in user
       description: >-
-        Uploads or replaces the profile picture for the authenticated user.
+        Uploads or replaces the avatar for the authenticated user.
         The image must be JPEG, PNG or WebP format, maximum 5MB.
         Returns the updated user object with the new image URL.
-      operationId: setMyPhoto
+      operationId: setMyUserAvatar
       security: [ { BearerAuth: [] } ]
       requestBody:
-        description: Image file for user profile picture
+        description: Image file for user avatar
         required: true
         content:
           multipart/form-data:
@@ -152,19 +152,15 @@ paths:
               binaryImage:
                 contentType: image/jpeg, image/png, image/webp
       responses:
-        '200':
-          description: Profile picture uploaded successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
+        "204":
+          description: Avatar uploaded successfully. No content is returned.
+        "400":
           description: Bad request - invalid image format or too large
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '401':
+        "401":
           description: Authentication required or failed
           content:
             application/json:
@@ -287,18 +283,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # -------------------- USER PROFILE IMAGE --------------------
-  /users/{userId}/profile-image:
+  # -------------------- USER AVATAR IMAGE --------------------
+  /users/{userId}/avatar:
     parameters:
       - $ref: '#/components/parameters/UserId'
 
     get:
       tags: ["User Management"]
-      summary: Serve the profile picture of a user
+      summary: Serve the avatar of a user
       description: >-
-        Returns the profile image of the specified user.
+        Returns the avatar of the specified user.
         Publicly accessible; no authentication required.
-      operationId: serveUserProfileImage
+      operationId: serveUserAvatar
       responses:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
@@ -394,15 +390,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # -------------------- GROUP PROFILE IMAGE --------------------
-  /chats/{chatId}/image:
+  # -------------------- GROUP AVATAR IMAGE --------------------
+  /chats/{chatId}/avatar:
     parameters:
       - $ref: '#/components/parameters/ChatId'
     put:
       tags: ["Group Operations"]
-      summary: Upload or replace the profile picture of the group
+      summary: Upload or replace the avatar of the group
       description: >-
-        Uploads or replace the profile picture for the specified group chat.
+        Uploads or replace the avatar for the specified group chat.
         Only group members can update the image.
         If the given identifier is not associated with a group chat, an error will be returned.
         The image must be JPEG, PNG or WebP format, maximum 5MB.
@@ -410,7 +406,7 @@ paths:
       operationId: setGroupPhoto
       security: [ { BearerAuth: [] } ]
       requestBody:
-        description: Image file for group profile picture
+        description: Image file for group avatar
         required: true
         content:
           multipart/form-data:
@@ -420,12 +416,8 @@ paths:
               binaryImage:
                 contentType: image/jpeg, image/png, image/webp
       responses:
-        '200':
-          description: Group picture uploaded successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChatPreview'
+        "204":
+          description: Group avatar uploaded successfully. No content is returned.
         '400':
           description: Bad request - invalid image format or too large
           content:
@@ -451,7 +443,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         "409":
-          description: This is not a group chat, only the profile picture of group chats can be set/changed.
+          description: This is not a group chat, only the avatar of group chats can be set/changed.
           content:
             application/json:
               schema:
@@ -971,20 +963,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  # -------------------- SERVE CHAT/GROUP PROFILE IMAGE --------------------
-  /chats/{chatId}/profile-image:
+  # -------------------- SERVE CHAT/GROUP AVATAR --------------------
+  /chats/{chatId}/avatar:
     parameters:
       - $ref: '#/components/parameters/ChatId'
 
     get:
       tags: ["Chat Operations"]
-      summary: Serve the profile picture of a chat or group
+      summary: Serve the avatar of a chat or group
       description: >-
-        Returns the profile image of the specified chat.
-        For 1-on-1 chats, returns the other user's profile picture.
-        For group chats, returns the group profile picture.
+        Returns the avatar of the specified chat.
+        For 1-on-1 chats, returns the other user's avatar.
+        For group chats, returns the group avatar.
         Authentication required, only chat members can access.
-      operationId: serveChatProfileImage
+      operationId: serveChatAvatar
       security: [ { BearerAuth: [] } ]
       responses:
         '200':
@@ -1002,7 +994,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Chat not found or no profile image set.
+          description: Chat not found or no avatar set.
           content:
             application/json:
               schema:
