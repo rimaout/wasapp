@@ -16,10 +16,10 @@ func (rt *_router) Handler() http.Handler {
 	// Authenticated routes (require Bearer token)
 	rt.router.GET("/profile", rt.wrapAuthenticated(rt.getMyProfile))
 	rt.router.PATCH("/profile/name", rt.wrapAuthenticated(rt.setMyUserName))
-	rt.router.PUT("/profile/image", rt.wrapAuthenticated(rt.setMyPhoto))
+	rt.router.PUT("/profile/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
 
 	// Public image serving (no auth needed)
-	rt.router.GET("/users/:userId/profile-image", rt.wrap(rt.getUserProfileImage))
+	rt.router.GET("/users/:userId/avatar", rt.wrap(rt.getUserAvatar))
 
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)

@@ -119,24 +119,24 @@ func (db *appdbimpl) GetUserIDByToken(token string) (string, error) {
 	return userId, nil
 }
 
-func (db *appdbimpl) SetUserProfileImage(userId string, imagePath string) error {
-	_, err := db.c.Exec("UPDATE users SET profile_image_path = ? WHERE id = ?", imagePath, userId)
+func (db *appdbimpl) SetUserAvatarPath(userId string, imagePath string) error {
+	_, err := db.c.Exec("UPDATE users SET avatar_image_path = ? WHERE id = ?", imagePath, userId)
 	if err != nil {
-		return fmt.Errorf("updating user profile image path: %w", err)
+		return fmt.Errorf("updating user avatar image path: %w", err)
 	}
 	return nil
 }
 
-func (db *appdbimpl) GetUserProfileImagePath(userId string) (string, error) {
+func (db *appdbimpl) GetUserAvatarPath(userId string) (string, error) {
 	var path sql.NullString
-	err := db.c.QueryRow("SELECT profile_image_path FROM users WHERE id = ?", userId).Scan(&path)
+	err := db.c.QueryRow("SELECT avatar_image_path FROM users WHERE id = ?", userId).Scan(&path)
 	if errors.Is(err, sql.ErrNoRows) {
 		return "", nil
 	}
 	if err != nil {
-		return "", fmt.Errorf("querying user profile image path: %w", err)
+		return "", fmt.Errorf("querying user avatar image path: %w", err)
 	}
-	if !path.Valid {
+	if !path.Valid { // check if the path is NULL in the database
 		return "", nil
 	}
 	return path.String, nil

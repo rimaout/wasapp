@@ -8,14 +8,14 @@ import (
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
-const profileUploadDir = "uploads/profile"
+const profileUploadDir = "uploads/profile-avatars/"
 
-func (rt *_router) setMyPhoto(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	// Get the current profile image path
+func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// Get the current avatar image path
 	// DB error → 500 (server can't proceed without knowing if old image exists)
-	oldImagePath, err := rt.db.GetUserProfileImagePath(ctx.UserID)
+	oldImagePath, err := rt.db.GetUserAvatarPath(ctx.UserID)
 	if err != nil {
-		ctx.Logger.WithError(err).Error("error fetching old profile path")
+		ctx.Logger.WithError(err).Error("error fetching old avatar path")
 		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
 		return
 	}
@@ -29,8 +29,8 @@ func (rt *_router) setMyPhoto(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 
 	// Update the database with the new file path
-	if err := rt.db.SetUserProfileImage(ctx.UserID, newImagePath); err != nil {
-		ctx.Logger.WithError(err).Error("error updating profile image path in database")
+	if err := rt.db.SetUserAvatarPath(ctx.UserID, newImagePath); err != nil {
+		ctx.Logger.WithError(err).Error("error updating avatar image path in database")
 		rt.deleteImageFile(ctx, newImagePath)
 		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
 		return
@@ -42,5 +42,5 @@ func (rt *_router) setMyPhoto(w http.ResponseWriter, r *http.Request, ps httprou
 	// Return Response
 	userName, _ := rt.db.GetUserNameById(ctx.UserID)
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(profileResponse{Id: ctx.UserID, Name: userName})
+	json.NewEncoder(w).Encode(userResponse{Id: ctx.UserID, Name: userName})
 }

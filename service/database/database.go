@@ -44,8 +44,8 @@ type AppDatabase interface {
 	SetUserName(userId string, newName string) error
 	GenerateUserSessionToken(userId string) (string, error)
 	GetUserIDByToken(token string) (string, error)
-	SetUserProfileImage(userId string, imagePath string) error
-	GetUserProfileImagePath(userId string) (string, error)
+	SetUserAvatarPath(userId string, imagePath string) error
+	GetUserAvatarPath(userId string) (string, error)
 	Ping() error
 }
 
@@ -75,7 +75,7 @@ func New(db *sql.DB) (AppDatabase, error) {
         usersStmt := `CREATE TABLE users (
             id TEXT NOT NULL PRIMARY KEY,
             name TEXT NOT NULL UNIQUE,
-            profile_image_path TEXT
+            avatar_image_path TEXT
         );`
         _, err = db.Exec(usersStmt)
         if err != nil {
