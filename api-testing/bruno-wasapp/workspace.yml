@@ -1,0 +1,10 @@
+opencollection: 1.0.0
+info:
+  name: "bruno-wasapp"
+  type: workspace
+
+collections:
+  - name: "wasapp-api"
+    path: "collections/wasapp-api"
+
+docs: ''
