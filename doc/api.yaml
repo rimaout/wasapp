@@ -549,7 +549,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden - you are not a member of this group.
+          description: Forbidden - you are not a member of this group or this is not a group chat.
           content:
             application/json:
               schema:
