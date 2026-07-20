@@ -71,27 +71,134 @@ func New(db *sql.DB) (AppDatabase, error) {
 	err = db.QueryRow(`SELECT name FROM sqlite_master WHERE type='table' AND name='users';`).Scan(&tableName)
 	if errors.Is(err, sql.ErrNoRows) {
 
-		// --- Create the users table
-        usersStmt := `CREATE TABLE users (
-            id TEXT NOT NULL PRIMARY KEY,
-            name TEXT NOT NULL UNIQUE,
-            avatar_image_path TEXT
-        );`
-        _, err = db.Exec(usersStmt)
-        if err != nil {
-            return nil, fmt.Errorf("error creating users table: %w", err)
-        }
+		// --- USERS TABLE
+		usersStmt := `CREATE TABLE users (
+			"id"  TEXT NOT NULL PRIMARY KEY, -- UUID
 
+			"name"               TEXT NOT NULL UNIQUE,
+			"avatar_image_path"  TEXT
+		);`
+		_, err = db.Exec(usersStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating users table: %w", err)
+		}
+
+		// --- TOKENS TABLE
 		tokensStmt := `CREATE TABLE tokens (
-			token TEXT NOT NULL PRIMARY KEY,
-			user_id TEXT NOT NULL,
-			expires_at DATETIME NOT NULL,
+			"token"       TEXT NOT NULL PRIMARY KEY,
+			"user_id"     TEXT NOT NULL,
+			"expires_at"  DATETIME NOT NULL,
+
 			FOREIGN KEY (user_id) REFERENCES users(id)
 		)`
 		_, err = db.Exec(tokensStmt)
-        if err != nil {
-            return nil, fmt.Errorf("error creating tokens table: %w", err)
-        }
+		if err != nil {
+			return nil, fmt.Errorf("error creating tokens table: %w", err)
+		}
+
+		// ---  CHATS TABLE (for private and group chats)
+		chatsStmt := `CREATE TABLE chats (
+			"id"  TEXT NOT NULL PRIMARY KEY, -- UUID
+
+			"group_name"        TEXT,    -- Optional (NULL for private chats)
+			"group_image_path"  TEXT     -- Optional (NULL for private chats)
+		);`
+		_, err = db.Exec(chatsStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating chats table: %w", err)
+		}
+
+		// --- MEMBERS TABLE (for chat members)
+		membersStmt := `CREATE TABLE members (
+			"chat_id"  TEXT NOT NULL,
+			"user_id"  TEXT NOT NULL,
+
+			"group_join_time"   DATETIME,		-- Optional (NULL for private chats)
+			"group_leave_time"	DATETIME,		-- Optional (NULL if the user is active or for private chats)
+
+			PRIMARY KEY (chat_id, user_id),
+			FOREIGN KEY (chat_id) REFERENCES chats(id),
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		);`
+		_, err = db.Exec(membersStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating members table: %w", err)
+		}
+
+		// --- MESSAGES TABLE
+		messagesStmt := `CREATE TABLE messages (
+			"id"              TEXT NOT NULL PRIMARY KEY, -- UUID
+
+			"chat_id"         TEXT NOT NULL,
+			"sender_id"       TEXT NOT NULL,
+			"send_time"       DATETIME NOT NULL,
+			"is_deleted"      BOOLEAN NOT NULL,
+			"is_init_message" BOOLEAN NOT NULL,
+
+			"text"      TEXT,
+			"image_id"  TEXT, -- Optional, points to images(id)
+
+			"reply_to_msg_id"         TEXT,  -- Self-referencing for replies
+
+			"is_forward_message"      BOOLEAN NOT NULL,
+			"forwarded_from_chat_id"  TEXT,
+			"forwarded_from_msg_id"   TEXT,
+
+			FOREIGN KEY (chat_id) REFERENCES chats(id),
+			FOREIGN KEY (sender_id) REFERENCES users(id),
+			FOREIGN KEY (image_id) REFERENCES images(id),
+			FOREIGN KEY (reply_to_msg_id) REFERENCES messages(id),
+			FOREIGN KEY (forwarded_from_chat_id) REFERENCES chats(id),
+			FOREIGN KEY (forwarded_from_msg_id) REFERENCES messages(id)
+		);`
+		_, err = db.Exec(messagesStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating messages table: %w", err)
+		}
+
+		// --- IMAGES TABLE (for message images)
+		imagesStmt := `CREATE TABLE images (
+			"id"   TEXT NOT NULL PRIMARY KEY,
+			"path" TEXT NOT NULL
+		);`
+		_, err = db.Exec(imagesStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating images table: %w", err)
+		}
+
+	    // --- RECEIVER_STATUSES TABLE (for message delivery and read statuses)
+		receiverStatusesStmt := `CREATE TABLE receiver_statuses (
+			"message_id"  TEXT NOT NULL,
+			"user_id"     TEXT NOT NULL,
+
+			"recv_time"   DATETIME,            -- Optional (until delivered)
+			"read_time"   DATETIME,            -- Optional (until read)
+
+			PRIMARY KEY (message_id, user_id),
+			FOREIGN KEY (message_id) REFERENCES messages(id),
+			FOREIGN KEY (user_id) REFERENCES users(id),
+
+		);`
+		_, err = db.Exec(receiverStatusesStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating receiver_statuses table: %w", err)
+		}
+
+		// --- REACTIONS TABLE (for message reactions)
+		reactionsStmt := `CREATE TABLE reactions (
+			"message_id" TEXT NOT NULL,
+			"user_id"    TEXT NOT NULL,
+
+			"emoji_id"   INTEGER NOT NULL CHECK (emoji_id >= 0 AND emoji_id <= 9),
+
+			PRIMARY KEY (message_id, user_id),
+			FOREIGN KEY (message_id) REFERENCES messages(id),
+			FOREIGN KEY (user_id) REFERENCES users(id)
+		);`
+		_, err = db.Exec(reactionsStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating reactions table: %w", err)
+		}
 	}
 
 	return &appdbimpl{
