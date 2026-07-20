@@ -100,6 +100,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 		chatsStmt := `CREATE TABLE chats (
 			"id"  TEXT NOT NULL PRIMARY KEY, -- UUID
 
+			"is_group_chat"     BOOLEAN NOT NULL,
 			"group_name"        TEXT,    -- Optional (NULL for private chats)
 			"group_image_path"  TEXT     -- Optional (NULL for private chats)
 		);`
@@ -147,7 +148,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			FOREIGN KEY (chat_id) REFERENCES chats(id),
 			FOREIGN KEY (sender_id) REFERENCES users(id),
 			FOREIGN KEY (image_id) REFERENCES images(id),
-			FOREIGN KEY (reply_to_msg_id) REFERENCES messages(id),
+			FOREIGN KEY (chat_id, reply_to_msg_id) REFERENCES messages(chat_id, id),
 			FOREIGN KEY (forwarded_from_chat_id) REFERENCES chats(id),
 			FOREIGN KEY (forwarded_from_msg_id) REFERENCES messages(id)
 		);`
@@ -189,7 +190,8 @@ func New(db *sql.DB) (AppDatabase, error) {
 			"message_id" TEXT NOT NULL,
 			"user_id"    TEXT NOT NULL,
 
-			"emoji_id"   INTEGER NOT NULL CHECK (emoji_id >= 0 AND emoji_id <= 9),
+			"reac_time"  DATETIME NOT NULL,
+			"emoji_id"	 INTEGER NOT NULL CHECK (emoji_id >= 0 AND emoji_id <= 9),
 
 			PRIMARY KEY (message_id, user_id),
 			FOREIGN KEY (message_id) REFERENCES messages(id),
