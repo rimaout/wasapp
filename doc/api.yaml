@@ -716,7 +716,7 @@ paths:
 
     post:
       tags: ["Message Operations"]
-      summary: Add a comment replying to a specific message
+      summary: Add a comment replying to a specific message of the chat
       description: >
         Creates a new message in the specified chat that replies to
         the message identified by messageId.
