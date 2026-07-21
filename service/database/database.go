@@ -46,6 +46,7 @@ type AppDatabase interface {
 	GetUserIDByToken(token string) (string, error)
 	SetUserAvatarPath(userId string, imagePath string) error
 	GetUserAvatarPath(userId string) (string, error)
+	SearchUsers(query string) ([]User, error)
 	Ping() error
 }
 

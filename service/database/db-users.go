@@ -9,6 +9,11 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+type User struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
 func (db *appdbimpl) CreateUser(userName string) (string, error) {
     // Generate a new randomly-generated UUID
     id, err := uuid.NewV4()
@@ -140,4 +145,54 @@ func (db *appdbimpl) GetUserAvatarPath(userId string) (string, error) {
 		return "", nil
 	}
 	return path.String, nil
+}
+
+func (db *appdbimpl) SearchUsers(query string) ([]User, error) {
+	var rows *sql.Rows
+	var err error
+
+	if query == "" {
+		// No query provided: return all users ordered alphabetically
+		rows, err = db.c.Query("SELECT id, name FROM users ORDER BY name ASC LIMIT 50")
+	} else {
+		// Query provided: search using query string
+		pattern := "%" + query + "%" // Use `%` wildcars for pattern matching
+									 // For example, searching "bob" will match "bob", "spongebob", and "superbob123".
+		rows, err = db.c.Query(
+			`SELECT id, name
+			FROM users
+			WHERE name LIKE ?
+			ORDER BY
+				-- Ensures exact matches appear at the top
+				CASE WHEN name = ? THEN 0 ELSE 1 END,
+				name ASC
+			LIMIT 50`,
+			pattern, query,
+		)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("error searching users: %w", err)
+	}
+	defer rows.Close() // ensure rows are closed after processing (even if an error occurs)
+
+	var users []User
+	for rows.Next() { // iterate over the results (rows.Next() returns false when there are no more rows)
+		// Reads the current row into a User struct and appends it to the users slice
+		var u User
+		if err := rows.Scan(&u.Id, &u.Name); err != nil {
+			return nil, fmt.Errorf("scanning user row: %w", err)
+		}
+		users = append(users, u)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating user rows: %w", err)
+	}
+
+	// If no users were found, return an empty slice instead of nil
+	if users == nil {
+		return []User{}, nil
+	}
+
+	return users, nil
 }
