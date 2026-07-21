@@ -102,7 +102,12 @@ func New(db *sql.DB) (AppDatabase, error) {
 
 			"is_group_chat"     BOOLEAN NOT NULL,
 			"group_name"        TEXT,    -- Optional (NULL for private chats)
-			"group_image_path"  TEXT     -- Optional (NULL for private chats)
+			"group_image_path"  TEXT     -- Optional (NULL for private chats or for group chats without an image)
+
+			CONSTRAINT chk_group_chat_fields CHECK (
+				(is_group_chat = 1 AND group_name IS NOT NULL) OR
+				(is_group_chat = 0 AND group_name IS NULL AND group_image_path IS NULL)
+			)
 		);`
 		_, err = db.Exec(chatsStmt)
 		if err != nil {
@@ -137,20 +142,63 @@ func New(db *sql.DB) (AppDatabase, error) {
 			"is_init_message" BOOLEAN NOT NULL,
 
 			"text"      TEXT,
-			"image_id"  TEXT, -- Optional, points to images(id)
+			"image_id"  TEXT,
 
-			"reply_to_msg_id"         TEXT,  -- Self-referencing for replies
+			"reply_to_msg_id"         TEXT,
 
 			"is_forward_message"      BOOLEAN NOT NULL,
 			"forwarded_from_chat_id"  TEXT,
 			"forwarded_from_msg_id"   TEXT,
 
+			UNIQUE(chat_id, id),
 			FOREIGN KEY (chat_id) REFERENCES chats(id),
 			FOREIGN KEY (sender_id) REFERENCES users(id),
 			FOREIGN KEY (image_id) REFERENCES images(id),
 			FOREIGN KEY (chat_id, reply_to_msg_id) REFERENCES messages(chat_id, id),
 			FOREIGN KEY (forwarded_from_chat_id) REFERENCES chats(id),
 			FOREIGN KEY (forwarded_from_msg_id) REFERENCES messages(id)
+
+			-- Constraint 1.1: Minimum Content Requirement
+			-- Must have text or image, unless it's an init message, deleted, or a forward
+			CONSTRAINT chk_msg_minimum_content CHECK (
+				(is_init_message = 1 OR is_deleted = 1 OR is_forward_message = 1) OR
+				(text IS NOT NULL OR image_id IS NOT NULL)
+			),
+
+			-- Constraint 1.2: Initial Message Constraints
+			-- If it's an init message, it cannot have text, images, be deleted, or be a forward
+			CONSTRAINT chk_init_msg_fields CHECK (
+				NOT (is_init_message = 1) OR
+				(text IS NULL AND image_id IS NULL AND is_deleted = 0 AND is_forward_message = 0)
+			),
+
+			-- Constraint 1.3: Forwarded Message Parameters
+			-- Either all 3 forward fields are active/filled, or all 3 are inactive/NULL
+			CONSTRAINT chk_forward_pointers CHECK (
+				(is_forward_message = 1 AND forwarded_from_chat_id IS NOT NULL AND forwarded_from_msg_id IS NOT NULL) OR
+				(is_forward_message = 0 AND forwarded_from_chat_id IS NULL AND forwarded_from_msg_id IS NULL)
+			),
+
+			-- Constraint 1.4: Content of a Forwarded Message
+			-- Forwarded messages cannot contain raw text or images directly, and cannot be an init message
+			CONSTRAINT chk_forward_content_empty CHECK (
+				NOT (is_forward_message = 1) OR
+				(text IS NULL AND image_id IS NULL AND is_init_message = 0)
+			),
+
+			-- Constraint 1.5: Logical Deletion State Enforcement
+			-- When deleted, all user data and forward links must be cleared. Init messages can't be deleted.
+			CONSTRAINT chk_logical_deletion_state CHECK (
+				NOT (is_deleted = 1) OR (
+					text IS NULL AND
+					image_id IS NULL AND
+					is_forward_message = 0 AND
+					forwarded_from_chat_id IS NULL AND
+					forwarded_from_msg_id IS NULL AND
+					is_init_message = 0
+				)
+			)
+
 		);`
 		_, err = db.Exec(messagesStmt)
 		if err != nil {
@@ -179,6 +227,11 @@ func New(db *sql.DB) (AppDatabase, error) {
 			FOREIGN KEY (message_id) REFERENCES messages(id),
 			FOREIGN KEY (user_id) REFERENCES users(id),
 
+			-- Constraint 4.2: Message Timeline Coherence
+			-- Chronological order: recv_time <= read_time (safely handling NULLs)
+			CONSTRAINT chk_delivery_timeline CHECK (
+				read_time IS NULL OR (recv_time IS NOT NULL AND recv_time <= read_time)
+			)
 		);`
 		_, err = db.Exec(receiverStatusesStmt)
 		if err != nil {
@@ -200,6 +253,11 @@ func New(db *sql.DB) (AppDatabase, error) {
 		_, err = db.Exec(reactionsStmt)
 		if err != nil {
 			return nil, fmt.Errorf("error creating reactions table: %w", err)
+		}
+
+		// --- DATABASE TRIGGERS (cross-table constraints)
+		if err = createTriggers(db); err != nil {
+			return nil, err
 		}
 	}
 
