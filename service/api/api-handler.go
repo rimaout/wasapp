@@ -13,6 +13,9 @@ func (rt *_router) Handler() http.Handler {
 	// Login
 	rt.router.POST("/session", rt.wrap(rt.doLogin))
 
+	// User search (no auth required)
+	rt.router.GET("/users", rt.wrap(rt.userSearch))
+
 	// Authenticated routes (require Bearer token)
 	rt.router.PATCH("/me/name", rt.wrapAuthenticated(rt.setMyUserName))
 	rt.router.PUT("/me/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
