@@ -38,6 +38,7 @@ import (
 
 // AppDatabase is the high level interface for the DB
 type AppDatabase interface {
+	// Users
 	CreateUser(userName string) (string, error)
 	GetUserIdByName(userName string) (string, error)
 	GetUserNameById(userId string) (string, error)
@@ -47,6 +48,9 @@ type AppDatabase interface {
 	SetUserAvatarPath(userId string, imagePath string) error
 	GetUserAvatarPath(userId string) (string, error)
 	SearchUsers(query string) ([]User, error)
+
+	// Chats
+	CreateChat(isGroup bool, groupName string, groupImagePath string) (string, error)
 	Ping() error
 }
 

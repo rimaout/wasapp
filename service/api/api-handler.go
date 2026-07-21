@@ -20,6 +20,9 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PATCH("/me/name", rt.wrapAuthenticated(rt.setMyUserName))
 	rt.router.PUT("/me/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
 
+	// Chat creation
+	rt.router.POST("/chats/groups", rt.wrapAuthenticated(rt.createGroupChat))
+
 	// Public image serving (no auth needed)
 	rt.router.GET("/users/:userId/avatar", rt.wrap(rt.getUserAvatar))
 
