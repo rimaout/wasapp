@@ -67,9 +67,24 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	// TODO: add logged user as member if not already in members list (to avoid duplicates)
+	// Add creator (logged user) as member
+	if err := rt.db.AddChatMember(chatId, ctx.UserID); err != nil {
+		ctx.Logger.WithError(err).Error("error adding creator to group")
+		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		return
+	}
 
-	// TODO: add all members
+	// add all members from meber list
+	for _, id := range req.MembersList {
+		if id == ctx.UserID {
+			continue // already added as creator
+		}
+		if err := rt.db.AddChatMember(chatId, id); err != nil {
+			ctx.Logger.WithError(err).Error("error adding member to group")
+			rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+			return
+		}
+	}
 
 	//TODO: create init message for group chat
 

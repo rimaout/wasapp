@@ -51,6 +51,10 @@ type AppDatabase interface {
 
 	// Chats
 	CreateChat(isGroup bool, groupName string, groupImagePath string) (string, error)
+
+	// Members
+	AddChatMember(chatId string, userId string) error
+
 	Ping() error
 }
 
