@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
@@ -86,7 +87,26 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 		}
 	}
 
-	//TODO: create init message for group chat
+	// Create init message for group chat
+	//	 The init message is a message with out content, just to have a message in the chat.
+	//	 The frontend can use it to display "Group created by ..." or similar in the chat history.
+	_, err = rt.db.CreateMessage(
+		chatId,
+		ctx.UserID,
+		time.Now().UTC().Format("2006-01-02 15:04:05"),
+		"",
+		"",
+		"",
+		true,
+		false,
+		"",
+		"",
+	)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("error creating init message")
+		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
