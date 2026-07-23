@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/rimaout/wasapp/service/structures"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
@@ -110,7 +111,7 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(chatPreviewResponse{
+	json.NewEncoder(w).Encode(structures.ChatPrevieResponse{
 		Id:          chatId,
 		DisplayName: req.GroupName,
 		IsGroupChat: true,
