@@ -21,6 +21,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PUT("/me/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
 
 	// Chat creation
+	rt.router.POST("/user/:userId/chats", rt.wrapAuthenticated(rt.createDirectChat))
 	rt.router.POST("/chats/groups", rt.wrapAuthenticated(rt.createGroupChat))
 
 	// Public image serving (no auth needed)
