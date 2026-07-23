@@ -32,7 +32,17 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 
-	// TODO: Check if private chat already exists between these two users
+	// Check if private chat already exists between these two users
+	existingChatId, err := rt.db.FindPrivateChatBetween(ctx.UserID, targetUserId)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("error checking existing private chat")
+		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		return
+	}
+	if existingChatId != "" {
+		rt.respondWithError(w, http.StatusConflict, "409", "you already have a direct chat with this user")
+		return
+	}
 
 	// Create chat
 	chatId, err := rt.db.CreateChat(false, "", "")

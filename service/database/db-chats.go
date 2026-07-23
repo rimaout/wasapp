@@ -1,6 +1,8 @@
 package database
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/gofrs/uuid"
@@ -35,6 +37,29 @@ func (db *appdbimpl) CreateChat(isGroup bool, groupNameIn string, groupImagePath
 	)
 	if err != nil {
 		return "", fmt.Errorf("error inserting chat into database: %w", err)
+	}
+
+	return chatId, nil
+}
+
+func (db *appdbimpl) FindPrivateChatBetween(userId1 string, userId2 string) (string, error) {
+	var chatId string
+	err := db.c.QueryRow(
+		`SELECT c.id FROM chats c
+			JOIN members m1 ON c.id = m1.chat_id
+			JOIN members m2 ON c.id = m2.chat_id
+		 WHERE c.is_group_chat = 0
+		   AND m1.user_id = ?
+		   AND m2.user_id = ?
+		 LIMIT 1`,
+		userId1, userId2,
+	).Scan(&chatId)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", nil
+	}
+	if err != nil {
+		return "", fmt.Errorf("finding private chat: %w", err)
 	}
 
 	return chatId, nil
