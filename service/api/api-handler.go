@@ -27,8 +27,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.POST("/chats/groups", rt.wrapAuthenticated(rt.createGroupChat))
 
 	// Chat edits
-	rt.router.PUT("/chats/:chatId/name:", rt.wrapAuthenticated(rt.setGroupChatName))
-	rt.router.PUT("/chats/:chatId/avatar:", rt.wrapAuthenticated(rt.setGroupChatAvatar))
+	rt.router.PATCH("/chats/:chatId/name", rt.wrapAuthenticated(rt.setGroupChatName))
+	rt.router.PUT("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.setGroupChatAvatar))
 
 	// Public image serving (no auth needed)
 	rt.router.GET("/users/:userId/avatar", rt.wrap(rt.getUserAvatar))

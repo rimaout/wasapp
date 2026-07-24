@@ -11,8 +11,8 @@ import (
 const userAvatarUploadDir = "uploads/users/avatars/"
 
 func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+
 	// Get the current avatar image path
-	// DB error → 500 (server can't proceed without knowing if old image exists)
 	oldImagePath, err := rt.db.GetUserAvatarPath(ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error fetching old avatar path")
@@ -23,8 +23,9 @@ func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps ht
 	// Extract and save the new image
 	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", userAvatarUploadDir)
 	if !ok {
-		// can emit: 400 (invalid form / missing file),
-		// 413 (too large), 415 (bad format), 500 (disk error).
+		// TODO:
+		//	 - 400 (invalid form / missing file),
+		//	 - 413 (too large), 415 (bad format), 500 (disk error).
 		return
 	}
 
