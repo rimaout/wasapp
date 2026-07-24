@@ -8,6 +8,15 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+type Chat struct {
+	Id             string  `json:"id"`
+	IsGroupChat    bool    `json:"isGroupChat"`
+	GroupName      *string `json:"groupName,omitempty"`
+	GroupImagePath *string `json:"groupImagePath,omitempty"`
+}
+// Note: for GroupName & GroupImagePath we use `*string` (pointer to string) instad of `string`
+//		 because `*string` can be null.
+
 // CreateChat inserts a new chat row and returns the chat ID.
 // For group chats, groupName must be non-empty and groupImagePath is optional.
 // For private chats use empty string for groupName and groupImagePath.
@@ -42,6 +51,28 @@ func (db *appdbimpl) CreateChat(isGroup bool, groupNameIn string, groupImagePath
 	return chatId, nil
 }
 
+// GetChatById returns the chat struct with the given ID.
+func (db *appdbimpl) GetChatById(chatId string) (Chat, error) {
+	var chat Chat
+
+	err := db.c.QueryRow(
+		`SELECT id, is_group_chat, group_name, group_image_path FROM chats WHERE id = ?`,
+		chatId,
+	).Scan(&chat.Id, &chat.IsGroupChat, &chat.GroupName, &chat.GroupImagePath)
+
+	// If no rows are returned, return an empty Chat and no error
+	if errors.Is(err, sql.ErrNoRows) {
+		return Chat{}, nil
+	}
+
+	// If any other error occurs, return it
+	if err != nil {
+		return Chat{}, fmt.Errorf("querying chat: %w", err)
+	}
+
+	return chat, nil
+}
+
 func (db *appdbimpl) FindPrivateChatBetween(userId1 string, userId2 string) (string, error) {
 	var chatId string
 	err := db.c.QueryRow(
@@ -64,3 +95,16 @@ func (db *appdbimpl) FindPrivateChatBetween(userId1 string, userId2 string) (str
 
 	return chatId, nil
 }
+
+// SetGroupName updates the group name for a group chat.
+func (db *appdbimpl) SetGroupName(chatId string, name string) error {
+	_, err := db.c.Exec(
+		`UPDATE chats SET group_name = ? WHERE id = ?`,
+		name, chatId,
+	)
+	if err != nil {
+		return fmt.Errorf("updating group name: %w", err)
+	}
+	return nil
+}
+
