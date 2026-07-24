@@ -60,7 +60,17 @@ func (rt *_router) setGroupNameName(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 
-	// TODO: Check if logged user ia a member of the group chat (403 error)
+	// Check if logged user ia a member of the group chat (403 error)
+	isMember, err := rt.db.IsActiveChatMember(ctx.UserID, targetChatId)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
+		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		return
+	}
+	if !isMember {
+		rt.respondWithError(w, http.StatusForbidden, "403", "you are not a member of this group chat")
+		return
+	}
 
 	// Set new group name
 	if err := rt.db.SetGroupName(targetChatId, newGroupName); err != nil {

@@ -21,3 +21,20 @@ func (db *appdbimpl) AddChatMember(chatId string, userId string) error {
 	return nil
 }
 
+
+// IsActiveChatMember checks if the user is an active member of the chat.
+func (db *appdbimpl) IsActiveChatMember(chatId string, userId string) (bool, error) {
+	var exists int
+	err := db.c.QueryRow(
+		`SELECT COUNT(*) FROM members
+		 WHERE chat_id = ? AND user_id = ? AND group_leave_time IS NULL`,
+		chatId, userId,
+	).Scan(&exists)
+
+	if err != nil {
+		return false, fmt.Errorf("checking chat membership: %w", err)
+	}
+
+	return exists > 0, nil
+}
+
