@@ -126,3 +126,37 @@ func (db *appdbimpl) SetGroupName(chatId string, name string) error {
 	return nil
 }
 
+// SetGroupAvatarPath updates the group image path for a group chat.
+func (db *appdbimpl) SetGroupAvatarPath(chatId string, path string) error {
+	_, err := db.c.Exec(
+		`UPDATE chats SET group_image_path = ? WHERE id = ?`,
+		path, chatId,
+	)
+	if err != nil {
+		return fmt.Errorf("updating group image path: %w", err)
+	}
+	return nil
+}
+
+// GetGroupAvatarPath returns the group image path for a group chat.
+// If the chat does not have an image, it returns an empty string and no error.
+func (db *appdbimpl) GetGroupAvatrPath(chatId string) (string, error) {
+	var path *string
+	err := db.c.QueryRow(
+		`SELECT group_image_path FROM chats WHERE id = ?`,
+		chatId,
+	).Scan(&path)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", ErrChatNotFound
+	}
+	if err != nil {
+		return "", fmt.Errorf("querying group image path: %w", err)
+	}
+
+	if path == nil {
+		return "", nil
+	}
+
+	return *path, nil
+}

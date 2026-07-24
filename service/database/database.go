@@ -55,6 +55,8 @@ type AppDatabase interface {
 	IsGroupChat(chatId string) (bool, error)
 	FindPrivateChatBetween(userId1 string, userId2 string) (string, error)
 	SetGroupName(chatId string, name string) error
+	SetGroupAvatarPath(chatId string, path string) error
+	GetGroupAvatarPath(chatId string) (string, error)
 
 	// Members
 	AddChatMember(chatId string, userId string) error
