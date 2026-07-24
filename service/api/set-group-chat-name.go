@@ -17,7 +17,7 @@ type GroupNameResponse struct {
 	GroupName string `json:"userName"`
 }
 
-func (rt *_router) setGroupNameName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
 	// Extract target chat id form url (http params)
 	targetChatId := ps.ByName("chatId")

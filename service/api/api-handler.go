@@ -17,12 +17,17 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/users", rt.wrap(rt.userSearch))
 
 	// Authenticated routes (require Bearer token)
+
+	// User
 	rt.router.PATCH("/me/name", rt.wrapAuthenticated(rt.setMyUserName))
 	rt.router.PUT("/me/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
 
 	// Chat creation
 	rt.router.POST("/user/:userId/chats", rt.wrapAuthenticated(rt.createDirectChat))
 	rt.router.POST("/chats/groups", rt.wrapAuthenticated(rt.createGroupChat))
+
+	// Chat edits
+	rt.router.PUT("/chats/:chatId/name:", rt.wrapAuthenticated(rt.setGroupChatName))
 
 	// Public image serving (no auth needed)
 	rt.router.GET("/users/:userId/avatar", rt.wrap(rt.getUserAvatar))
