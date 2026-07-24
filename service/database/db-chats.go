@@ -8,6 +8,8 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+var ErrChatNotFound = errors.New("chat not found")
+
 type Chat struct {
 	Id             string  `json:"id"`
 	IsGroupChat    bool    `json:"isGroupChat"`
@@ -60,17 +62,33 @@ func (db *appdbimpl) GetChatById(chatId string) (Chat, error) {
 		chatId,
 	).Scan(&chat.Id, &chat.IsGroupChat, &chat.GroupName, &chat.GroupImagePath)
 
-	// If no rows are returned, return an empty Chat and no error
 	if errors.Is(err, sql.ErrNoRows) {
-		return Chat{}, nil
+		return Chat{}, ErrChatNotFound
 	}
 
-	// If any other error occurs, return it
 	if err != nil {
 		return Chat{}, fmt.Errorf("querying chat: %w", err)
 	}
 
 	return chat, nil
+}
+
+// IsGroupChat returns whether the given chat is a group chat.
+func (db *appdbimpl) IsGroupChat(chatId string) (bool, error) {
+	var isGroup bool
+	err := db.c.QueryRow(
+		`SELECT is_group_chat FROM chats WHERE id = ?`,
+		chatId,
+	).Scan(&isGroup)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return false, ErrChatNotFound
+	}
+	if err != nil {
+		return false, fmt.Errorf("querying chat type: %w", err)
+	}
+
+	return isGroup, nil
 }
 
 func (db *appdbimpl) FindPrivateChatBetween(userId1 string, userId2 string) (string, error) {

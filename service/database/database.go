@@ -52,6 +52,7 @@ type AppDatabase interface {
 	// Chats
 	CreateChat(isGroup bool, groupName string, groupImagePath string) (string, error)
 	GetChatById(chatId string) (Chat, error)
+	IsGroupChat(chatId string) (bool, error)
 	FindPrivateChatBetween(userId1 string, userId2 string) (string, error)
 	SetGroupName(chatId string, name string) error
 

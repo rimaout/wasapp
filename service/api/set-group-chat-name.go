@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/rimaout/wasapp/service/api/reqcontext"
 	"github.com/julienschmidt/httprouter"
+	"github.com/rimaout/wasapp/service/database"
+	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
 type patchGroupNameRequest struct {
@@ -29,15 +30,35 @@ func (rt *_router) setGroupNameName(w http.ResponseWriter, r *http.Request, ps h
 	}
 	newGroupName := req.GroupName
 
-	// Check if new group name is valid (respects the basename rules)
+	// Check if new group name is valid (400 error)
 	if !isValidBaseName(newGroupName) {
 		rt.respondWithError(w, http.StatusBadRequest, "400", "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space")
 		return
 	}
 
-	// TODO: Check if chat exist (404 error)
+	// Check if chat exist (404 error)
+	_, err := rt.db.GetChatById(targetChatId)
+	if err == database.ErrChatNotFound {
+		rt.respondWithError(w, http.StatusNotFound, "404", "chat not found")
+		return
+	}
+	if err != nil {
+		ctx.Logger.WithError(err).Error("error getting chat by id")
+		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		return
+	}
 
-	// TODO: Check if chat is a group chat (409 error)
+	// Check if chat is a group chat (409 error)
+	isGroup, err := rt.db.IsGroupChat(targetChatId)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("error checking if chat is a group chat")
+		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		return
+	}
+	if !isGroup {
+		rt.respondWithError(w, http.StatusConflict, "409", "chat is not a group chat, only the names of group chats can be set/changed")
+		return
+	}
 
 	// TODO: Check if logged user ia a member of the group chat (403 error)
 
