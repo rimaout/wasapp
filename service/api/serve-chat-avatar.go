@@ -44,6 +44,19 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
+	// Check if logged user is member of the chat (403 error)
+	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("error checking if user is member of chat")
+		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		return
+	}
+	if !isMember {
+		rt.respondWithError(w, http.StatusForbidden, "403", "user is not a member of the chat")
+		return
+	}
+
+	// Initialize imagePath variable to hold the path of the avatar imagePath
 	imagePath := ""
 
 	if isGroup {
