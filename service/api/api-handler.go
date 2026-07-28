@@ -16,7 +16,10 @@ func (rt *_router) Handler() http.Handler {
 	// User search (no auth required)
 	rt.router.GET("/users", rt.wrap(rt.userSearch))
 
-	// Authenticated routes (require Bearer token)
+	// User avatar serving (no auth required)
+	rt.router.GET("/users/:userId/avatar", rt.wrap(rt.getUserAvatar))
+
+	// --- Authenticated routes (require Bearer token)
 
 	// User
 	rt.router.PATCH("/me/name", rt.wrapAuthenticated(rt.setMyUserName))
@@ -30,8 +33,8 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PATCH("/chats/:chatId/name", rt.wrapAuthenticated(rt.setGroupChatName))
 	rt.router.PUT("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.setGroupChatAvatar))
 
-	// Public image serving (no auth needed)
-	rt.router.GET("/users/:userId/avatar", rt.wrap(rt.getUserAvatar))
+	// Chat Image Serving
+	rt.router.GET("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.getChatAvatar))
 
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)

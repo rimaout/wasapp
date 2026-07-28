@@ -22,6 +22,25 @@ func (db *appdbimpl) AddChatMember(chatId string, userId string) error {
 }
 
 
+// GetOtherMemberId returns the user ID of the other member in a private chat.
+func (db *appdbimpl) GetOtherMemberId(chatId string, userId string) (string, error) {
+	var otherUserId string
+	err := db.c.QueryRow(
+		`SELECT user_id FROM members WHERE chat_id = ? AND user_id != ? LIMIT 1`,
+		chatId, userId,
+	).Scan(&otherUserId)
+
+	//NOTE: if no rows are found a error is returned, because
+	//      it shoud not exists a direct chat with only one member
+
+	if err != nil {
+		return "", fmt.Errorf("querying other member: %w", err)
+	}
+
+	return otherUserId, nil
+}
+
+
 // IsActiveChatMember checks if the user is an active member of the chat.
 func (db *appdbimpl) IsActiveChatMember(chatId string, userId string) (bool, error) {
 	var exists int

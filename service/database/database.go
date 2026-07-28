@@ -60,6 +60,7 @@ type AppDatabase interface {
 
 	// Members
 	AddChatMember(chatId string, userId string) error
+	GetOtherMemberId(chatId string, userId string) (string, error)
 	IsActiveChatMember(chatId string, userId string) (bool, error)
 	// Messages
 	CreateMessage(chatId, senderId, sendTime, text, imageId, replyTo string, isInit, isForward bool, forwardFromChat, forwardFromMsg string) (string, error)
