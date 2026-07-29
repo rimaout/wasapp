@@ -6,6 +6,13 @@ import (
 	"time"
 )
 
+type Member struct {
+	UserId    string  `json:"userId"`
+	Name      string  `json:"name"`
+	JoinTime  *string `json:"joinTime,omitempty"`	// direct chat: NULL, group chat: timestamp
+	LeaveTime *string `json:"leaveTime,omitempty"`	// direct chat: NULL, group chat: timestamp or NULL if still active
+}
+
 // AddChatMember inserts a new row into the members table.
 // For private chats, join_time and leave_time are NULL.
 // For group chats, join_time is set to now, leave_time is NULL.
@@ -19,6 +26,43 @@ func (db *appdbimpl) AddChatMember(chatId string, userId string) error {
 		return fmt.Errorf("error adding member to chat: %w", err)
 	}
 	return nil
+}
+
+// GetChatMembers returns all members of a chat (regardless of leave status).
+func (db *appdbimpl) GetChatMembers(chatId string) ([]Member, error) {
+
+	// Query members and join with users table to get user names
+	rows, err := db.c.Query(
+		`SELECT m.user_id, u.name, m.group_join_time, m.group_leave_time
+		 FROM members m
+		 JOIN users u ON m.user_id = u.id
+		 WHERE m.chat_id = ?
+		 ORDER BY u.name ASC`,
+		chatId,
+	)
+
+	// Check for errors in the query
+	if err != nil {
+		return nil, fmt.Errorf("querying chat members: %w", err)
+	}
+	defer rows.Close()
+
+	// Iterate over the rows and scan into Member structs
+	members := make([]Member, 0)
+	for rows.Next() {
+		var m Member
+		if err := rows.Scan(&m.UserId, &m.Name, &m.JoinTime, &m.LeaveTime); err != nil {
+			return nil, fmt.Errorf("scanning member row: %w", err)
+		}
+		members = append(members, m)
+	}
+
+	// Check for errors during iteration
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating member rows: %w", err)
+	}
+
+	return members, nil
 }
 
 
