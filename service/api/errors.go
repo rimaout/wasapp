@@ -5,6 +5,23 @@ import (
 	"net/http"
 )
 
+// Machine-readable error codes returned in the JSON error payload.
+// NOTE: Keep in sync with the Error schema enum in doc/api.yaml.
+const (
+	ErrCodeChatNotFound       = "CHAT_NOT_FOUND"
+	ErrCodeUserNotFound       = "USER_NOT_FOUND"
+	ErrCodeAlreadyInGroup     = "ALREADY_IN_GROUP"
+	ErrCodeNotAGroupChat      = "NOT_A_GROUP_CHAT"
+	ErrCodeForbiddenNotMember = "FORBIDDEN_NOT_MEMBER"
+	ErrCodeInvalidInput       = "INVALID_INPUT"
+	ErrCodeInternalError      = "INTERNAL_SERVER_ERROR"
+	ErrCodeUnauthorized       = "UNAUTHORIZED"
+	ErrCodeUsernameTaken      = "USERNAME_TAKEN"
+	ErrCodeChatAlreadyExists  = "CHAT_ALREADY_EXISTS"
+	ErrCodePayloadTooLarge    = "PAYLOAD_TOO_LARGE"
+	ErrCodeUnsupportedMedia   = "UNSUPPORTED_MEDIA_TYPE"
+)
+
 // errorResponse defines a structural type for consistent error responses
 type errorResponse struct {
 	Code    string `json:"code"`

@@ -18,17 +18,17 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	targetName, err := rt.db.GetUserNameById(targetUserId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error looking up target user")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 	if targetName == "" {
-		rt.respondWithError(w, http.StatusNotFound, "404", "user not found")
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeUserNotFound, "user not found") //404
 		return
 	}
 
 	// Cannot create a chat with yourself
 	if targetUserId == ctx.UserID {
-		rt.respondWithError(w, http.StatusBadRequest, "400", "cannot create a chat with yourself")
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "cannot create a chat with yourself") //400
 		return
 	}
 
@@ -36,11 +36,11 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	existingChatId, err := rt.db.FindPrivateChatBetween(ctx.UserID, targetUserId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking existing private chat")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 	if existingChatId != "" {
-		rt.respondWithError(w, http.StatusConflict, "409", "you already have a direct chat with this user")
+		rt.respondWithError(w, http.StatusConflict, ErrCodeChatAlreadyExists, "you already have a direct chat with this user") //409
 		return
 	}
 
@@ -48,19 +48,19 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	chatId, err := rt.db.CreateChat(false, "", "")
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating chat")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 
 	// Add both members
 	if err := rt.db.AddChatMember(chatId, ctx.UserID); err != nil {
 		ctx.Logger.WithError(err).Error("error adding creator to chat")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 	if err := rt.db.AddChatMember(chatId, targetUserId); err != nil {
 		ctx.Logger.WithError(err).Error("error adding target user to chat")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 
@@ -79,7 +79,7 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating init message")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 

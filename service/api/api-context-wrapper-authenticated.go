@@ -33,27 +33,27 @@ func (rt *_router) wrapAuthenticated(fn httpRouterHandler) func(http.ResponseWri
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			ctx.Logger.Warning("missing or invalid Authorization header")
-			rt.respondWithError(w, http.StatusUnauthorized, "401", "authentication required")
+			rt.respondWithError(w, http.StatusUnauthorized, ErrCodeUnauthorized, "authentication required") //401
 			return
 		}
 
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 		if token == "" {
 			ctx.Logger.Warning("empty token in Authorization header")
-			rt.respondWithError(w, http.StatusUnauthorized, "401", "authentication required")
+			rt.respondWithError(w, http.StatusUnauthorized, ErrCodeUnauthorized, "authentication required") //401
 			return
 		}
 
 		userId, err := rt.db.GetUserIDByToken(token)
 		if err != nil {
 			ctx.Logger.WithError(err).Error("error validating token")
-			rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 			return
 		}
 
 		if userId == "" {
 			ctx.Logger.Warning("invalid or expired token")
-			rt.respondWithError(w, http.StatusUnauthorized, "401", "authentication failed")
+			rt.respondWithError(w, http.StatusUnauthorized, ErrCodeUnauthorized, "authentication failed") //401
 			return
 		}
 

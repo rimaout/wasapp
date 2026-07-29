@@ -16,7 +16,7 @@ func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps ht
 	oldImagePath, err := rt.db.GetUserAvatarPath(ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error fetching old avatar path")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 
@@ -33,7 +33,7 @@ func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps ht
 	if err := rt.db.SetUserAvatarPath(ctx.UserID, newImagePath); err != nil {
 		ctx.Logger.WithError(err).Error("error updating avatar image path in database")
 		rt.deleteImageFile(ctx, newImagePath)
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 

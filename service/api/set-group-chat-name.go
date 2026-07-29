@@ -25,26 +25,26 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 	// Read request (to extract new group name)
 	var req patchGroupNameRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		rt.respondWithError(w, http.StatusBadRequest, "400", "invalid request body")
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") //400
 		return
 	}
 	newGroupName := req.GroupName
 
 	// Check if new group name is valid (400 error)
 	if !isValidBaseName(newGroupName) {
-		rt.respondWithError(w, http.StatusBadRequest, "400", "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space")
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
 		return
 	}
 
 	// Check if chat exist (404 error)
 	_, err := rt.db.GetChatById(targetChatId)
 	if err == database.ErrChatNotFound {
-		rt.respondWithError(w, http.StatusNotFound, "404", "chat not found")
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
 		return
 	}
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting chat by id")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 
@@ -52,11 +52,11 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 	isGroup, err := rt.db.IsGroupChat(targetChatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if chat is a group chat")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 	if !isGroup {
-		rt.respondWithError(w, http.StatusConflict, "409", "chat is not a group chat, only the names of group chats can be set/changed")
+		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat, only the names of group chats can be set/changed") //409
 		return
 	}
 
@@ -64,18 +64,18 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 	isMember, err := rt.db.IsActiveChatMember(ctx.UserID, targetChatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 	if !isMember {
-		rt.respondWithError(w, http.StatusForbidden, "403", "you are not a member of this group chat")
+		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "you are not a member of this group chat") //403
 		return
 	}
 
 	// Set new group name
 	if err := rt.db.SetGroupName(targetChatId, newGroupName); err != nil {
 		ctx.Logger.WithError(err).Error("error updating group name")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 

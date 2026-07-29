@@ -561,6 +561,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        "409":
+          description: This is not a group chat, only members of group chats can leave the group.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   /chats/{chatId}/messages:
     parameters:
@@ -1408,10 +1414,25 @@ components:
       properties:
         code:
           type: string
-          description: HTTP error code.
+          description: Machine-readable error code for frontend logic.
+          enum:
+            - CHAT_NOT_FOUND
+            - USER_NOT_FOUND
+            - ALREADY_IN_GROUP
+            - NOT_A_GROUP_CHAT
+            - FORBIDDEN_NOT_MEMBER
+            - INVALID_INPUT
+            - INTERNAL_SERVER_ERROR
+            - UNAUTHORIZED
+            - USERNAME_TAKEN
+            - CHAT_ALREADY_EXISTS
+            - PAYLOAD_TOO_LARGE
+            - UNSUPPORTED_MEDIA_TYPE
+          example: USER_NOT_FOUND
         message:
           type: string
-          description: Error information.
+          description: Human-readable error message.
+          example: The specified user ID does not exist.
 
     AuthResponse:
       type: object

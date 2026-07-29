@@ -22,13 +22,13 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	// Read request
 	var req patchUserNameRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		rt.respondWithError(w, http.StatusBadRequest, "400", "invalid request body")
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") //400
 		return
 	}
 
 	// Check if new username is valied (respects the basename rules)
 	if !isValidBaseName(req.UserName) {
-		rt.respondWithError(w, http.StatusBadRequest, "400", "userName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space")
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "userName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
 		return
 	}
 
@@ -36,18 +36,18 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	existingId, err := rt.db.GetUserIdByName(req.UserName)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking user name availability")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 	if existingId != "" && existingId != ctx.UserID {
-		rt.respondWithError(w, http.StatusConflict, "409", "username already in use")
+		rt.respondWithError(w, http.StatusConflict, ErrCodeUsernameTaken, "username already in use") //409
 		return
 	}
 
 	// Set new username
 	if err := rt.db.SetUserName(ctx.UserID, req.UserName); err != nil {
 		ctx.Logger.WithError(err).Error("error updating user name")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 
@@ -55,7 +55,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 	newName, err := rt.db.GetUserNameById(ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting updated user name")
-		rt.respondWithError(w, http.StatusInternalServerError, "500", "internal server error")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 
