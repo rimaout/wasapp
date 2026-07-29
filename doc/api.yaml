@@ -440,6 +440,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+    # -------------------- SERVE CHAT/GROUP AVATAR --------------------
+    get:
+      tags: ["Chat Operations"]
+      summary: Serve the avatar of a chat or group
+      description: >-
+        Returns the avatar of the specified chat.
+        For 1-on-1 chats, returns the other user's avatar.
+        For group chats, returns the group avatar.
+        Authentication required, only chat members can access.
+      operationId: serveChatAvatar
+      security: [ { BearerAuth: [] } ]
+      responses:
+        '200':
+          $ref: '#/components/responses/RawImageFileResponse'
+        '401':
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - you are not a member of this chat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Chat not found or no avatar set.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /chats/{chatId}/members:
     parameters:
       - $ref: '#/components/parameters/ChatId'
@@ -943,43 +976,6 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: Chat or image not found.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  # -------------------- SERVE CHAT/GROUP AVATAR --------------------
-  /chats/{chatId}/avatar:
-    parameters:
-      - $ref: '#/components/parameters/ChatId'
-
-    get:
-      tags: ["Chat Operations"]
-      summary: Serve the avatar of a chat or group
-      description: >-
-        Returns the avatar of the specified chat.
-        For 1-on-1 chats, returns the other user's avatar.
-        For group chats, returns the group avatar.
-        Authentication required, only chat members can access.
-      operationId: serveChatAvatar
-      security: [ { BearerAuth: [] } ]
-      responses:
-        '200':
-          $ref: '#/components/responses/RawImageFileResponse'
-        '401':
-          description: Authentication required.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '403':
-          description: Forbidden - you are not a member of this chat.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Chat not found or no avatar set.
           content:
             application/json:
               schema:
