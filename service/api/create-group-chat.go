@@ -94,7 +94,7 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 	_, err = rt.db.CreateMessage(
 		chatId,
 		ctx.UserID,
-		time.Now().UTC().Format("2006-01-02 15:04:05"),
+		time.Now().UTC().Format(time.DateTime),
 		"",
 		"",
 		"",
