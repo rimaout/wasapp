@@ -40,6 +40,20 @@ func (db *appdbimpl) GetOtherMemberId(chatId string, userId string) (string, err
 	return otherUserId, nil
 }
 
+// SetLeaveTime marks the user as having left the group chat.
+// The row is NOT deleted, but the leave_time field is set to now.
+func (db *appdbimpl) SetLeaveTime(chatId string, userId string) error {
+	now := time.Now().UTC().Format(time.DateTime)
+
+	_, err := db.c.Exec(
+		`UPDATE members SET group_leave_time = ? WHERE chat_id = ? AND user_id = ?`,
+		now, chatId, userId,
+	)
+	if err != nil {
+		return fmt.Errorf("setting leave time: %w", err)
+	}
+	return nil
+}
 
 // IsActiveChatMember checks if the user is an active member of the chat.
 func (db *appdbimpl) IsActiveChatMember(chatId string, userId string) (bool, error) {

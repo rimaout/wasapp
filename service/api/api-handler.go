@@ -39,5 +39,9 @@ func (rt *_router) Handler() http.Handler {
 	// Special routes
 	rt.router.GET("/liveness", rt.liveness)
 
+	// Members
+	rt.router.GET("/chats/:chatId:/members/me", rt.wrapAuthenticated(rt.leaveGroup))
+
+
 	return rt.router
 }
