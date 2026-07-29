@@ -76,7 +76,7 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Check if new member is already a member of the group (409)
-	isAlreadyMember, err := rt.db.IsActiveChatMember(newMemberId, targetChatId)
+	isAlreadyMember, err := rt.db.IsActiveChatMember(targetChatId, newMemberId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
