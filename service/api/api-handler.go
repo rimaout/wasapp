@@ -40,7 +40,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/liveness", rt.liveness)
 
 	// Members
-	rt.router.POST("/chats/:chatId:/members", rt.wrapAuthenticated(rt.addToGroup))
+	rt.router.POST("/chats/:chatId:/members", rt.wrapAuthenticated(rt.addMemberToGroup))
 	rt.router.DELETE("/chats/:chatId:/members/me", rt.wrapAuthenticated(rt.leaveGroup))
 
 
