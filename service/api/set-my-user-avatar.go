@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -20,13 +19,10 @@ func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	// Extract and save the new image
+	// Extract and save the new image.
+	// (saveUploadedImage writes 400, 413, 415, or 500 error responses directly on failure)
 	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", userAvatarUploadDir)
 	if !ok {
-		// TODO:
-		//	 - 400 (invalid form)
-		//   - 400 (missing image file),
-		//	 - 413 (too large), 415 (bad format), 500 (disk error).
 		return
 	}
 
@@ -42,7 +38,5 @@ func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps ht
 	rt.deleteImageFile(ctx, oldImagePath)
 
 	// Return Response
-	userName, _ := rt.db.GetUserNameById(ctx.UserID)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(userResponse{Id: ctx.UserID, Name: userName})
+	w.WriteHeader(http.StatusNoContent)
 }

@@ -15,6 +15,7 @@ import (
 const maxImageSize = 5 * 1024 * 1024
 
 // deleteImageFile deleat a image file from disk and logs warnings if it fails.
+// deleteImageFile deletes an image file from disk and logs warnings if it fails.
 func (rt *_router) deleteImageFile(ctx reqcontext.RequestContext, filePath string) {
 	if filePath == "" {
 		return
@@ -34,7 +35,7 @@ func (rt *_router) saveUploadedImage(
 	// Limit the size of the incoming request body
 	r.Body = http.MaxBytesReader(w, r.Body, maxImageSize)
 
-	// Parse the multipart form to determine if is correctly formed and not too large.
+	// Parse the multipart form to determine if it is correctly formed and not too large.
 	if err := r.ParseMultipartForm(maxImageSize); err != nil {
 		var maxBytesErr *http.MaxBytesError
 		if errors.As(err, &maxBytesErr) {
@@ -49,7 +50,7 @@ func (rt *_router) saveUploadedImage(
 	// Extract the file from the form data
 	file, header, err := r.FormFile(formField)
 	if err != nil {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "missing image file") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeMissingImageFile, "missing image file") // 400
 		return "", false
 	}
 	defer file.Close()
@@ -102,7 +103,8 @@ func (rt *_router) saveUploadedImage(
 	// Copy the uploaded file to the destination file
 	if _, err := io.Copy(dst, file); err != nil {
 		ctx.Logger.WithError(err).Error("error saving image file")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.deleteImageFile(ctx, imagePath) // clean up partial file
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return "", false
 	}
 

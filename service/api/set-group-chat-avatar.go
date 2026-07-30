@@ -8,13 +8,13 @@ import (
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
-const groupChatAvatarUploadDir = "uploads/users/avatars/"
+const groupChatAvatarUploadDir = "uploads/groups/avatars/"
 
 func (rt *_router) setGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	// Extract target chat id form url (http params)
+	// Extract target chat id from url (http params)
 	chatId := ps.ByName("chatId")
 
-	// Check if chat exist (404 error)
+	// Check if chat exists (404 error)
 	_, err := rt.db.GetChatById(chatId)
 	if err == database.ErrChatNotFound {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
@@ -34,11 +34,11 @@ func (rt *_router) setGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 	if !isGroup {
-		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat, only the names of group chats can be set/changed") //409
+		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat, only group avatars can be updated") // 409
 		return
 	}
 
-	// Check if logged user ia a member of the group chat (403 error)
+	// Check if logged user is a member of the group chat (403 error)
 	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
@@ -50,7 +50,7 @@ func (rt *_router) setGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 
-	// Get the current avatar image path
+	// Get the current group avatar image path to delete later
 	oldImagePath, err := rt.db.GetGroupAvatarPath(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error fetching old group avatar path")
@@ -58,13 +58,10 @@ func (rt *_router) setGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 
-	// Extract and save the new image
+	// Extract and save the new image.
+	// (saveUploadedImage writes 400, 413, 415, or 500 error responses directly on failure)
 	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", groupChatAvatarUploadDir)
 	if !ok {
-		// TODO:
-		//	 - 400 (invalid form)
-		//   - 400 (missing image file)
-		//	 - 413 (too large), 415 (bad format), 500 (disk error).
 		return
 	}
 
@@ -79,6 +76,6 @@ func (rt *_router) setGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps
 	// Now it's safe to delete the old image from disk
 	rt.deleteImageFile(ctx, oldImagePath)
 
-	// Return Response
+	// Return 204 No Content
 	w.WriteHeader(http.StatusNoContent)
 }
