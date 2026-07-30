@@ -8,18 +8,30 @@ import (
 // Machine-readable error codes returned in the JSON error payload.
 // NOTE: Keep in sync with the Error schema enum in doc/api.yaml.
 const (
-	ErrCodeChatNotFound       = "CHAT_NOT_FOUND"
-	ErrCodeUserNotFound       = "USER_NOT_FOUND"
-	ErrCodeAlreadyInGroup     = "ALREADY_IN_GROUP"
-	ErrCodeNotAGroupChat      = "NOT_A_GROUP_CHAT"
-	ErrCodeForbiddenNotMember = "FORBIDDEN_NOT_MEMBER"
-	ErrCodeInvalidInput       = "INVALID_INPUT"
-	ErrCodeInternalError      = "INTERNAL_SERVER_ERROR"
-	ErrCodeUnauthorized       = "UNAUTHORIZED"
-	ErrCodeUsernameTaken      = "USERNAME_TAKEN"
-	ErrCodeChatAlreadyExists  = "CHAT_ALREADY_EXISTS"
-	ErrCodePayloadTooLarge    = "PAYLOAD_TOO_LARGE"
-	ErrCodeUnsupportedMedia   = "UNSUPPORTED_MEDIA_TYPE"
+	ErrCodeChatNotFound        = "CHAT_NOT_FOUND"
+	ErrCodeUserNotFound        = "USER_NOT_FOUND"
+	ErrCodeAlreadyInGroup      = "ALREADY_IN_GROUP"
+	ErrCodeNotAGroupChat       = "NOT_A_GROUP_CHAT"
+	ErrCodeForbiddenNotMember  = "FORBIDDEN_NOT_MEMBER"
+	ErrCodeInvalidInput        = "INVALID_INPUT"
+	ErrCodeInternalError       = "INTERNAL_SERVER_ERROR"
+	ErrCodeUnauthorized        = "UNAUTHORIZED"
+	ErrCodeUsernameTaken       = "USERNAME_TAKEN"
+	ErrCodeChatAlreadyExists   = "CHAT_ALREADY_EXISTS"
+	ErrCodePayloadTooLarge     = "PAYLOAD_TOO_LARGE"
+	ErrCodeUnsupportedMedia    = "UNSUPPORTED_MEDIA_TYPE"
+	ErrCodeInvalidUserName     = "INVALID_USER_NAME"
+	ErrCodeInvalidGroupName    = "INVALID_GROUP_NAME"
+	ErrCodeEmptyMemberList	   = "EMPTY_MEMBER_LIST"
+	ErrCodeMissingImageFile    = "MISSING_IMAGE_FILE"
+	ErrCodeForbiddenNotSender  = "FORBIDDEN_NOT_SENDER"
+	ErrCodeItsInitMessage      = "FORBIDDEN_ITS_INIT_MESSAGE"
+	ErrCodeMessageNotFound     = "MESSAGE_NOT_FOUND"
+	ErrCodeInvalidEmojiId      = "INVALID_EMOJI_ID"
+	ErrCodeReactionNotFound    = "REACTION_NOT_FOUND"
+	ErrDestinationChatNotFound = "DESTINATION_CHAT_NOT_FOUND"
+	ErrCodeOriginChatNotFound  = "ORIGIN_CHAT_NOT_FOUND"
+
 )
 
 // errorResponse defines a structural type for consistent error responses

@@ -28,7 +28,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 
 	// Check if new username is valied (respects the basename rules)
 	if !isValidBaseName(req.UserName) {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "userName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidUserName, "userName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
 		return
 	}
 

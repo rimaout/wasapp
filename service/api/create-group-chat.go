@@ -24,13 +24,13 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 
 	// Check group name
 	if !isValidBaseName(req.GroupName) {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidGroupName, "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
 		return
 	}
 
 	// Check members list: at least 1 member
 	if len(req.MembersList) == 0 {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "membersList must contain at least one user") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeEmptyMemberList, "membersList must contain at least one user") //400
 		return
 	}
 
@@ -56,7 +56,7 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 
 		// If name is empty, user does not exist in the database
 		if name == "" {
-			rt.respondWithError(w, http.StatusBadRequest, ErrCodeUserNotFound, "user not found: "+id) //400
+			rt.respondWithError(w, http.StatusNotFound, ErrCodeUserNotFound, "user not found: "+id) //404
 			return
 		}
 	}

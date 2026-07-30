@@ -32,7 +32,7 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 
 	// Check if new group name is valid (400 error)
 	if !isValidBaseName(newGroupName) {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidGroupName, "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
 		return
 	}
 

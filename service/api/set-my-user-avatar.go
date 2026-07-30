@@ -24,7 +24,8 @@ func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps ht
 	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", userAvatarUploadDir)
 	if !ok {
 		// TODO:
-		//	 - 400 (invalid form / missing file),
+		//	 - 400 (invalid form)
+		//   - 400 (missing image file),
 		//	 - 413 (too large), 415 (bad format), 500 (disk error).
 		return
 	}

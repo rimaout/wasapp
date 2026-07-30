@@ -58,7 +58,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Bad request - invalid username (too short or too long or invalid chars).
+          description: Bad request - Returns code `INVALID_INPUT` if the request body is missing/malformed or `INVALID_USER_NAME` if the username is invalid (must be 3-24 chars, alphanumeric + spaces/underscores/hyphens, at least one non-space).
           content:
             application/json:
               schema:
@@ -112,19 +112,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
         "400":
-          description: Invalid username (too short or too long or invalid chars).
+          description: Bad request - Returns code `INVALID_INPUT` if the request body is missing/malformed or `INVALID_USER_NAME` if the username is invalid (must be 3-24 chars, alphanumeric + spaces/underscores/hyphens, at least one non-space).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "409":
-          description: Username already in use.
+          description: Conflict - Returns code `USERNAME_TAKEN` if the username is already in use by another user.
           content:
             application/json:
               schema:
@@ -155,25 +155,25 @@ paths:
         "204":
           description: Avatar uploaded successfully. No content is returned.
         "400":
-          description: Bad request - invalid image format or too large
+          description: Bad request - Returns code `INVALID_INPUT` if the multipart form is malformed or `MISSING_IMAGE_FILE` if the image file is missing.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "413":
-          description: Image file exceeds maximum size (5MB).
+          description: Payload too large - Returns code `PAYLOAD_TOO_LARGE` if the image file exceeds the maximum size (5MB).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "415":
-          description: Unsupported image format. Only JPEG, PNG, WebP allowed.
+          description: Unsupported media type - Returns code `UNSUPPORTED_MEDIA_TYPE` if the image format is not supported. Only JPEG, PNG, WebP allowed.
           content:
             application/json:
               schema:
@@ -206,19 +206,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatPreview'
         '400':
-          description: Bad request - invalid UserId or invalid GroupName.
+          description: Bad request - Returns code `INVALID_INPUT` if the request body is missing/malformed, `INVALID_GROUP_NAME` if the group name is invalid, or `EMPTY_MEMBER_LIST` the members list is empty.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "404":
+          description: Resource not found - Returns code `USER_NOT_FOUND` if a user ID in membersList does not exist.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "409":
-          description: Conflict - 1 or more UserID is repeated
+          description: Conflict - Returns code `ALREADY_IN_GROUP` if the same user ID appears more than once in membersList.
           content:
             application/json:
               schema:
@@ -243,20 +249,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatPreview'
+        '400':
+          description: Bad request - Returns code `INVALID_INPUT` if you try to create a chat with yourself.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '401':
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: User not found.
+          description: Resource not found - Returns code `USER_NOT_FOUND` if the specified user does not exist.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "409":
-          description: You already have a direct chat with this user.
+          description: Conflict - Returns code `CHAT_ALREADY_EXISTS` if you already have a direct chat with this user.
           content:
             application/json:
               schema:
@@ -278,7 +290,7 @@ paths:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
         '404':
-          description: User not found.
+          description: Resource not found - Returns code `USER_NOT_FOUND` if the specified user does not exist.
           content:
             application/json:
               schema:
@@ -304,7 +316,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatsPreviewListResponse'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
@@ -339,31 +351,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatName'
         "400":
-          description: Bad request - invalid group name.
+          description: Bad request - Returns code `INVALID_INPUT` if the request body is missing/malformed or `INVALID_GROUP_NAME` the group name is invalid (must be 3-24 chars, alphanumeric + spaces/underscores/hyphens, at least one non-space).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden - you are not authorized to change this group name.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this group chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
-          description: Group not found.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "409":
-          description: This is not a group chat, only the names of group chats can be set/changed.
+          description: Conflict - Returns code `NOT_A_GROUP_CHAT` if the chat ID belongs to a direct message chat; only the names of group chats can be set/changed.
           content:
             application/json:
               schema:
@@ -398,43 +410,43 @@ paths:
         "204":
           description: Group avatar uploaded successfully. No content is returned.
         '400':
-          description: Bad request - invalid image format or too large
+          description: Bad request - Returns code `INVALID_INPUT` if the multipart form is malformed or `MISSING_IMAGE_FILE` if the image file is missing.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '401':
-          description: Authentication required or failed
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Forbidden - you are not a member of this group
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this group chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Group not found
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "409":
-          description: This is not a group chat, only the avatar of group chats can be set/changed.
+          description: Conflict - Returns code `NOT_A_GROUP_CHAT` if the chat ID belongs to a direct message chat; only the avatar of group chats can be set/changed.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "413":
-          description: Image file exceeds maximum size (5MB).
+          description: Payload too large - Returns code `PAYLOAD_TOO_LARGE` if the image file exceeds the maximum size (5MB).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "415":
-          description: Unsupported image format. Only JPEG, PNG, WebP allowed.
+          description: Unsupported media type - Returns code `UNSUPPORTED_MEDIA_TYPE` if the image format is not supported. Only JPEG, PNG, WebP allowed.
           content:
             application/json:
               schema:
@@ -455,19 +467,19 @@ paths:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
         '401':
-          description: Authentication required.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Forbidden - you are not a member of this chat.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Chat not found or no avatar set.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist.
           content:
             application/json:
               schema:
@@ -496,13 +508,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ChatMembersListResponse'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden - you do not have access to this chat.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat.
           content:
             application/json:
               schema:
@@ -538,7 +550,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
@@ -577,25 +589,25 @@ paths:
         "204":
           description: User left the group successfully. No content is returned.
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden - you are not a member of this group or this is not a group chat.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this group chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
-          description: Group not found.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "409":
-          description: This is not a group chat, only members of group chats can leave the group.
+          description: Conflict - Returns code `NOT_A_GROUP_CHAT` if the chat ID belongs to a direct message chat; only members of group chats can leave the group.
           content:
             application/json:
               schema:
@@ -623,19 +635,19 @@ paths:
               schema:
                     $ref: '#/components/schemas/ChatMessagesResponse'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden - you do not have access to the specified chat.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
-          description: Chat not found.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist.
           content:
             application/json:
               schema:
@@ -668,37 +680,37 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "400":
-          description: Bad request - invalid message content or missing required fields.
+          description: Bad request - Returns code `INVALID_INPUT` if the message content is invalid or required fields are missing.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden - you are not allowed to send messages in this chat.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
-          description: Chat not found.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "413":
-          description: Image file exceeds maximum size (5MB).
+          description: Payload too large - Returns code `PAYLOAD_TOO_LARGE` if the image file exceeds the maximum size (5MB).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "415":
-          description: Unsupported image format. Only JPEG, PNG, WebP allowed.
+          description: Unsupported media type - Returns code `UNSUPPORTED_MEDIA_TYPE` if the image format is not supported. Only JPEG, PNG, WebP allowed.
           content:
             application/json:
               schema:
@@ -728,21 +740,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: >-
-            Forbidden - You are not allowed to delete this message because you are not the sender of the message
-            or the message you are trying to delete is an initial message (isInitMessage=true)
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat, `FORBIDDEN_NOT_SENDER` is not the sender of the message, `FORBIDDEN_ITS_INIT_MESSAGE` or the message is an initial message (isInitMessage=true).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
-          description: Chat or message not found.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the chat or `MESSAGE_NOT_FOUND` the message does not exist.
           content:
             application/json:
               schema:
@@ -777,25 +787,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "400":
-          description: Bad request - invalid message content or missing required fields.
+          description: Bad request - Returns code `INVALID_INPUT` if the message content is invalid or required fields are missing.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden - you are not allowed to send messages in this chat.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
-          description: Chat or referenced message not found.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the chat or `MESSAGE_NOT_FOUND` if the referenced message does not exist.
           content:
             application/json:
               schema:
@@ -830,25 +840,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "400":
-          description: Bad request - invalid emojiId
+          description: Bad request - Returns code `INVALID_INPUT` if the request body is missing/malformed or `INVALID_EMOJI_ID` if the emojiId is invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden - you are not allowed to access this chat.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
-          description: Chat or referenced message not found.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the chat or `MESSAGE_NOT_FOUND` if the referenced message does not exist.
           content:
             application/json:
               schema:
@@ -870,19 +880,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: Forbidden - you are not allowed to access this chat.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
-          description: Chat, message, or reaction not found.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the chat, `MESSAGE_NOT_FOUND` if the message, or `REACTION_NOT_FOUND` if the reaction does not exist.
           content:
             application/json:
               schema:
@@ -919,27 +929,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "400":
-          description: Bad request - invalid message sendTime or missing required fields.
+          description: Bad request - Returns code `INVALID_INPUT` if the destination chat ID or the sendTime is missing or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "401":
-          description: Authentication required or failed.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "403":
-          description: >-
-            Forbidden - you are not allowed to send messages in this chat,
-            or you do not have access to the specified message.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of the origin or destination chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         "404":
-          description: Origin chat, message, or destination chat not found.
+          description: Resource not found - Returns code `ORIGIN_CHAT_NOT_FOUND` if the origin chat, `MESSAGE_NOT_FOUND` if the message, or `DESTINATION_CHAT_NOT_FOUND` the destination chat does not exist.
           content:
             application/json:
               schema:
@@ -963,19 +971,19 @@ paths:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
         '401':
-          description: Authentication required.
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '403':
-          description: Forbidden - you are not a member of this chat.
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Chat or image not found.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the chat or `MISSING_IMAGE_FILE` if the image does not exist.
           content:
             application/json:
               schema:
@@ -1424,6 +1432,17 @@ components:
             - CHAT_ALREADY_EXISTS
             - PAYLOAD_TOO_LARGE
             - UNSUPPORTED_MEDIA_TYPE
+            - INVALID_USER_NAME
+            - INVALID_GROUP_NAME
+            - EMPTY_MEMBER_LIST
+            - MISSING_IMAGE_FILE
+            - FORBIDDEN_NOT_SENDER
+            - FORBIDDEN_ITS_INIT_MESSAGE
+            - MESSAGE_NOT_FOUND
+            - INVALID_EMOJI_ID
+            - REACTION_NOT_FOUND
+            - DESTINATION_CHAT_NOT_FOUND
+            - ORIGIN_CHAT_NOT_FOUND
           example: USER_NOT_FOUND
         message:
           type: string

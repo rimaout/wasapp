@@ -28,7 +28,7 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 
 	// Validate the userName using the same rules as PATCH /profile/name
 	if !isValidBaseName(req.UserName) {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "userName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidUserName, "userName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
 		return
 	}
 
