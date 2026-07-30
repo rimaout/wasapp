@@ -20,7 +20,7 @@ type GroupNameResponse struct {
 func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
 	// Extract target chat id form url (http params)
-	targetChatId := ps.ByName("chatId")
+	chatId := ps.ByName("chatId")
 
 	// Read request (to extract new group name)
 	var req patchGroupNameRequest
@@ -37,7 +37,7 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Check if chat exist (404 error)
-	_, err := rt.db.GetChatById(targetChatId)
+	_, err := rt.db.GetChatById(chatId)
 	if err == database.ErrChatNotFound {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
 		return
@@ -49,7 +49,7 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Check if chat is a group chat (409 error)
-	isGroup, err := rt.db.IsGroupChat(targetChatId)
+	isGroup, err := rt.db.IsGroupChat(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if chat is a group chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
@@ -61,7 +61,7 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Check if logged user ia a member of the group chat (403 error)
-	isMember, err := rt.db.IsActiveChatMember(ctx.UserID, targetChatId)
+	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
@@ -73,7 +73,7 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Set new group name
-	if err := rt.db.SetGroupName(targetChatId, newGroupName); err != nil {
+	if err := rt.db.SetGroupName(chatId, newGroupName); err != nil {
 		ctx.Logger.WithError(err).Error("error updating group name")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return

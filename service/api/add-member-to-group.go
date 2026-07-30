@@ -15,10 +15,7 @@ type AddUserToGroupRequest struct {
 
 func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// Extract target chat id from url (http params)
-	targetChatId := ps.ByName("chatId")
-
-	// Extract user id from context (logged user)
-	loggedUserId := ctx.UserID
+	chatId := ps.ByName("chatId")
 
 	// Extract new member id from request body (JSON)
 	var req AddUserToGroupRequest
@@ -29,7 +26,7 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	newMemberId := req.UserID
 
 	// Check if chat exist (404 error)
-	_, err := rt.db.GetChatById(targetChatId)
+	_, err := rt.db.GetChatById(chatId)
 	if err == database.ErrChatNotFound {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
 		return
@@ -39,8 +36,9 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
+
 	// Check if chat is a group chat (409 error)
-	isGroup, err := rt.db.IsGroupChat(targetChatId)
+	isGroup, err := rt.db.IsGroupChat(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if chat is a group chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
@@ -52,7 +50,7 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Check if logged user ia a member of the group chat (403 error)
-	isMember, err := rt.db.IsActiveChatMember(loggedUserId, targetChatId)
+	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
@@ -76,7 +74,7 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Check if new member is already a member of the group (409)
-	isAlreadyMember, err := rt.db.IsActiveChatMember(targetChatId, newMemberId)
+	isAlreadyMember, err := rt.db.IsActiveChatMember(chatId, newMemberId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
@@ -88,14 +86,14 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Add new member to group
-	if err := rt.db.AddChatMember(targetChatId, newMemberId); err != nil {
+	if err := rt.db.AddChatMember(chatId, newMemberId); err != nil {
 		ctx.Logger.WithError(err).Error("error adding new user to group")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
 
 	// Get updated list of members
-	updatedMembers, err := rt.db.GetChatMembers(targetChatId)
+	updatedMembers, err := rt.db.GetChatMembers(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting updated list of members")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500

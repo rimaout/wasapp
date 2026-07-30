@@ -10,13 +10,10 @@ import (
 
 func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// Extract target chat id from url (http params)
-	targetChatId := ps.ByName("chatId")
-
-	// Extract user id from context (logged user)
-	userId := ctx.UserID
+	chatId := ps.ByName("chatId")
 
 	// Check if chat exists (404)
-	_, err := rt.db.GetChatById(targetChatId)
+	_, err := rt.db.GetChatById(chatId)
 	if err == database.ErrChatNotFound {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
 		return
@@ -28,7 +25,7 @@ func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 
 	// Check if chat is groupchat (409)
-	isGroup, err := rt.db.IsGroupChat(targetChatId)
+	isGroup, err := rt.db.IsGroupChat(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if chat is a group chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
@@ -40,7 +37,7 @@ func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 
 	// Check if logged user is group member (403)
-	isMember, err := rt.db.IsActiveChatMember(userId, targetChatId)
+	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
@@ -52,7 +49,7 @@ func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 
 	// Set leave time
-	err = rt.db.SetLeaveTime(targetChatId, userId)
+	err = rt.db.SetLeaveTime(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error setting leave time for user in chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
