@@ -519,6 +519,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        "404":
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
     # -------------------- GROUP ADD USERS --------------------
     post:
