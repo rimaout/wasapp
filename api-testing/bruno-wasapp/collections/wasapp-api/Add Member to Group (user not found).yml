@@ -1,0 +1,28 @@
+info:
+  name: Add Member to Group (user not found)
+  type: http
+  seq: 24
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{groupChatId}}/members"
+  body:
+    type: json
+    data: |-
+      {
+        "userId": "00000000-0000-0000-0000-000000000000"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(404);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

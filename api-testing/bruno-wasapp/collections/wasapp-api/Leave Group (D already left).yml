@@ -1,0 +1,22 @@
+info:
+  name: Leave Group (D after leaving)
+  type: http
+  seq: 27
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/chats/{{groupChatId}}/members/me"
+  auth:
+    type: bearer
+    token: "{{tokenD}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(403);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

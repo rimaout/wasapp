@@ -1,0 +1,30 @@
+info:
+  name: Set Group Avatar
+  type: http
+  seq: 36
+
+http:
+  method: PUT
+  url: "{{baseUrl}}/chats/{{groupChatId}}/avatar"
+  body:
+    type: multipart-form
+    data:
+      - name: binaryImage
+        type: file
+        value:
+          - /Users/rima/Documents/Dev/Uni/WASA/wasapp/api-testing/bruno-wasapp/assets/test-group-image.jpg
+        contentType: image/jpeg
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(204);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

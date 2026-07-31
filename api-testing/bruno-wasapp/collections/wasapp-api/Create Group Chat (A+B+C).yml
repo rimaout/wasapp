@@ -1,0 +1,33 @@
+info:
+  name: Create Group Chat (A+B+C)
+  type: http
+  seq: 14
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats"
+  body:
+    type: json
+    data: |-
+      {
+        "groupName": "Thrombey Legacy",
+        "membersList": ["{{userIdB}}", "{{userIdC}}"]
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        bru.setVar("groupChatId", data.id);
+    - type: tests
+      code: expect(res.getStatus()).to.equal(201);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,29 @@
+info:
+  name: Create Group Chat (empty members list)
+  type: http
+  seq: 16
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats"
+  body:
+    type: json
+    data: |-
+      {
+        "groupName": "Empty Group",
+        "membersList": []
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(400);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

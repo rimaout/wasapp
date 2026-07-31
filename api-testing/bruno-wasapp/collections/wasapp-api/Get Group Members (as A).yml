@@ -1,0 +1,25 @@
+info:
+  name: Get Group Members (as A)
+  type: http
+  seq: 20
+
+http:
+  method: GET
+  url: "{{baseUrl}}/chats/{{groupChatId}}/members"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const data = res.getBody();
+        expect(res.getStatus()).to.equal(200);
+        expect(data.membersList.length).to.equal(3);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

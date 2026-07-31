@@ -1,0 +1,22 @@
+info:
+  name: Create Direct Chat (self)
+  type: http
+  seq: 8
+
+http:
+  method: POST
+  url: "{{baseUrl}}/user/{{userIdA}}/chats"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(400);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

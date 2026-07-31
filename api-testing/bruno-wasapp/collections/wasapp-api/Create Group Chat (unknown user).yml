@@ -1,0 +1,29 @@
+info:
+  name: Create Group Chat (unknown user)
+  type: http
+  seq: 18
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats"
+  body:
+    type: json
+    data: |-
+      {
+        "groupName": "Ghost Group",
+        "membersList": ["00000000-0000-0000-0000-000000000000"]
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(404);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

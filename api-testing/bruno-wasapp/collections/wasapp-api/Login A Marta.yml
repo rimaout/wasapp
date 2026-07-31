@@ -1,0 +1,34 @@
+info:
+  name: Login A (Marta)
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{baseUrl}}/session"
+  body:
+    type: json
+    data: |-
+      {
+        "userName":"Marta Cabrera"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        const rawToken = data.token.replace("Bearer ", "");
+        bru.setVar("tokenA", rawToken);
+        bru.setVar("userIdA", data.userId);
+        bru.setVar("token", rawToken);
+        bru.setVar("userId", data.userId);
+    - type: tests
+      code: expect(res.getStatus()).to.be.oneOf([200, 201]);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

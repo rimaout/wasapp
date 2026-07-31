@@ -1,0 +1,31 @@
+info:
+  name: Login D (Walt)
+  type: http
+  seq: 4
+
+http:
+  method: POST
+  url: "{{baseUrl}}/session"
+  body:
+    type: json
+    data: |-
+      {
+        "userName":"Walt Thrombey"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        bru.setVar("tokenD", data.token.replace("Bearer ", ""));
+        bru.setVar("userIdD", data.userId);
+    - type: tests
+      code: expect(res.getStatus()).to.be.oneOf([200, 201]);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

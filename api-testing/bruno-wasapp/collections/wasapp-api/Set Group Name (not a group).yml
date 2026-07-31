@@ -1,25 +1,25 @@
 info:
-  name: Update User Name
+  name: Set Group Name (not a group)
   type: http
-  seq: 45
+  seq: 33
 
 http:
   method: PATCH
-  url: "{{baseUrl}}/me/name"
+  url: "{{baseUrl}}/chats/{{directChatId}}/name"
   body:
     type: json
     data: |-
       {
-        "userName": "rima_new_name"
+        "groupName": "Not a Group"
       }
   auth:
     type: bearer
-    token: "{{token}}"
+    token: "{{tokenA}}"
 
 runtime:
   scripts:
     - type: tests
-      code: expect(res.getStatus()).to.equal(200);
+      code: expect(res.getStatus()).to.equal(409);
 
 settings:
   encodeUrl: true

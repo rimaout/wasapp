@@ -1,25 +1,25 @@
 info:
-  name: Update User Name
+  name: Set Group Name (bad name)
   type: http
-  seq: 45
+  seq: 32
 
 http:
   method: PATCH
-  url: "{{baseUrl}}/me/name"
+  url: "{{baseUrl}}/chats/{{groupChatId}}/name"
   body:
     type: json
     data: |-
       {
-        "userName": "rima_new_name"
+        "groupName": "!!"
       }
   auth:
     type: bearer
-    token: "{{token}}"
+    token: "{{tokenA}}"
 
 runtime:
   scripts:
     - type: tests
-      code: expect(res.getStatus()).to.equal(200);
+      code: expect(res.getStatus()).to.equal(400);
 
 settings:
   encodeUrl: true

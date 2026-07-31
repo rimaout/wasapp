@@ -1,0 +1,25 @@
+info:
+  name: Get Direct Chat Members (as A)
+  type: http
+  seq: 10
+
+http:
+  method: GET
+  url: "{{baseUrl}}/chats/{{directChatId}}/members"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        const data = res.getBody();
+        expect(res.getStatus()).to.equal(200);
+        expect(data.membersList.length).to.equal(2);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

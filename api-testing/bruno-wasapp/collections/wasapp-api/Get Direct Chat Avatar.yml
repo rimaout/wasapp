@@ -1,20 +1,14 @@
 info:
-  name: Update User Name
+  name: Get Direct Chat Avatar
   type: http
-  seq: 45
+  seq: 41
 
 http:
-  method: PATCH
-  url: "{{baseUrl}}/me/name"
-  body:
-    type: json
-    data: |-
-      {
-        "userName": "rima_new_name"
-      }
+  method: GET
+  url: "{{baseUrl}}/chats/{{directChatId}}/avatar"
   auth:
     type: bearer
-    token: "{{token}}"
+    token: "{{tokenA}}"
 
 runtime:
   scripts:

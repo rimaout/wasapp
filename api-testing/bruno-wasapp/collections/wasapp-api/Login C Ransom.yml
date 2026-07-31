@@ -1,0 +1,31 @@
+info:
+  name: Login C (Ransom)
+  type: http
+  seq: 3
+
+http:
+  method: POST
+  url: "{{baseUrl}}/session"
+  body:
+    type: json
+    data: |-
+      {
+        "userName":"Ransom Drysdale"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        bru.setVar("tokenC", data.token.replace("Bearer ", ""));
+        bru.setVar("userIdC", data.userId);
+    - type: tests
+      code: expect(res.getStatus()).to.be.oneOf([200, 201]);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

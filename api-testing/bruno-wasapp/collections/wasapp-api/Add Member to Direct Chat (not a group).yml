@@ -1,0 +1,28 @@
+info:
+  name: Add Member to Direct Chat (not a group)
+  type: http
+  seq: 25
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/members"
+  body:
+    type: json
+    data: |-
+      {
+        "userId": "{{userIdD}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(409);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

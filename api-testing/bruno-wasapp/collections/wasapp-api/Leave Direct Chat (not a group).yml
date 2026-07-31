@@ -1,0 +1,22 @@
+info:
+  name: Leave Direct Chat (not a group)
+  type: http
+  seq: 28
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/chats/{{directChatId}}/members/me"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(409);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,7 +1,7 @@
 info:
-  name: Login
+  name: Login B (Harlan)
   type: http
-  seq: 1
+  seq: 2
 
 http:
   method: POST
@@ -10,7 +10,7 @@ http:
     type: json
     data: |-
       {
-        "userName":"rima"
+        "userName":"Harlan Thrombey"
       }
   auth: inherit
 
@@ -19,12 +19,8 @@ runtime:
     - type: after-response
       code: |-
         const data = res.getBody();
-
-        // Extract the raw UUID by removing the "Bearer " prefix
-        const rawToken = data.token.replace("Bearer ", "");
-        // Save as collection variables (no environment selection needed!)
-        bru.setVar("token", rawToken);
-        bru.setVar("userId", data.userId);
+        bru.setVar("tokenB", data.token.replace("Bearer ", ""));
+        bru.setVar("userIdB", data.userId);
     - type: tests
       code: expect(res.getStatus()).to.be.oneOf([200, 201]);
 

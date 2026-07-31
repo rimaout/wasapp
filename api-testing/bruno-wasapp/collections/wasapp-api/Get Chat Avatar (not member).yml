@@ -1,0 +1,22 @@
+info:
+  name: Get Chat Avatar (not member)
+  type: http
+  seq: 42
+
+http:
+  method: GET
+  url: "{{baseUrl}}/chats/{{groupChatId}}/avatar"
+  auth:
+    type: bearer
+    token: "{{tokenD}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(403);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

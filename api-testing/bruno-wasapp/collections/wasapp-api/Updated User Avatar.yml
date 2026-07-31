@@ -1,7 +1,7 @@
 info:
   name: Updated User Avatar
   type: http
-  seq: 4
+  seq: 47
 
 http:
   method: PUT
@@ -12,7 +12,7 @@ http:
       - name: binaryImage
         type: file
         value:
-          - /Users/rima/Downloads/profile.jpeg
+          - /Users/rima/Documents/Dev/Uni/WASA/wasapp/api-testing/bruno-wasapp/assets/test-user-imag.jpg
         contentType: image/jpeg
   auth:
     type: bearer

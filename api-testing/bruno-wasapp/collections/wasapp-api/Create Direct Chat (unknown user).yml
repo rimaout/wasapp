@@ -1,0 +1,22 @@
+info:
+  name: Create Direct Chat (unknown user)
+  type: http
+  seq: 9
+
+http:
+  method: POST
+  url: "{{baseUrl}}/user/00000000-0000-0000-0000-000000000000/chats"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(404);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

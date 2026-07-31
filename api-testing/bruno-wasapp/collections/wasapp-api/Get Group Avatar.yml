@@ -1,20 +1,14 @@
 info:
-  name: Update User Name
+  name: Get Group Avatar
   type: http
-  seq: 45
+  seq: 40
 
 http:
-  method: PATCH
-  url: "{{baseUrl}}/me/name"
-  body:
-    type: json
-    data: |-
-      {
-        "userName": "rima_new_name"
-      }
+  method: GET
+  url: "{{baseUrl}}/chats/{{groupChatId}}/avatar"
   auth:
     type: bearer
-    token: "{{token}}"
+    token: "{{tokenA}}"
 
 runtime:
   scripts:

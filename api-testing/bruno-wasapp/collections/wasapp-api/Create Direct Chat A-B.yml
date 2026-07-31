@@ -1,0 +1,26 @@
+info:
+  name: Create Direct Chat A→B
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: "{{baseUrl}}/user/{{userIdB}}/chats"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        bru.setVar("directChatId", data.id);
+    - type: tests
+      code: expect(res.getStatus()).to.equal(201);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

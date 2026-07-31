@@ -1,0 +1,29 @@
+info:
+  name: Create Group Chat (bad name)
+  type: http
+  seq: 15
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats"
+  body:
+    type: json
+    data: |-
+      {
+        "groupName": "!!",
+        "membersList": ["{{userIdB}}"]
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(400);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
