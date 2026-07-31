@@ -63,7 +63,7 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 		// If the chat is a group chat, we need to get the avatar image of the group
 
 		// Get the avatar image path for the group
-		imagePath, err := rt.db.GetGroupAvatarPath(chatId)
+		imagePath, err = rt.db.GetGroupAvatarPath(chatId)
 		if err != nil {
 			ctx.Logger.WithError(err).Error("error getting avatar image path")
 			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
@@ -101,7 +101,7 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 		// If the user doesn't have an avatar, serve the default user avatar.
 		if imagePath == "" {
 			w.Header().Set("Content-Type", "image/png")
-			_, err = w.Write(defaultGroupAvatar)
+			_, err = w.Write(defaultUserAvatar)
 			if err != nil {
 				ctx.Logger.WithError(err).Error("error writing default avatar to response")
 			}
