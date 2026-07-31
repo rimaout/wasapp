@@ -181,7 +181,7 @@ paths:
 
   # -------------------- CREATE CHATS --------------------
 
-  /chats/groups:  # CREATE GROUP
+  /chats:  # CREATE GROUP
     post:
       tags: ["Chat Creation"]
       summary: Create a group chat
