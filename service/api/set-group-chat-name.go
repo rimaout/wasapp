@@ -10,11 +10,11 @@ import (
 )
 
 type patchGroupNameRequest struct {
-	GroupName string `json:"userName"`
+	GroupName string `json:"groupName"`
 }
 
 type GroupNameResponse struct {
-	GroupName string `json:"userName"`
+	GroupName string `json:"groupName"`
 }
 
 func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {

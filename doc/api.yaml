@@ -187,7 +187,7 @@ paths:
       summary: Create a group chat
       description: >-
         Create a group chat with the users specified in the request as members. The chat is automatically created by the server with an initial message.
-        The autenticated user is automaticaly added to the group chat ea a member.
+        The autenticated user is automaticaly added to the group chat a member.
         The welcome message has the following characteristics: the sender is the user who created the chat, the content is empty, and it has isInitMessage = true.
       operationId: createGroupChat
       security: [ { BearerAuth: [] } ]

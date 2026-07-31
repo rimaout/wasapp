@@ -140,7 +140,7 @@ func (db *appdbimpl) SetGroupAvatarPath(chatId string, path string) error {
 
 // GetGroupAvatarPath returns the group image path for a group chat.
 // If the chat does not have an image, it returns an empty string and no error.
-func (db *appdbimpl) GetGroupAvatrPath(chatId string) (string, error) {
+func (db *appdbimpl) GetGroupAvatarPath(chatId string) (string, error) {
 	var path *string
 	err := db.c.QueryRow(
 		`SELECT group_image_path FROM chats WHERE id = ?`,
