@@ -56,3 +56,31 @@ func (db *appdbimpl) CreateMessage(
 
 	return msgId, nil
 }
+
+// SaveMessageImage inserts an image path into the images table and returns its generated UUID.
+func (db *appdbimpl) SaveMessageImage(path string) (string, error) {
+	id, err := uuid.NewV4()
+	if err != nil {
+		return "", fmt.Errorf("error generating image UUID: %w", err)
+	}
+	imageId := id.String()
+
+	_, err = db.c.Exec(
+		`INSERT INTO images (id, path) VALUES (?, ?)`,
+		imageId, path,
+	)
+	if err != nil {
+		return "", fmt.Errorf("inserting image into database: %w", err)
+	}
+
+	return imageId, nil
+}
+
+// DeleteMessageImage removes an image record from the database.
+func (db *appdbimpl) DeleteMessageImage(imageId string) error {
+	_, err := db.c.Exec(`DELETE FROM images WHERE id = ?`, imageId)
+	if err != nil {
+		return fmt.Errorf("deleting image from database: %w", err)
+	}
+	return nil
+}
