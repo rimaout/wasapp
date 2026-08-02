@@ -671,8 +671,8 @@ paths:
       security: [ { BearerAuth: [] } ]
       requestBody:
         description: >-
-          The message content (text OR image OR both) and sendtime used to create the
-          new message in the specified chat.
+          The message content (text OR image OR both) used to create the
+          new message in the specified chat. The sendTime is assigned server-side.
         required: true
         content:
           multipart/form-data:
@@ -920,8 +920,7 @@ paths:
       security: [ { BearerAuth: [] } ]
       requestBody:
         description: >-
-          The chatId and sendTime to use to forward the message in
-          the destination chat.
+          The ID of the destination chat to forward the message to.
         required: true
         content:
           application/json:
@@ -935,7 +934,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "400":
-          description: Bad request - Returns code `INVALID_INPUT` if the destination chat ID or the sendTime is missing or invalid.
+          description: Bad request - Returns code `INVALID_INPUT` if the destination chat ID is missing or invalid.
           content:
             application/json:
               schema:
@@ -1368,31 +1367,27 @@ components:
         (in this case, the text is used as a caption for the image).
       oneOf:
         - type: object
-          required: [text, imageFile, sendTime]
+          required: [text, imageFile]
           properties:
             text:      { $ref: '#/components/schemas/MessageText'  }
             imageFile: { $ref: '#/components/schemas/BinaryImage'  }
-            sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
         #--------------------------
         - type: object
-          required: [imageFile, sendTime]
+          required: [imageFile]
           properties:
             imageFile: { $ref: '#/components/schemas/BinaryImage'  }
-            sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
         #--------------------------
         - type: object
-          required: [text, sendTime]
+          required: [text]
           properties:
             text:     { $ref: '#/components/schemas/MessageText'  }
-            sendTime: { $ref: '#/components/schemas/BaseDateTime' }
 
     ForwardMessageRequest:
       type: object
       description: Request to forward a message to another chat.
-      required: [forwardTo, sendTime]
+      required: [forwardTo]
       properties:
         forwardTo: { $ref: '#/components/schemas/ChatId'       }
-        sendTime:  { $ref: '#/components/schemas/BaseDateTime' }
 
     EmojiReactionRequest:
       type: object

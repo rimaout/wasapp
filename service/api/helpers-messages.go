@@ -17,7 +17,6 @@ const maxMessagePayloadSize = maxImageSize + (1 * 1024 * 1024) //5MB max image +
 
 type NewMessageContent struct {
 	Text      string
-	SendTime  string
 	ImagePath string
 }
 
@@ -47,14 +46,7 @@ func (rt *_router) extractSendMessageContent(
 
 	// Extract fields
 	text := r.FormValue("text")
-	sendTime := r.FormValue("sendTime")
 	file, header, err := r.FormFile("imageFile")
-
-	// Check for missing sendTime field (required)
-	if sendTime == "" {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "sendTime is required") // 400
-		return NewMessageContent{}, false
-	}
 
 	// Check for errors in reading the image file, but allow for the case where no file was uploaded
 	if err != nil && !errors.Is(err, http.ErrMissingFile) {
@@ -122,6 +114,14 @@ func (rt *_router) extractSendMessageContent(
 		}
 	}
 
+	// Validate text content if present
+	if text != "" {
+		if valid, errMsg := isValidMessageText(text); !valid {
+			rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, errMsg) // 400
+			return NewMessageContent{}, false
+		}
+	}
+
 	// Check for "oneOf" between image and text (must contain text, image, or both)
 	if text == "" && imagePath == "" {
 		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "message must contain text, an image, or both") // 400
@@ -130,7 +130,24 @@ func (rt *_router) extractSendMessageContent(
 
 	return NewMessageContent{
 		Text:      text,
-		SendTime:  sendTime,
 		ImagePath: imagePath,
 	}, true
+}
+
+// isValidMessageText validates message text, it must be 1-3000 characters and contain at least one non-whitespace character.
+func isValidMessageText(text string) (bool, string) {
+	if len(text) > 3000 {
+		return false, "text exceeds maximum length of 3000 characters"
+	}
+	nonSpace := false
+	for _, c := range text {
+		if c != ' ' && c != '\t' && c != '\n' && c != '\r' {
+			nonSpace = true
+			break
+		}
+	}
+	if !nonSpace {
+		return false, "text cannot be only whitespace"
+	}
+	return true, ""
 }

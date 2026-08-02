@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/rimaout/wasapp/service/database"
@@ -38,8 +39,8 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	// Extract and validate message request content (text, sendTime, image)
-	// Note: if a image was sent, it will be saved to disk and its path will be returned in reqContent.ImagePath
+	// Extract and validate message request content (text, image)
+	// Note: if an image was sent, it will be saved to disk and its path will be returned in reqContent.ImagePath
 	reqContent, ok := rt.extractSendMessageContent(w, r, ctx)
 	if !ok {
 		return // Helper already sent the 400, 413, 415, or 500 response
@@ -62,10 +63,11 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	// Save message to DB
+	sendTime := time.Now().UTC().Format(time.DateTime)
 	_, err = rt.db.CreateMessage(
 		chatId,
 		ctx.UserID,
-		reqContent.SendTime,
+		sendTime,
 		reqContent.Text,
 		imageId,
 		"",
