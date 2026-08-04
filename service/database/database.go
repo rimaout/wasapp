@@ -69,7 +69,7 @@ type AppDatabase interface {
 
 	// Messages
 	CreateMessage(chatId, senderId, sendTime, text, imageId, replyTo string, isInit, isForward bool, forwardFromChat, forwardFromMsg string) (string, error)
-	SaveMessageImage(path string) (string, error)
+	GetMessageById(chatId, messageId string) (Message, error)
 	SaveMessageImagePath(path string) (string, error)
 	DeleteMessageImagePath(imageId string) error
 

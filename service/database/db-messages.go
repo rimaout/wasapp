@@ -6,6 +6,42 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+type MessageStatus string
+const (
+	StatusDelivered MessageStatus = "delivered"
+	StatusReceived  MessageStatus = "received"
+	StatusRead      MessageStatus = "read"
+)
+
+type EmojiReaction struct {
+	UserID  string `json:"userId"`
+	EmojiID int32  `json:"emojiId"`
+}
+
+type ForwardedFromInfo struct {
+	ChatID    string `json:"chatId"`
+	MessageID string `json:"messageId"`
+}
+
+type MessageContent struct {
+	Text        *string `json:"text,omitempty"`
+	MsgImageURL *string `json:"msgImageUrl,omitempty"`
+}
+
+type Message struct {
+	ID            string             `json:"id"`
+	ChatID        string             `json:"chatId"`
+	SendTime      time.Time          `json:"sendTime"`
+	Sender        User               `json:"sender"`
+	Status        MessageStatus      `json:"status"`
+	IsDeleted     bool               `json:"isDeleted"`
+	IsInitMessage bool               `json:"isInitMessage"`
+	ReactionsList []EmojiReaction    `json:"reactionsList"`
+	ForwardedFrom *ForwardedFromInfo `json:"forwardedFrom,omitempty"`
+	ReplyTo       *string            `json:"replyTo,omitempty"`
+	Content       *MessageContent    `json:"content,omitempty"`
+}
+
 // CreateMessage inserts a new message and returns the message ID.
 // Pass empty strings for optional fields that should be NULL.
 func (db *appdbimpl) CreateMessage(
@@ -83,4 +119,103 @@ func (db *appdbimpl) DeleteMessageImagePath(imageId string) error {
 		return fmt.Errorf("deleting image from database: %w", err)
 	}
 	return nil
+}
+
+var ErrMessageNotFound = errors.New("message not found")
+
+// GetMessageById retrieves a message with its sender and reactions.
+// Returns ErrMessageNotFound if the message does not exist in the specified chat.
+func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
+
+	// Query the message and its sender from the database
+	query := `SELECT m.id, m.chat_id, m.send_time, m.is_deleted, m.is_init_message,
+		m.text, m.image_id, m.reply_to_msg_id,
+		m.is_forward_message, m.forwarded_from_chat_id, m.forwarded_from_msg_id,
+		u.id, u.name
+	FROM messages m
+	JOIN users u ON m.sender_id = u.id
+	WHERE m.id = ? AND m.chat_id = ?`
+
+	// Save the results into variables
+	var (
+		id, targetChatId, sendTimeStr, senderId, senderName string
+		isDeleted, isInit, isForward                        bool
+		dbText, dbImageId, dbReplyTo                        *string
+		dbFwdChatId, dbFwdMsgId                             *string
+	)
+	err := db.c.QueryRow(query, messageId, chatId).Scan(
+		&id, &targetChatId, &sendTimeStr, &isDeleted, &isInit,
+		&dbText, &dbImageId, &dbReplyTo,
+		&isForward, &dbFwdChatId, &dbFwdMsgId,
+		&senderId, &senderName,
+	)
+	if errors.Is(err, sql.ErrNoRows) {
+		return Message{}, ErrMessageNotFound
+	}
+	if err != nil {
+		return Message{}, fmt.Errorf("querying message by id: %w", err)
+	}
+
+	sendTime, err := time.Parse(time.RFC3339, sendTimeStr)
+	if err != nil {
+		return Message{}, fmt.Errorf("parsing message send_time: %w", err)
+	}
+
+	// Construct the Message object
+	msg := Message{
+		ID:            id,
+		ChatID:        targetChatId,
+		SendTime:      sendTime,
+		Sender:        User{Id: senderId, Name: senderName},
+		Status:        StatusDelivered, //TODO: Update status based on delivery/receipt/read events
+		IsDeleted:     isDeleted,
+		IsInitMessage: isInit,
+	}
+
+	// Only include content if the message is not deleted and not an init message
+	if !isDeleted && !isInit {
+		content := MessageContent{}
+		hasContent := false
+
+		if dbText != nil {
+			content.Text = dbText
+			hasContent = true
+		}
+		if dbImageId != nil {
+			url := messageImageURL(targetChatId, *dbImageId)
+			content.MsgImageURL = &url
+			hasContent = true
+		}
+
+		if hasContent {
+			msg.Content = &content
+		}
+	}
+
+	// Include forwarded message info if present
+	if isForward && (dbFwdChatId != nil) && (dbFwdMsgId != nil) {
+		msg.ForwardedFrom = &ForwardedFromInfo{
+			ChatID:    *dbFwdChatId,
+			MessageID: *dbFwdMsgId,
+		}
+	}
+
+	// Include reply-to message ID if present
+	if dbReplyTo != nil {
+		msg.ReplyTo = dbReplyTo
+	}
+
+	// Get and include reactions for the message
+	reactions, err := db.getReactionsForMessage(messageId)
+	if err != nil {
+		return Message{}, fmt.Errorf("querying reactions: %w", err)
+	}
+	msg.ReactionsList = reactions
+
+	return msg, nil
+}
+
+// messageImageURL constructs the relative path for serving a message image.
+func messageImageURL(chatId, imageId string) string {
+	return "/v1/chats/" + chatId + "/images/" + imageId
 }
