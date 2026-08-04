@@ -1230,10 +1230,10 @@ components:
         (in this case, the text is used as a caption for the image).
       oneOf:
         - type: object
-          required: [text, msgImageUrl]
+          required: [text, msgImageId]
           properties:
             text:        { $ref: '#/components/schemas/MessageText' }
-            msgImageUrl: { $ref: '#/components/schemas/ImageUrl'    }
+            msgImageId: { $ref: '#/components/schemas/ImageId'    }
         #--------------------------
         - type: object
           required: [text]
@@ -1241,9 +1241,9 @@ components:
             text: { $ref: '#/components/schemas/MessageText' }
         #--------------------------
         - type: object
-          required: [msgImageUrl]
+          required: [msgImageId]
           properties:
-            msgImageUrl: { $ref: '#/components/schemas/ImageUrl' }
+            msgImageId: { $ref: '#/components/schemas/ImageId' }
 
     MessageText:
       type: string

@@ -1,7 +1,10 @@
 package database
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/gofrs/uuid"
 )
@@ -25,7 +28,7 @@ type ForwardedFromInfo struct {
 
 type MessageContent struct {
 	Text        *string `json:"text,omitempty"`
-	MsgImageURL *string `json:"msgImageUrl,omitempty"`
+	MsgImageId  *string `json:"msgImageId,omitempty"`
 }
 
 type Message struct {
@@ -182,8 +185,7 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 			hasContent = true
 		}
 		if dbImageId != nil {
-			url := messageImageURL(targetChatId, *dbImageId)
-			content.MsgImageURL = &url
+			content.MsgImageId = dbImageId
 			hasContent = true
 		}
 
@@ -213,9 +215,4 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 	msg.ReactionsList = reactions
 
 	return msg, nil
-}
-
-// messageImageURL constructs the relative path for serving a message image.
-func messageImageURL(chatId, imageId string) string {
-	return "/v1/chats/" + chatId + "/images/" + imageId
 }
