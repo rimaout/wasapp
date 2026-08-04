@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"time"
 
@@ -64,7 +65,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 
 	// Save message to DB
 	sendTime := time.Now().UTC().Format(time.RFC3339)
-	_, err = rt.db.CreateMessage(
+	messageId, err := rt.db.CreateMessage(
 		chatId,
 		ctx.UserID,
 		sendTime,
@@ -89,7 +90,16 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	//TODO: send the message schema
+	// Fetch the created message to return as response
+	msg, err := rt.db.GetMessageById(chatId, messageId)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("error fetching created message")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error")
+		return
+	}
+
+	// Send 201 Created response with the full message
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(msg)
 }
