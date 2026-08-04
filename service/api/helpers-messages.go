@@ -117,14 +117,14 @@ func (rt *_router) extractSendMessageContent(
 	// Validate text content if present
 	if text != "" {
 		if valid, errMsg := isValidMessageText(text); !valid {
-			rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, errMsg) // 400
+			rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidMessageText, errMsg) // 400
 			return NewMessageContent{}, false
 		}
 	}
 
 	// Check for "oneOf" between image and text (must contain text, image, or both)
 	if text == "" && imagePath == "" {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "message must contain text, an image, or both") // 400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeMessageWithNoContent, "message must contain text, an image, or both") // 400
 		return NewMessageContent{}, false
 	}
 

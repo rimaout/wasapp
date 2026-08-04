@@ -31,6 +31,8 @@ const (
 	ErrCodeReactionNotFound    = "REACTION_NOT_FOUND"
 	ErrDestinationChatNotFound = "DESTINATION_CHAT_NOT_FOUND"
 	ErrCodeOriginChatNotFound  = "ORIGIN_CHAT_NOT_FOUND"
+	ErrCodeInvalidMessageText  = "INVALID_MESSAGE_TEXT"
+	ErrCodeMessageWithNoContent= "MESSAGE_WITH_NO_CONTENT"
 
 )
 

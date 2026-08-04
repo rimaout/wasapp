@@ -686,7 +686,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "400":
-          description: Bad request - Returns code `INVALID_INPUT` if the message content is invalid or required fields are missing.
+          description: Bad request - Returns code `INVALID_INPUT` if the multipart form is invalid, code `INVALID_MESSAGE_TEXT` if the text is not formatted correctly, or code `MESSAGE_WITH_NO_CONTENT` if the message contains neither text nor an image.
           content:
             application/json:
               schema:
