@@ -63,7 +63,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	}
 
 	// Save message to DB
-	sendTime := time.Now().UTC().Format(time.DateTime)
+	sendTime := time.Now().UTC().Format(time.RFC3339)
 	_, err = rt.db.CreateMessage(
 		chatId,
 		ctx.UserID,

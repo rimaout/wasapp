@@ -68,7 +68,7 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	_, err = rt.db.CreateMessage(
 		chatId,
 		ctx.UserID,
-		time.Now().UTC().Format(time.DateTime),
+		time.Now().UTC().Format(time.RFC3339),
 		"",
 		"",
 		"",

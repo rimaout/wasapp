@@ -17,7 +17,7 @@ type Member struct {
 // For private chats, join_time and leave_time are NULL.
 // For group chats, join_time is set to now, leave_time is NULL.
 func (db *appdbimpl) AddChatMember(chatId string, userId string) error {
-	now := time.Now().UTC().Format(time.DateTime)
+	now := time.Now().UTC().Format(time.RFC3339)
 	_, err := db.c.Exec(
 		`INSERT INTO members (chat_id, user_id, group_join_time, group_leave_time) VALUES (?, ?, ?, ?)`,
 		chatId, userId, now, nil,
@@ -87,7 +87,7 @@ func (db *appdbimpl) GetOtherMemberId(chatId string, userId string) (string, err
 // SetLeaveTime marks the user as having left the group chat.
 // The row is NOT deleted, but the leave_time field is set to now.
 func (db *appdbimpl) SetLeaveTime(chatId string, userId string) error {
-	now := time.Now().UTC().Format(time.DateTime)
+	now := time.Now().UTC().Format(time.RFC3339)
 
 	_, err := db.c.Exec(
 		`UPDATE members SET group_leave_time = ? WHERE chat_id = ? AND user_id = ?`,
