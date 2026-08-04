@@ -50,7 +50,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	var imageId string
 	if reqContent.ImagePath != "" {
 		var err error
-		imageId, err = rt.db.SaveMessageImage(reqContent.ImagePath)
+		imageId, err = rt.db.SaveMessageImagePath(reqContent.ImagePath)
 		if err != nil {
 			ctx.Logger.WithError(err).Error("error saving image path to database")
 
@@ -81,7 +81,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 
 		// Clean up uploaded image if database insert fails
 		if reqContent.ImagePath != "" {
-			_ = rt.db.DeleteMessageImage(imageId)          // Delete image record from database
+			_ = rt.db.DeleteMessageImagePath(imageId)          // Delete image record from database
 			rt.deleteImageFile(ctx, reqContent.ImagePath)  // Delete image file from disk
 		}
 
@@ -89,7 +89,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 		return
 	}
 
-	// Send 201 Created response
+	//TODO: send the message schema
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 }

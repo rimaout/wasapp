@@ -1,6 +1,6 @@
 package structures
 
-type ChatPrevieResponse struct {
+type ChatPreviewResponse struct {
 	Id          string `json:"id"`
 	DisplayName string `json:"displayName"`
 	IsGroupChat bool   `json:"isGroupChat"`

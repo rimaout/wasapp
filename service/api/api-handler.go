@@ -8,6 +8,7 @@ import (
 func (rt *_router) Handler() http.Handler {
 	// Register routes
 	rt.router.GET("/", rt.getHelloWorld)
+	rt.router.GET("/liveness", rt.liveness)
 	rt.router.GET("/context", rt.wrap(rt.getContextReply))
 
 	// Login
@@ -35,9 +36,6 @@ func (rt *_router) Handler() http.Handler {
 
 	// Chat Image Serving
 	rt.router.GET("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.getChatAvatar))
-
-	// Special routes
-	rt.router.GET("/liveness", rt.liveness)
 
 	// Members
 	rt.router.GET("/chats/:chatId/members", rt.wrapAuthenticated(rt.getChatMembers))

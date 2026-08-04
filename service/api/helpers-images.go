@@ -6,9 +6,9 @@ import (
 	"errors"
 	"net/http"
 	"path/filepath"
-	
+
 	"github.com/gofrs/uuid"
-	
+
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
@@ -37,12 +37,15 @@ func (rt *_router) saveUploadedImage(
 
 	// Parse the multipart form to determine if it is correctly formed and not too large.
 	if err := r.ParseMultipartForm(maxImageSize); err != nil {
+
+		// Check if request body exceeds the maximum size limit
 		var maxBytesErr *http.MaxBytesError
 		if errors.As(err, &maxBytesErr) {
 			rt.respondWithError(w, http.StatusRequestEntityTooLarge, ErrCodePayloadTooLarge, "image exceeds maximum size of 5MB") //413
 			return "", false
 		}
 
+		// Check if the error is due to invalid multipart form format
 		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid multipart form") //400
 		return "", false
 	}
@@ -55,7 +58,7 @@ func (rt *_router) saveUploadedImage(
 	}
 	defer file.Close()
 
-	// Validate content type (only JPEG, PNG, WEBP are allowed)
+	// Validate content type (only JPEG, PNG, WEBP)
 	contentType := header.Header.Get("Content-Type")
 	if contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/webp" {
 		rt.respondWithError(w, http.StatusUnsupportedMediaType, ErrCodeUnsupportedMedia, "unsupported image format, only JPEG, PNG, WebP allowed") //415
@@ -82,7 +85,7 @@ func (rt *_router) saveUploadedImage(
 		}
 	}
 
-	// Generate a random image name (path)
+	// Generate random UUID for filename
 	imageId, err := uuid.NewV4()
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error generating image UUID")
@@ -91,7 +94,7 @@ func (rt *_router) saveUploadedImage(
 	}
 	imagePath := filepath.Join(targetDir, imageId.String()+ext)
 
-	// Create the destination file
+	// Create destination file
 	dst, err := os.Create(imagePath)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating image file")
@@ -100,7 +103,7 @@ func (rt *_router) saveUploadedImage(
 	}
 	defer dst.Close()
 
-	// Copy the uploaded file to the destination file
+	// Write content to disk (note: io.Copy directly writes to the disk without buffering the entire file in memory)
 	if _, err := io.Copy(dst, file); err != nil {
 		ctx.Logger.WithError(err).Error("error saving image file")
 		rt.deleteImageFile(ctx, imagePath) // clean up partial file

@@ -85,7 +85,7 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(structures.ChatPrevieResponse{
+	json.NewEncoder(w).Encode(structures.ChatPreviewResponse{
 		Id:          chatId,
 		DisplayName: targetName,
 		IsGroupChat: false,

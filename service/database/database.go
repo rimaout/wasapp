@@ -61,14 +61,17 @@ type AppDatabase interface {
 	// Members
 	AddChatMember(chatId string, userId string) error
 	GetChatMembers(chatId string) ([]Member, error)
+//	GetActiveMemberCount(chatId string) (int, error)
 	GetOtherMemberId(chatId string, userId string) (string, error)
 	SetLeaveTime(chatId string, userId string) error
 	IsActiveChatMember(chatId string, userId string) (bool, error)
+//	IsActiveMemberAtTime(chatId string, userId string, t time.Time) (bool, error)
 
 	// Messages
 	CreateMessage(chatId, senderId, sendTime, text, imageId, replyTo string, isInit, isForward bool, forwardFromChat, forwardFromMsg string) (string, error)
 	SaveMessageImage(path string) (string, error)
-	DeleteMessageImage(imageId string) error
+	SaveMessageImagePath(path string) (string, error)
+	DeleteMessageImagePath(imageId string) error
 
 	Ping() error
 }
