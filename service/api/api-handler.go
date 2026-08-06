@@ -41,6 +41,7 @@ func (rt *_router) Handler() http.Handler {
 	// Messages
 	rt.router.POST("/chats/:chatId/messages", rt.wrapAuthenticated(rt.sendMessage))
 	rt.router.DELETE(`/chats/:chatId/messages/:messageId`, rt.wrapAuthenticated(rt.deleteMessage))
+	rt.router.POST("/chats/:chatId/messages/:messageId/reply", rt.wrapAuthenticated(rt.replyMessage))
 
 	// Image Serving
 	rt.router.PUT("/me/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
