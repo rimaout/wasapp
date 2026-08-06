@@ -24,7 +24,6 @@ func (rt *_router) Handler() http.Handler {
 
 	// User
 	rt.router.PATCH("/me/name", rt.wrapAuthenticated(rt.setMyUserName))
-	rt.router.PUT("/me/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
 
 	// Chat creation
 	rt.router.POST("/user/:userId/chats", rt.wrapAuthenticated(rt.createDirectChat))
@@ -34,9 +33,6 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.PATCH("/chats/:chatId/name", rt.wrapAuthenticated(rt.setGroupChatName))
 	rt.router.PUT("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.setGroupChatAvatar))
 
-	// Chat Image Serving
-	rt.router.GET("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.getChatAvatar))
-
 	// Members
 	rt.router.GET("/chats/:chatId/members", rt.wrapAuthenticated(rt.getChatMembers))
 	rt.router.POST("/chats/:chatId/members", rt.wrapAuthenticated(rt.addMemberToGroup))
@@ -45,6 +41,11 @@ func (rt *_router) Handler() http.Handler {
 	// Messages
 	rt.router.POST("/chats/:chatId/messages", rt.wrapAuthenticated(rt.sendMessage))
 	rt.router.DELETE(`/chats/:chatId/messages/:messageId`, rt.wrapAuthenticated(rt.deleteMessage))
+
+	// Image Serving
+	rt.router.PUT("/me/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
+	rt.router.GET("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.getChatAvatar))
+	rt.router.GET("/chats/:chatId/images/:imageId", rt.wrapAuthenticated(rt.getMessageImage))
 
 	return rt.router
 }

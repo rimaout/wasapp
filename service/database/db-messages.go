@@ -275,3 +275,32 @@ func (db *appdbimpl) SetMessageAsDeleted(chatId, messageId string) (Message, err
 
 	return msg, nil
 }
+
+// GetImagePathByImageId returns the file path for an image by its ID.
+// Returns ("", nil) if the image is not found.
+func (db *appdbimpl) GetImagePathByImageId(imageId string) (string, error) {
+	var path string
+	err := db.c.QueryRow(
+		"SELECT path FROM images WHERE id = ?", imageId,
+	).Scan(&path)
+	if errors.Is(err, sql.ErrNoRows) {
+		return "", nil
+	}
+	if err != nil {
+		return "", fmt.Errorf("querying image path: %w", err)
+	}
+	return path, nil
+}
+
+// IsImageInChat checks if an image is associated with any message in a chat.
+func (db *appdbimpl) IsImageInChat(chatId, imageId string) (bool, error) {
+	var exists bool
+	err := db.c.QueryRow(
+		"SELECT EXISTS(SELECT 1 FROM messages WHERE chat_id = ? AND image_id = ? LIMIT 1)",
+		chatId, imageId,
+	).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("checking image in chat: %w", err)
+	}
+	return exists, nil
+}
