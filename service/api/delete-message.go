@@ -41,7 +41,7 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 	}
 
 	// Check if message exists (404)
-	msg, err := rt.db.GetMessageById(messageId, chatId)
+	msg, err := rt.db.GetMessageById(chatId, messageId)
 	if err == database.ErrMessageNotFound {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeMessageNotFound, "message not found")
 		return
@@ -58,9 +58,15 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	// Check if message is initMessage (403)
+	// Check if message is already deleted (400)
+	if msg.IsDeleted {
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeAlreadyDeleted, "message already deleted")
+		return
+	}
+
+	// Check if message is initMessage (400)
 	if msg.IsInitMessage {
-		rt.respondWithError(w, http.StatusForbidden, ErrCodeItsInitMessage, "cannot delete init message")
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeItsInitMessage, "cannot delete init message")
 		return
 	}
 

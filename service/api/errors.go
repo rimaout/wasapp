@@ -25,6 +25,7 @@ const (
 	ErrCodeEmptyMemberList	   = "EMPTY_MEMBER_LIST"
 	ErrCodeMissingImageFile    = "MISSING_IMAGE_FILE"
 	ErrCodeForbiddenNotSender  = "FORBIDDEN_NOT_SENDER"
+	ErrCodeAlreadyDeleted      = "MESSAGE_ALREADY_DELETED"
 	ErrCodeItsInitMessage      = "ITS_INIT_MESSAGE"
 	ErrCodeMessageNotFound     = "MESSAGE_NOT_FOUND"
 	ErrCodeInvalidEmojiId      = "INVALID_EMOJI_ID"

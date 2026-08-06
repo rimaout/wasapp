@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -221,13 +222,49 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 //		since for the user is still impossible to see the message content, because GetMessageById will return a Message with Content = nil if IsDeleted = true.
 func (db *appdbimpl) SetMessageAsDeleted(chatId, messageId string) (Message, error) {
 
-	// Mark the message as deleted in the database
-	_, err := db.c.Exec(
-		`UPDATE messages SET is_deleted = 1 WHERE id = ? AND chat_id = ?`,
+	// Get image_id before clearing it
+	var imageId *string
+	err := db.c.QueryRow(
+		"SELECT image_id FROM messages WHERE id = ? AND chat_id = ?",
+		messageId, chatId,
+	).Scan(&imageId)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return Message{}, fmt.Errorf("error looking up message image before deletion: %w", err)
+	}
+
+	// Mark the message as deleted in the database.
+	_, err = db.c.Exec(
+		`UPDATE messages SET
+			is_deleted = 1,
+			text = NULL,
+			image_id = NULL,
+			reply_to_msg_id = NULL,
+			is_forward_message = 0,
+			forwarded_from_chat_id = NULL,
+			forwarded_from_msg_id = NULL,
+			is_init_message = 0
+		WHERE id = ? AND chat_id = ?`,
 		messageId, chatId,
 	)
 	if err != nil {
 		return Message{}, fmt.Errorf("updating message as deleted: %w", err)
+	}
+
+	// Delete image file and record if exists
+	if imageId != nil && *imageId != "" {
+
+		// Get image file path from db
+		var imagePath string
+		err := db.c.QueryRow(
+			"SELECT path FROM images WHERE id = ?", *imageId,
+		).Scan(&imagePath)
+
+		// If the image path was found, delete the file and the record from the database
+		if err == nil {
+			_ = os.Remove(imagePath)
+		}
+		_, _ = db.c.Exec("DELETE FROM images WHERE id = ?", *imageId)
 	}
 
 	// Fetch the updated message to return
