@@ -216,3 +216,25 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 
 	return msg, nil
 }
+
+//TODO: In the future also delete the message text and image from the database, but for now we just mark it as deleted,
+//		since for the user is still impossible to see the message content, because GetMessageById will return a Message with Content = nil if IsDeleted = true.
+func (db *appdbimpl) SetMessageAsDeleted(chatId, messageId string) (Message, error) {
+
+	// Mark the message as deleted in the database
+	_, err := db.c.Exec(
+		`UPDATE messages SET is_deleted = 1 WHERE id = ? AND chat_id = ?`,
+		messageId, chatId,
+	)
+	if err != nil {
+		return Message{}, fmt.Errorf("updating message as deleted: %w", err)
+	}
+
+	// Fetch the updated message to return
+	msg, err := db.GetMessageById(chatId, messageId)
+	if err != nil {
+		return Message{}, fmt.Errorf("fetching updated message: %w", err)
+	}
+
+	return msg, nil
+}

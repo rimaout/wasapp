@@ -44,6 +44,7 @@ func (rt *_router) Handler() http.Handler {
 
 	// Messages
 	rt.router.POST("/chats/:chatId/messages", rt.wrapAuthenticated(rt.sendMessage))
+	rt.router.DELETE(`/chats/:chatId/messages/:messageId`, rt.wrapAuthenticated(rt.deleteMessage))
 
 	return rt.router
 }

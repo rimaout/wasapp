@@ -72,6 +72,7 @@ type AppDatabase interface {
 	GetMessageById(chatId, messageId string) (Message, error)
 	SaveMessageImagePath(path string) (string, error)
 	DeleteMessageImagePath(imageId string) error
+	SetMessageAsDeleted(chatId, messageId string) (Message, error)
 
 	Ping() error
 }

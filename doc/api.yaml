@@ -724,45 +724,65 @@ paths:
 
   # -------------------- DELETE MESSAGE --------------------
   /chats/{chatId}/messages/{messageId}:
-    parameters:
-      - $ref: '#/components/parameters/ChatId'
-      - $ref: '#/components/parameters/MessageId'
+  parameters:
+    - $ref: '#/components/parameters/ChatId'
+    - $ref: '#/components/parameters/MessageId'
 
-    delete:
-      tags: ["Message Operations"]
-      summary: Delete a specific message from the specified chat
-      description: |-
-        Deletes the message identified by messageId from the chat identified by chatId.
-        The authenticated user must be the same user that sent the message.
-          - Subsequent reads of this message will return it with 'isDeleted' set to true and 'content' set to null, so clients can display it as a deleted message.
-          - A message with the `InitMessage` flag set to true cannot be deleted.
-      operationId: deleteMessage
-      security: [ { BearerAuth: [] } ]
-      responses:
-        "200":
-          description: Message marked as deleted successfully. Returns the updated message.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Message'
-        "401":
-          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "403":
-          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this chat, `FORBIDDEN_NOT_SENDER` is not the sender of the message, `FORBIDDEN_ITS_INIT_MESSAGE` or the message is an initial message (isInitMessage=true).
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        "404":
-          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the chat or `MESSAGE_NOT_FOUND` the message does not exist.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+  delete:
+    tags: ["Message Operations"]
+    summary: Delete a specific message from the specified chat
+    description: |-
+      Soft-deletes the message identified by messageId from the chat identified by chatId.
+      The authenticated user must be the sender of the message.
+        - Subsequent reads of this message will return it with `isDeleted: true` and `content: null`.
+        - System initialization messages (`isInitMessage: true`) cannot be deleted.
+        - Already deleted messages cannot be deleted again.
+    operationId: deleteMessage
+    security: [ { BearerAuth: [] } ]
+    responses:
+      "200":
+        description: Message marked as deleted successfully. Returns the updated message record.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message'
+
+      "400":
+        description: >-
+          Bad Request - Returned when attempting an illegal operation on the message state:
+          - `MESSAGE_ALREADY_DELETED`: The message has already been deleted.
+          - `ITS_INIT_MESSAGE`: Initial system messages cannot be deleted.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+      "401":
+        description: Authentication required - Bearer token missing, malformed, or expired.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+      "403":
+        description: >-
+          Forbidden - Returned when authorization checks fail:
+          - `FORBIDDEN_NOT_MEMBER`: Logged-in user is not a member of this chat.
+          - `FORBIDDEN_NOT_SENDER`: Logged-in user is not the author of this message.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
+
+      "404":
+        description: >-
+          Not Found:
+          - `CHAT_NOT_FOUND`: Specified chat ID does not exist.
+          - `MESSAGE_NOT_FOUND`: Specified message ID does not exist.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Error'
 
   # -------------------- REPLY MESSAGE --------------------
   /chats/{chatId}/messages/{messageId}/replies:
@@ -1438,7 +1458,7 @@ components:
             - EMPTY_MEMBER_LIST
             - MISSING_IMAGE_FILE
             - FORBIDDEN_NOT_SENDER
-            - FORBIDDEN_ITS_INIT_MESSAGE
+            - ITS_INIT_MESSAGE
             - MESSAGE_NOT_FOUND
             - INVALID_EMOJI_ID
             - REACTION_NOT_FOUND
