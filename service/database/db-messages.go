@@ -304,3 +304,102 @@ func (db *appdbimpl) IsImageInChat(chatId, imageId string) (bool, error) {
 	}
 	return exists, nil
 }
+
+// GetChatMessages retrieves the last 50 messages for a chat, ordered by send_time descending.
+func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
+	rows, err := db.c.Query(
+		`SELECT m.id, m.chat_id, m.send_time, m.is_deleted, m.is_init_message,
+			m.text, m.image_id, m.reply_to_msg_id,
+			m.is_forward_message, m.forwarded_from_chat_id, m.forwarded_from_msg_id,
+			u.id, u.name
+		FROM messages m
+		JOIN users u ON m.sender_id = u.id
+		WHERE m.chat_id = ?
+		ORDER BY m.send_time DESC
+		LIMIT 50`,
+		chatId,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("querying chat messages: %w", err)
+	}
+	defer rows.Close()
+
+	// Extract messages list form the query results
+	var messages []Message
+	for rows.Next() {
+		var (
+			id, targetChatId, sendTimeStr, senderId, senderName string
+			isDeleted, isInit, isForward                        bool
+			dbText, dbImageId, dbReplyTo                        *string
+			dbFwdChatId, dbFwdMsgId                             *string
+		)
+		err := rows.Scan(
+			&id, &targetChatId, &sendTimeStr, &isDeleted, &isInit,
+			&dbText, &dbImageId, &dbReplyTo,
+			&isForward, &dbFwdChatId, &dbFwdMsgId,
+			&senderId, &senderName,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("scanning message row: %w", err)
+		}
+
+		sendTime, err := time.Parse(time.RFC3339, sendTimeStr)
+		if err != nil {
+			return nil, fmt.Errorf("parsing message send_time: %w", err)
+		}
+
+		msg := Message{
+			ID:            id,
+			ChatID:        targetChatId,
+			SendTime:      sendTime,
+			Sender:        User{Id: senderId, Name: senderName},
+			Status:        StatusDelivered,
+			IsDeleted:     isDeleted,
+			IsInitMessage: isInit,
+		}
+
+		// Only include content if the message is not deleted and not an init message
+		if !isDeleted && !isInit {
+			content := MessageContent{}
+			hasContent := false
+			if dbText != nil {
+				content.Text = dbText
+				hasContent = true
+			}
+			if dbImageId != nil {
+				content.MsgImageId = dbImageId
+				hasContent = true
+			}
+			if hasContent {
+				msg.Content = &content
+			}
+		}
+
+		// Include forwarded message info if present
+		if isForward && dbFwdChatId != nil && dbFwdMsgId != nil {
+			msg.ForwardedFrom = &ForwardedFromInfo{
+				ChatID:    *dbFwdChatId,
+				MessageID: *dbFwdMsgId,
+			}
+		}
+
+		// Include reply to message ID if present
+		if dbReplyTo != nil {
+			msg.ReplyTo = dbReplyTo
+		}
+
+		msg.ReactionsList = make([]EmojiReaction, 0)
+		messages = append(messages, msg)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating message rows: %w", err)
+	}
+
+	// Return an empry list instead of nil if there are no messages
+	if messages == nil {
+		messages = make([]Message, 0)
+	}
+
+	return messages, nil
+}
