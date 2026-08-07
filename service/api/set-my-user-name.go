@@ -59,7 +59,7 @@ func (rt *_router) setMyUserName(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	// Return userId and userName (TODO: add retuen profile image)
+	// Return userId and userName
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(userResponse{
 		Id:   ctx.UserID,
