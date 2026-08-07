@@ -1,9 +1,12 @@
 package database
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
+
+var ErrReactionNotFound = errors.New("reaction not found")
 
 // getReactionsForMessage fetches all reactions for a message.
 func (db *appdbimpl) getReactionsForMessage(messageId string) ([]EmojiReaction, error) {
@@ -41,6 +44,24 @@ func (db *appdbimpl) CreateReaction(messageId, userId string, emojiId int32) err
 	)
 	if err != nil {
 		return fmt.Errorf("creating reaction: %w", err)
+	}
+	return nil
+}
+
+func (db *appdbimpl) DeleteReaction(messageId, userId string) error {
+	result, err := db.c.Exec(
+		"DELETE FROM reactions WHERE message_id = ? AND user_id = ?",
+		messageId, userId,
+	)
+	if err != nil {
+		return fmt.Errorf("deleting reaction: %w", err)
+	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("checking rows affected: %w", err)
+	}
+	if rows == 0 {
+		return ErrReactionNotFound
 	}
 	return nil
 }

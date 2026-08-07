@@ -80,6 +80,7 @@ type AppDatabase interface {
 
 	// Reactions
 	CreateReaction(messageId, userId string, emojiId int32) error
+	DeleteReaction(messageId, userId string) error
 
 	Ping() error
 }
