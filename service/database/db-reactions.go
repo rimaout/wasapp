@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"time"
 )
 
 // getReactionsForMessage fetches all reactions for a message.
@@ -30,4 +31,16 @@ func (db *appdbimpl) getReactionsForMessage(messageId string) ([]EmojiReaction, 
 	}
 
 	return reactions, nil
+}
+
+func (db *appdbimpl) CreateReaction(messageId, userId string, emojiId int32) error {
+	_, err := db.c.Exec(
+		`INSERT OR REPLACE INTO reactions (message_id, user_id, reac_time, emoji_id)
+		 VALUES (?, ?, ?, ?)`,
+		messageId, userId, time.Now().UTC().Format(time.RFC3339), emojiId,
+	)
+	if err != nil {
+		return fmt.Errorf("creating reaction: %w", err)
+	}
+	return nil
 }

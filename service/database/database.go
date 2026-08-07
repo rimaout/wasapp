@@ -78,6 +78,9 @@ type AppDatabase interface {
 	GetMyChats(userId string) ([]ChatPreview, error)
 	GetChatMessages(chatId string) ([]Message, error)
 
+	// Reactions
+	CreateReaction(messageId, userId string, emojiId int32) error
+
 	Ping() error
 }
 
