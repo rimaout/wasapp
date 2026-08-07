@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/gofrs/uuid"
 )
@@ -159,4 +160,78 @@ func (db *appdbimpl) GetGroupAvatarPath(chatId string) (string, error) {
 	}
 
 	return *path, nil
+}
+
+type ChatPreview struct {
+	ChatID       string
+	IsGroupChat  bool
+	DisplayName  string
+	MessageID    string
+	SendTime     time.Time
+	SenderID     string
+	SenderName   string
+	IsDeleted    bool
+	IsInitMsg    bool
+	Text         *string
+	ImageID      *string
+	ReplyTo      *string
+}
+
+// GetMyChats returns a list of chats for the given user, including the last message in each chat.
+func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
+	rows, err := db.c.Query(
+		`SELECT
+			c.id, c.is_group_chat, c.group_name,
+
+			-- Determine the display name based on if it's a group chat or a private chat
+
+			CASE WHEN c.is_group_chat = 1 THEN c.group_name
+				 ELSE (SELECT u2.name
+					   FROM members m2 JOIN users u2 ON m2.user_id = u2.id
+					   WHERE m2.chat_id = c.id AND m2.user_id != ? LIMIT 1)
+			END AS display_name,
+
+			m.id, m.send_time, m.sender_id, u.name AS sender_name,
+			m.is_deleted, m.is_init_message,
+			m.text, m.image_id, m.reply_to_msg_id
+
+		FROM members mem
+		JOIN chats c ON mem.chat_id = c.id
+		JOIN messages m ON m.id = (
+			SELECT id FROM messages WHERE chat_id = c.id ORDER BY send_time DESC LIMIT 1
+		)
+		JOIN users u ON m.sender_id = u.id
+		WHERE mem.user_id = ? AND mem.group_leave_time IS NULL
+		ORDER BY m.send_time DESC
+		LIMIT 50`,
+		userId, userId,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("querying chats: %w", err)
+	}
+	defer rows.Close()
+
+	// Extract the chat previews from the rows
+	chats := make([]ChatPreview, 0)
+	for rows.Next() {
+		var cp ChatPreview
+		var groupName *string
+		err := rows.Scan(
+			&cp.ChatID, &cp.IsGroupChat, &groupName,
+			&cp.DisplayName,
+			&cp.MessageID, &cp.SendTime, &cp.SenderID, &cp.SenderName,
+			&cp.IsDeleted, &cp.IsInitMsg,
+			&cp.Text, &cp.ImageID, &cp.ReplyTo,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("scanning chat row: %w", err)
+		}
+		chats = append(chats, cp)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterating chat rows: %w", err)
+	}
+
+	return chats, nil
 }

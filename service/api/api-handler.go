@@ -25,11 +25,14 @@ func (rt *_router) Handler() http.Handler {
 	// User
 	rt.router.PATCH("/me/name", rt.wrapAuthenticated(rt.setMyUserName))
 
-	// Chat creation
+	// Chats Reading
+	rt.router.GET("/chats", rt.wrapAuthenticated(rt.getMyChats))
+
+	// Chat Creation
 	rt.router.POST("/user/:userId/chats", rt.wrapAuthenticated(rt.createDirectChat))
 	rt.router.POST("/chats", rt.wrapAuthenticated(rt.createGroupChat))
 
-	// Chat edits
+	// Chat Edits
 	rt.router.PATCH("/chats/:chatId/name", rt.wrapAuthenticated(rt.setGroupChatName))
 	rt.router.PUT("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.setGroupChatAvatar))
 

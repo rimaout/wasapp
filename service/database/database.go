@@ -75,6 +75,7 @@ type AppDatabase interface {
 	GetImagePathByImageId(imageId string) (string, error)
 	IsImageInChat(chatId string, imageId string) (bool, error)
 	SetMessageAsDeleted(chatId, messageId string) (Message, error)
+	GetMyChats(userId string) ([]ChatPreview, error)
 
 	Ping() error
 }
