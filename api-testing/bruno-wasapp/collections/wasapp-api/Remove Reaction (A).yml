@@ -1,0 +1,24 @@
+info:
+  name: Remove Reaction (A)
+  type: http
+  seq: 76
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages/{{msgId2}}/reactions"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        expect(res.getStatus()).to.equal(200);
+        expect(res.getBody().reactionsList.length).to.equal(1);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

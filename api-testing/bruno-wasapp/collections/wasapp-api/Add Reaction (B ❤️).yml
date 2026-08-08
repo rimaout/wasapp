@@ -1,0 +1,30 @@
+info:
+  name: Add Reaction (B ❤️)
+  type: http
+  seq: 72
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages/{{msgId2}}/reactions"
+  body:
+    type: json
+    data: |-
+      {
+        "emojiId": 1
+      }
+  auth:
+    type: bearer
+    token: "{{tokenB}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        expect(res.getStatus()).to.equal(201);
+        expect(res.getBody().reactionsList.length).to.equal(2);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

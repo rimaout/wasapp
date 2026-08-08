@@ -1,0 +1,32 @@
+info:
+  name: Login Test (EmptyChats)
+  type: http
+  seq: 50
+
+http:
+  method: POST
+  url: "{{baseUrl}}/session"
+  body:
+    type: json
+    data: |-
+      {
+        "userName":"Test EmptyChats"
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        const rawToken = data.token.replace("Bearer ", "");
+        bru.setVar("tokenEmpty", rawToken);
+        bru.setVar("userIdEmpty", data.userId);
+    - type: tests
+      code: expect(res.getStatus()).to.be.oneOf([200, 201]);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

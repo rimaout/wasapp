@@ -1,0 +1,28 @@
+info:
+  name: Send Empty Message
+  type: http
+  seq: 54
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages"
+  body:
+    type: multipart-form
+    data:
+      - name: text
+        type: text
+        value: " "
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(400);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

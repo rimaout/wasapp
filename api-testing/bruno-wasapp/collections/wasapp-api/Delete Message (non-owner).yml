@@ -1,0 +1,22 @@
+info:
+  name: Delete Message (non-owner)
+  type: http
+  seq: 63
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages/{{msgId2}}"
+  auth:
+    type: bearer
+    token: "{{tokenB}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(403);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,30 @@
+info:
+  name: Reply to Message
+  type: http
+  seq: 59
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages/{{msgId2}}/reply"
+  body:
+    type: multipart-form
+    data:
+      - name: text
+        type: text
+        value: This is a reply
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        expect(res.getStatus()).to.equal(201);
+        expect(res.getBody().replyTo).to.equal(bru.getVar("msgId2"));
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

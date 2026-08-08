@@ -1,0 +1,22 @@
+info:
+  name: Serve Message Image (non-member)
+  type: http
+  seq: 67
+
+http:
+  method: GET
+  url: "{{baseUrl}}/chats/{{directChatId}}/images/{{imageMsgId}}"
+  auth:
+    type: bearer
+    token: "{{tokenC}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(403);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

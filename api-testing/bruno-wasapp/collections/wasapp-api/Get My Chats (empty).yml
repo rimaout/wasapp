@@ -1,0 +1,24 @@
+info:
+  name: Get My Chats (new user - empty)
+  type: http
+  seq: 79
+
+http:
+  method: GET
+  url: "{{baseUrl}}/chats"
+  auth:
+    type: bearer
+    token: "{{tokenEmpty}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        expect(res.getStatus()).to.equal(200);
+        expect(res.getBody().chatsPreviewList.length).to.equal(0);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

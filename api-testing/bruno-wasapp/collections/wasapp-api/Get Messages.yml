@@ -1,0 +1,34 @@
+info:
+  name: Get Messages
+  type: http
+  seq: 56
+
+http:
+  method: GET
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const messages = res.getBody().messages;
+        for (const m of messages) {
+          if (m.isInitMessage) {
+            bru.setVar("initMsgId", m.id);
+            break;
+          }
+        }
+    - type: tests
+      code: |-
+        const messages = res.getBody().messages;
+        expect(res.getStatus()).to.equal(200);
+        expect(messages.length).to.be.greaterThanOrEqual(5);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,32 @@
+info:
+  name: Send Text Message
+  type: http
+  seq: 51
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages"
+  body:
+    type: multipart-form
+    data:
+      - name: text
+        type: text
+        value: Hello from Marta
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        bru.setVar("msgId", data.id);
+    - type: tests
+      code: expect(res.getStatus()).to.equal(201);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

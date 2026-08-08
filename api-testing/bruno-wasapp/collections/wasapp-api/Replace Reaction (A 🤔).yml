@@ -1,0 +1,31 @@
+info:
+  name: Replace Reaction (A 🤔)
+  type: http
+  seq: 71
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages/{{msgId2}}/reactions"
+  body:
+    type: json
+    data: |-
+      {
+        "emojiId": 5
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: |-
+        expect(res.getStatus()).to.equal(201);
+        expect(res.getBody().reactionsList.length).to.equal(1);
+        expect(res.getBody().reactionsList[0].emojiId).to.equal(5);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,37 @@
+info:
+  name: Send Image Message
+  type: http
+  seq: 53
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages"
+  body:
+    type: multipart-form
+    data:
+      - name: text
+        type: text
+        value: Message with image
+      - name: imageFile
+        type: file
+        value:
+          - /Users/rima/Documents/Dev/Uni/WASA/wasapp/api-testing/bruno-wasapp/assets/test-group-image.jpg
+        contentType: image/jpeg
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: after-response
+      code: |-
+        const data = res.getBody();
+        bru.setVar("imageMsgId", data.content.msgImageId);
+    - type: tests
+      code: expect(res.getStatus()).to.equal(201);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,22 @@
+info:
+  name: Delete Message (already deleted)
+  type: http
+  seq: 64
+
+http:
+  method: DELETE
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages/{{msgId}}"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(400);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
