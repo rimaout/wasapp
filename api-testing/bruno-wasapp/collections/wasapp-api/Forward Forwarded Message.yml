@@ -1,0 +1,28 @@
+info:
+  name: Forward Forwarded Message
+  type: http
+  seq: 85
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{groupChatId}}/messages/{{fwdMsgId}}/forwards"
+  body:
+    type: json
+    data: |-
+      {
+        "forwardTo": "{{directChatId}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(400);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

@@ -1,0 +1,28 @@
+info:
+  name: Forward Image to Group
+  type: http
+  seq: 83
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages/{{imgMsgId}}/forwards"
+  body:
+    type: json
+    data: |-
+      {
+        "forwardTo": "{{groupChatId}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(201);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

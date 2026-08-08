@@ -338,6 +338,67 @@ else
 fi
 check "Serve image not in chat" GET "$API_URL/chats/$DCID/images/00000000-0000-0000-0000-000000000000" "$TOKA" "" "404"
 
+# --- Forwarding ---
+echo ""
+echo "=== Forwarding ==="
+
+check "Forward text (201)" POST "$API_URL/chats/$DCID/messages/$MSG_A2/forwards" "$TOKA" \
+	"{\"forwardTo\":\"$GCID\"}" "201" \
+	'python3 -c "import json; d=json.load(open(\"/tmp/test-resp.json\")); ff=d[\"forwardedFrom\"]; assert ff[\"chatId\"]==\"'"$DCID"'\"; assert ff[\"text\"] is not None"'
+FWD_MSG_ID=$(python3 -c "import json; print(json.load(open('/tmp/test-resp.json'))['id'])" 2>/dev/null || true)
+[[ -z "$FWD_MSG_ID" ]] && { echo "  ✗ Could not capture forwarded message ID"; FAIL=$((FAIL + 1)); }
+
+if [[ -n "$IMG_ID" ]]; then
+	check "Forward image (201)" POST "$API_URL/chats/$DCID/messages/$MSG_IMG/forwards" "$TOKA" \
+		"{\"forwardTo\":\"$GCID\"}" "201" \
+		'python3 -c "import json; d=json.load(open(\"/tmp/test-resp.json\")); ff=d[\"forwardedFrom\"]; assert ff[\"msgImageId\"] is not None"'
+
+	# Verify image is accessible in destination chat via visibility table
+	IMG_VIS_CODE=$(curl -s -o /tmp/served-fwd.png -w "%{http_code}" "$API_URL/chats/$GCID/images/$IMG_ID" \
+		-H "Authorization: $TOKB" --max-time 5)
+	if [[ "$IMG_VIS_CODE" == "200" ]] && diff /tmp/test-msg-image.png /tmp/served-fwd.png > /dev/null 2>&1; then
+		echo "  ✓ Forward image visibility (200)"; PASS=$((PASS + 1))
+	else
+		echo "  ✗ Forward image visibility (expected 200+match, got $IMG_VIS_CODE)"; FAIL=$((FAIL + 1))
+	fi
+else
+	echo "  ✗ Forward image test skipped (no image ID)"; FAIL=$((FAIL + 1))
+	echo "  ✗ Forward image visibility skipped (no image ID)"; FAIL=$((FAIL + 1))
+fi
+
+if [[ -n "$FWD_MSG_ID" ]]; then
+	check "Forward forwarded (400)" POST "$API_URL/chats/$GCID/messages/$FWD_MSG_ID/forwards" "$TOKA" \
+		"{\"forwardTo\":\"$DCID\"}" "400"
+else
+	echo "  ✗ Forward forwarded skipped (no FWD_MSG_ID)"; FAIL=$((FAIL + 1))
+fi
+
+check "Forward same chat (400)" POST "$API_URL/chats/$DCID/messages/$MSG_B/forwards" "$TOKA" \
+	"{\"forwardTo\":\"$DCID\"}" "400"
+check "Forward non-member origin (403)" POST "$API_URL/chats/$DCID/messages/$MSG_B/forwards" "$TOKC" \
+	"{\"forwardTo\":\"$GCID\"}" "403"
+
+BCID_CODE=$(curl -s -o /tmp/bc-chat.json -w "%{http_code}" -X POST "$API_URL/user/$UIDB/chats" \
+	-H "Authorization: $TOKC" --max-time 5)
+if [[ "$BCID_CODE" == "201" ]]; then
+	BCID=$(python3 -c "import json; print(json.load(open('/tmp/bc-chat.json'))['id'])" 2>/dev/null || true)
+	if [[ -n "$BCID" ]]; then
+		check "Forward non-member dest (403)" POST "$API_URL/chats/$DCID/messages/$MSG_B/forwards" "$TOKA" \
+			"{\"forwardTo\":\"$BCID\"}" "403"
+	else
+		echo "  ✗ Forward non-member dest skipped (failed to parse BCID)"; FAIL=$((FAIL + 1))
+	fi
+else
+	echo "  ✗ Forward non-member dest skipped (failed to create B-C chat, got $BCID_CODE)"; FAIL=$((FAIL + 1))
+fi
+
+check "Forward msg not found (404)" POST "$API_URL/chats/$DCID/messages/00000000-0000-0000-0000-000000000000/forwards" "$TOKA" \
+	"{\"forwardTo\":\"$GCID\"}" "404"
+check "Forward dest not found (404)" POST "$API_URL/chats/$DCID/messages/$MSG_B/forwards" "$TOKA" \
+	"{\"forwardTo\":\"00000000-0000-0000-0000-000000000000\"}" "404"
+check "Forward origin not found (404)" POST "$API_URL/chats/00000000-0000-0000-0000-000000000000/messages/$MSG_B/forwards" "$TOKA" \
+	"{\"forwardTo\":\"$GCID\"}" "404"
+
 # --- Reactions ---
 echo ""
 echo "=== Reactions ==="
@@ -394,7 +455,7 @@ echo "============================================"
 # --- Cleanup ---
 kill $SERVER_PID 2>/dev/null || true
 wait $SERVER_PID 2>/dev/null || true
-rm -f /tmp/decaf.db /tmp/test-resp.json /tmp/test-avatar.png /tmp/test-avatar-resp.png /tmp/wasapp-server.log
+rm -f /tmp/decaf.db /tmp/test-resp.json /tmp/test-avatar.png /tmp/test-avatar-resp.png /tmp/wasapp-server.log /tmp/msg-a1.json /tmp/msg-a2.json /tmp/msg-img.json /tmp/msg-b-reply.json /tmp/msg-reply.json /tmp/msg-reply2.json /tmp/served-img.png /tmp/served-fwd.png /tmp/new-user.json /tmp/test-msg-image.png /tmp/bc-chat.json
 rm -rf uploads/
 
 if [[ $FAIL -gt 0 ]]; then

@@ -27,6 +27,7 @@ runtime:
       code: |-
         const data = res.getBody();
         bru.setVar("imageMsgId", data.content.msgImageId);
+        bru.setVar("imgMsgId", data.id);
     - type: tests
       code: expect(res.getStatus()).to.equal(201);
 

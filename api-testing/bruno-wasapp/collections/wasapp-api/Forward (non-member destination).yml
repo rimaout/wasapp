@@ -1,0 +1,28 @@
+info:
+  name: Forward (non-member destination)
+  type: http
+  seq: 88
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages/{{msgId2}}/forwards"
+  body:
+    type: json
+    data: |-
+      {
+        "forwardTo": "{{bcChatId}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(403);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

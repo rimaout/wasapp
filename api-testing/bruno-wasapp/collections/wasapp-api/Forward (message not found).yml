@@ -1,0 +1,28 @@
+info:
+  name: Forward (message not found)
+  type: http
+  seq: 89
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/messages/00000000-0000-0000-0000-000000000000/forwards"
+  body:
+    type: json
+    data: |-
+      {
+        "forwardTo": "{{groupChatId}}"
+      }
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(404);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
