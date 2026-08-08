@@ -420,7 +420,7 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 		return nil, fmt.Errorf("iterating message rows: %w", err)
 	}
 
-	// Return an empry list instead of nil if there are no messages
+	// Return an empty list instead of nil if there are no messages
 	if messages == nil {
 		messages = make([]Message, 0)
 	}

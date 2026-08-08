@@ -300,7 +300,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			"image_id"  TEXT NOT NULL,
 			"chat_id"   TEXT NOT NULL,
 			PRIMARY KEY (image_id, chat_id),
-			FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCAD, -- on delete cascade to remove visibility when image is deleted
+			FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCADE, -- on delete cascade to remove visibility when image is deleted
 			FOREIGN KEY (chat_id) REFERENCES chats(id)
 		);`
 		_, err = db.Exec(imageVisibilityStmt)
