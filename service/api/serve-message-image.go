@@ -38,7 +38,7 @@ func (rt *_router) getMessageImage(w http.ResponseWriter, r *http.Request, ps ht
 	}
 
 	// Check if image is associated with a message in this chat (404 error)
-	exists, err := rt.db.IsImageInChat(chatId, imageId)
+	exists, err := rt.db.IsImageVisibleInChat(chatId, imageId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if image is in chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500

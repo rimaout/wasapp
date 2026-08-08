@@ -78,6 +78,10 @@ type AppDatabase interface {
 	GetMyChats(userId string) ([]ChatPreview, error)
 	GetChatMessages(chatId string) ([]Message, error)
 
+	// Image visibility
+	InsertImageVisibility(imageId, chatId string) error
+	IsImageVisibleInChat(chatId, imageId string) (bool, error)
+
 	// Reactions
 	CreateReaction(messageId, userId string, emojiId int32) error
 	DeleteReaction(messageId, userId string) error
@@ -289,6 +293,19 @@ func New(db *sql.DB) (AppDatabase, error) {
 		_, err = db.Exec(reactionsStmt)
 		if err != nil {
 			return nil, fmt.Errorf("error creating reactions table: %w", err)
+		}
+
+		// --- IMAGE CHAT VISIBILITY TABLE (for forwarded image access)
+		imageVisibilityStmt := `CREATE TABLE image_chat_visibility (
+			"image_id"  TEXT NOT NULL,
+			"chat_id"   TEXT NOT NULL,
+			PRIMARY KEY (image_id, chat_id),
+			FOREIGN KEY (image_id) REFERENCES images(id) ON DELETE CASCAD, -- on delete cascade to remove visibility when image is deleted
+			FOREIGN KEY (chat_id) REFERENCES chats(id)
+		);`
+		_, err = db.Exec(imageVisibilityStmt)
+		if err != nil {
+			return nil, fmt.Errorf("error creating image_chat_visibility table: %w", err)
 		}
 
 		// --- DATABASE TRIGGERS (cross-table constraints)

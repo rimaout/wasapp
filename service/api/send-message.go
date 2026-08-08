@@ -72,6 +72,9 @@ func (rt *_router) createMessageLogic(w http.ResponseWriter, r *http.Request, ct
 			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 			return
 		}
+
+		// Grant this chat visibility to the uploaded image
+		_ = rt.db.InsertImageVisibility(imageId, chatId)
 	}
 
 	// Save message to DB

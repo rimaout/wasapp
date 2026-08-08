@@ -402,3 +402,28 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 
 	return messages, nil
 }
+
+// InsertImageVisibility records that an image is visible in a specific chat
+func (db *appdbimpl) InsertImageVisibility(imageId, chatId string) error {
+	_, err := db.c.Exec(
+		"INSERT OR IGNORE INTO image_chat_visibility (image_id, chat_id) VALUES (?, ?)",
+		imageId, chatId,
+	)
+	if err != nil {
+		return fmt.Errorf("inserting image visibility: %w", err)
+	}
+	return nil
+}
+
+// IsImageVisibleInChat checks if an image is marked as visible in a specific chat
+func (db *appdbimpl) IsImageVisibleInChat(chatId, imageId string) (bool, error) {
+	var exists bool
+	err := db.c.QueryRow(
+		"SELECT EXISTS(SELECT 1 FROM image_chat_visibility WHERE chat_id = ? AND image_id = ? LIMIT 1)",
+		chatId, imageId,
+	).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("checking image visibility: %w", err)
+	}
+	return exists, nil
+}
