@@ -23,8 +23,10 @@ type EmojiReaction struct {
 }
 
 type ForwardedFromInfo struct {
-	ChatID    string `json:"chatId"`
-	MessageID string `json:"messageId"`
+	ChatID     string  `json:"chatId"`
+	MessageID  string  `json:"messageId"`
+	Text       *string `json:"text,omitempty"`
+	MsgImageId *string `json:"msgImageId,omitempty"`
 }
 
 type MessageContent struct {
@@ -200,6 +202,20 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 		msg.ForwardedFrom = &ForwardedFromInfo{
 			ChatID:    *dbFwdChatId,
 			MessageID: *dbFwdMsgId,
+		}
+
+		// Resolve the original message's content for display
+		var fwdText, fwdImageId *string
+		err := db.c.QueryRow(
+			"SELECT text, image_id FROM messages WHERE id = ? AND is_deleted = 0",
+			*dbFwdMsgId,
+		).Scan(&fwdText, &fwdImageId)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return Message{}, fmt.Errorf("resolving forwarded content: %w", err)
+		}
+		if err == nil {
+			msg.ForwardedFrom.Text = fwdText
+			msg.ForwardedFrom.MsgImageId = fwdImageId
 		}
 	}
 
@@ -380,6 +396,15 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 				ChatID:    *dbFwdChatId,
 				MessageID: *dbFwdMsgId,
 			}
+
+			// Query the original message's content
+			var fwdText, fwdImageId *string
+			_ = db.c.QueryRow(
+				"SELECT text, image_id FROM messages WHERE id = ? AND is_deleted = 0",
+				*dbFwdMsgId,
+			).Scan(&fwdText, &fwdImageId)
+			msg.ForwardedFrom.Text = fwdText
+			msg.ForwardedFrom.MsgImageId = fwdImageId
 		}
 
 		// Include reply to message ID if present

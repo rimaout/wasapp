@@ -34,6 +34,7 @@ const (
 	ErrCodeOriginChatNotFound  = "ORIGIN_CHAT_NOT_FOUND"
 	ErrCodeInvalidMessageText  = "INVALID_MESSAGE_TEXT"
 	ErrCodeMessageWithNoContent= "MESSAGE_WITH_NO_CONTENT"
+	ErrCodeCannotForwardForwarded = "CANNOT_FORWARD_FORWARDED_MESSAGE"
 
 )
 

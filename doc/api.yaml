@@ -966,7 +966,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Message'
         "400":
-          description: Bad request - Returns code `INVALID_INPUT` if the destination chat ID is missing or invalid.
+          description: Bad request - Returns code `INVALID_INPUT` if the destination chat ID is missing or invalid, or `CANNOT_FORWARD_FORWARDED_MESSAGE` if the message is already a forwarded message.
           content:
             application/json:
               schema:
@@ -1324,8 +1324,10 @@ components:
       description: Information about the original message this one was forwarded from.
       required: [chatId, messageId]
       properties:
-        chatId:    { $ref: '#/components/schemas/ChatId'    }
-        messageId: { $ref: '#/components/schemas/MessageId' }
+        chatId:     { $ref: '#/components/schemas/ChatId'      }
+        messageId:  { $ref: '#/components/schemas/MessageId'   }
+        text:       { $ref: '#/components/schemas/MessageText' }  #optional
+        msgImageId: { $ref: '#/components/schemas/ImageId'     }  #optional
 
     # -------------------- EMOJI REACTIONS --------------------
 
@@ -1476,6 +1478,10 @@ components:
             - REACTION_NOT_FOUND
             - DESTINATION_CHAT_NOT_FOUND
             - ORIGIN_CHAT_NOT_FOUND
+            - MESSAGE_ALREADY_DELETED
+            - INVALID_MESSAGE_TEXT
+            - MESSAGE_WITH_NO_CONTENT
+            - CANNOT_FORWARD_FORWARDED_MESSAGE
           example: USER_NOT_FOUND
         message:
           type: string
