@@ -40,35 +40,45 @@ export default {
 </script>
 
 <template>
-	<div class="row justify-content-center">
-		<div class="col-md-4 col-lg-3">
-			<div class="text-center mt-5 mb-4">
-				<h2>WASAText</h2>
-				<p class="text-muted">Enter your username to sign in</p>
-			</div>
+	<div class="d-flex align-items-center justify-content-center min-vh-100">
+		<div class="login-box">
+			<div class="card card-body shadow p-4">
+				<div class="text-center mb-4">
+					<h1 class="display-5">WASAText</h1>
+					<p class="text-muted mb-0">Enter your username to sign in</p>
+				</div>
 
-			<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
+				<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 
-			<div class="mb-3">
-				<label class="form-label">Username</label>
-				<input
-					v-model="username"
-					type="text"
-					class="form-control"
-					placeholder="e.g. Feldspar"
-					@keyup.enter="doLogin"
+				<div class="mb-3">
+					<label class="form-label">Username</label>
+					<input
+						v-model="username"
+						type="text"
+						class="form-control"
+						placeholder="e.g. Feldspar"
+						@keyup.enter="doLogin"
+						:disabled="loading"
+					/>
+				</div>
+
+				<button
+					class="btn btn-primary w-100"
+					@click="doLogin"
 					:disabled="loading"
-				/>
+				>
+					<span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+					Sign in
+				</button>
 			</div>
-
-			<button
-				class="btn btn-primary w-100"
-				@click="doLogin"
-				:disabled="loading"
-			>
-				<span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
-				Sign in
-			</button>
 		</div>
 	</div>
 </template>
+
+
+<style scoped>
+.login-box {
+	width: 400px;
+	max-width: 90vw;
+}
+</style>
