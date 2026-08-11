@@ -14,7 +14,7 @@ import (
 func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	chatId := ps.ByName("chatId")
 
-	if !rt.newMessageRequestValidation(w, r, ctx, chatId) {
+	if !rt.validateChatAccess(w, r, ctx, chatId) {
 		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return
 	}
@@ -23,7 +23,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 	// Note: it also handles errors: 400 (invalid request), 413 (image too large), 415 (unsupported media type), 500 (internal error)
 }
 
-func (rt *_router) newMessageRequestValidation(w http.ResponseWriter, r *http.Request, ctx reqcontext.RequestContext, chatId string) bool {
+func (rt *_router) validateChatAccess(w http.ResponseWriter, r *http.Request, ctx reqcontext.RequestContext, chatId string) bool {
 	_, err := rt.db.GetChatById(chatId)
 	if err == database.ErrChatNotFound {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
