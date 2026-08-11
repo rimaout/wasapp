@@ -1,0 +1,22 @@
+info:
+  name: Mark Chat Read
+  type: http
+  seq: 92
+
+http:
+  method: POST
+  url: "{{baseUrl}}/chats/{{directChatId}}/read"
+  auth:
+    type: bearer
+    token: "{{tokenA}}"
+
+runtime:
+  scripts:
+    - type: tests
+      code: expect(res.getStatus()).to.equal(204);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

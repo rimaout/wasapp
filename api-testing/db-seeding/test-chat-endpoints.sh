@@ -399,6 +399,14 @@ check "Forward dest not found (404)" POST "$API_URL/chats/$DCID/messages/$MSG_B/
 check "Forward origin not found (404)" POST "$API_URL/chats/00000000-0000-0000-0000-000000000000/messages/$MSG_B/forwards" "$TOKA" \
 	"{\"forwardTo\":\"$GCID\"}" "404"
 
+# --- Mark Chat Read ---
+echo ""
+echo "=== Mark Chat Read ==="
+
+check "Mark chat read (204)" POST "$API_URL/chats/$DCID/read" "$TOKA" "" "204"
+check "Mark chat read non-member (403)" POST "$API_URL/chats/$DCID/read" "$TOKC" "" "403"
+check "Mark chat read not found (404)" POST "$API_URL/chats/00000000-0000-0000-0000-000000000000/read" "$TOKA" "" "404"
+
 # --- Reactions ---
 echo ""
 echo "=== Reactions ==="
@@ -446,6 +454,41 @@ fi
 
 check "Get my chats no auth" GET "$API_URL/chats" "" "" "401"
 
+# --- User Profile ---
+echo ""
+echo "=== User Profile ==="
+
+check "Search user by name" GET "$API_URL/users?username=Marta" "" "" "200" \
+	'python3 -c "import json; d=json.load(open(\"/tmp/test-resp.json\"))[\"usersList\"]; assert len(d)>=1, f\"expected >=1, got {len(d)}\""'
+check "List all users" GET "$API_URL/users" "" "" "200" \
+	'python3 -c "import json; d=json.load(open(\"/tmp/test-resp.json\"))[\"usersList\"]; assert len(d)>=4, f\"expected >=4, got {len(d)}\""'
+
+AVATAR_CODE=$(curl -s -o /tmp/test-avatar-resp.png -w "%{http_code}" "$API_URL/users/$UIDA/avatar" --max-time 5)
+if [[ "$AVATAR_CODE" == "200" ]]; then
+	if file /tmp/test-avatar-resp.png | grep -qi "PNG image"; then
+		echo "  ✓ Get user avatar (200)"; PASS=$((PASS + 1))
+	else
+		echo "  ✗ Get user avatar (not a PNG)"; FAIL=$((FAIL + 1))
+	fi
+else
+	echo "  ✗ Get user avatar (expected 200, got $AVATAR_CODE)"; FAIL=$((FAIL + 1))
+fi
+
+check "Set my name" PATCH "$API_URL/me/name" "$TOKA" \
+	"{\"userName\":\"Marta Updated\"}" "200" \
+	'python3 -c "import json; d=json.load(open(\"/tmp/test-resp.json\")); assert d[\"name\"]==\"Marta Updated\""'
+check "Set my name bad" PATCH "$API_URL/me/name" "$TOKA" \
+	"{\"userName\":\"!!\"}" "400"
+
+cp service/api/assets/default-group-avatar.png /tmp/test-user-avatar.png
+USER_AV_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$API_URL/me/avatar" \
+	-H "Authorization: $TOKA" -F "binaryImage=@/tmp/test-user-avatar.png;type=image/png" --max-time 5)
+if [[ "$USER_AV_CODE" == "204" ]]; then
+	echo "  ✓ Upload user avatar (204)"; PASS=$((PASS + 1))
+else
+	echo "  ✗ Upload user avatar (expected 204, got $USER_AV_CODE)"; FAIL=$((FAIL + 1))
+fi
+
 # --- Summary ---
 echo ""
 echo "============================================"
@@ -455,7 +498,7 @@ echo "============================================"
 # --- Cleanup ---
 kill $SERVER_PID 2>/dev/null || true
 wait $SERVER_PID 2>/dev/null || true
-rm -f /tmp/decaf.db /tmp/test-resp.json /tmp/test-avatar.png /tmp/test-avatar-resp.png /tmp/wasapp-server.log /tmp/msg-a1.json /tmp/msg-a2.json /tmp/msg-img.json /tmp/msg-b-reply.json /tmp/msg-reply.json /tmp/msg-reply2.json /tmp/served-img.png /tmp/served-fwd.png /tmp/new-user.json /tmp/test-msg-image.png /tmp/bc-chat.json
+rm -f /tmp/decaf.db /tmp/test-resp.json /tmp/test-avatar.png /tmp/test-avatar-resp.png /tmp/wasapp-server.log /tmp/msg-a1.json /tmp/msg-a2.json /tmp/msg-img.json /tmp/msg-b-reply.json /tmp/msg-reply.json /tmp/msg-reply2.json /tmp/served-img.png /tmp/served-fwd.png /tmp/new-user.json /tmp/test-msg-image.png /tmp/bc-chat.json /tmp/test-user-avatar.png
 rm -rf uploads/
 
 if [[ $FAIL -gt 0 ]]; then
