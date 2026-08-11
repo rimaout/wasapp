@@ -65,7 +65,7 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Create init message (sender=creator, is_init_message=1, no content)
-	_, err = rt.db.CreateMessage(
+	messageId, err := rt.db.CreateMessage(
 		chatId,
 		ctx.UserID,
 		time.Now().UTC().Format(time.RFC3339),
@@ -82,6 +82,10 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
+
+	// Create the receiver statuses for the message (one for each member of the chat)
+	// This means that the message is considered "sent" to all members, but not yet "delivered" or "read"
+	_ = rt.db.InsertReceiverStatuses(messageId, chatId, ctx.UserID)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

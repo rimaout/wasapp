@@ -48,6 +48,9 @@ func (rt *_router) getChatMessages(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
+	// Mark all messages in this chat as received by the requesting user
+	_ = rt.db.MarkMessagesReceivedByUser(chatId, ctx.UserID)
+
 	// Return the messages as JSON
 	resp := chatMessagesResponse{Messages: messages}
 	w.Header().Set("Content-Type", "application/json")

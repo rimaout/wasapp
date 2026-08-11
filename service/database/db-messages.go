@@ -173,7 +173,6 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 		ChatID:        targetChatId,
 		SendTime:      sendTime,
 		Sender:        User{Id: senderId, Name: senderName},
-		Status:        StatusDelivered, //TODO: Update status based on delivery/receipt/read events
 		IsDeleted:     isDeleted,
 		IsInitMessage: isInit,
 	}
@@ -230,6 +229,13 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 		return Message{}, fmt.Errorf("querying reactions: %w", err)
 	}
 	msg.ReactionsList = reactions
+
+	// Get message statuts (delivered, received, read) based on receiver_statuses
+	status, err := db.ComputeMessageStatus(messageId)
+	if err != nil {
+		return Message{}, fmt.Errorf("computing message status: %w", err)
+	}
+	msg.Status = status
 
 	return msg, nil
 }
@@ -368,7 +374,6 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 			ChatID:        targetChatId,
 			SendTime:      sendTime,
 			Sender:        User{Id: senderId, Name: senderName},
-			Status:        StatusDelivered,
 			IsDeleted:     isDeleted,
 			IsInitMessage: isInit,
 		}
@@ -413,6 +418,14 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 		}
 
 		msg.ReactionsList = make([]EmojiReaction, 0)
+
+		// Get message statuts (delivered, received, read) based on receiver_statuses
+		status, err := db.ComputeMessageStatus(id)
+		if err != nil {
+			return nil, fmt.Errorf("computing message status for %s: %w", id, err)
+		}
+		msg.Status = status
+
 		messages = append(messages, msg)
 	}
 

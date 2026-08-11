@@ -131,6 +131,9 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
+	// Create the receiver statuses for the message (one for each member of the chat)
+	// This means that the message is considered "sent" to all members, but not yet "delivered" or "read"
+	_ = rt.db.InsertReceiverStatuses(messageId, req.ForwardTo, ctx.UserID)
 	// Respond with the created forwarded message
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

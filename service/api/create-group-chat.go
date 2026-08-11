@@ -91,7 +91,7 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 	// Create init message for group chat
 	//	 The init message is a message with out content, just to have a message in the chat.
 	//	 The frontend can use it to display "Group created by ..." or similar in the chat history.
-	_, err = rt.db.CreateMessage(
+	messageId, err := rt.db.CreateMessage(
 		chatId,
 		ctx.UserID,
 		time.Now().UTC().Format(time.RFC3339),
@@ -108,6 +108,10 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
+
+	// Create the receiver statuses for the message (one for each member of the chat)
+	// This means that the message is considered "sent" to all members, but not yet "delivered" or "read"
+	_ = rt.db.InsertReceiverStatuses(messageId, chatId, ctx.UserID)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
