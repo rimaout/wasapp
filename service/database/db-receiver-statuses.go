@@ -54,7 +54,8 @@ func (db *appdbimpl) ComputeMessageStatus(messageId string) (MessageStatus, erro
 		`SELECT CASE
 			WHEN COUNT(*) = 0 THEN 'delivered'
 			WHEN SUM(CASE WHEN recv_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'delivered'
-			ELSE 'received'
+			WHEN SUM(CASE WHEN read_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'received'
+			ELSE 'read'
 		END
 		FROM receiver_statuses WHERE message_id = ?`,
 		messageId,
@@ -63,4 +64,22 @@ func (db *appdbimpl) ComputeMessageStatus(messageId string) (MessageStatus, erro
 		return StatusDelivered, fmt.Errorf("computing message status: %w", err)
 	}
 	return MessageStatus(status), nil
+}
+
+// MarkMessagesReadByUser marks all messages in a chat as read by the given user.
+func (db *appdbimpl) MarkMessagesReadByUser(chatId, userId string) error {
+	now := time.Now().UTC().Format(time.RFC3339)
+
+	_, err := db.c.Exec(
+		`UPDATE receiver_statuses
+		 SET read_time = ?
+		 WHERE message_id IN (SELECT id FROM messages WHERE chat_id = ?)
+		   AND user_id = ?
+		   AND read_time IS NULL`,
+		now, chatId, userId,
+	)
+	if err != nil {
+		return fmt.Errorf("marking messages read: %w", err)
+	}
+	return nil
 }

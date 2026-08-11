@@ -50,6 +50,9 @@ func (rt *_router) Handler() http.Handler {
 	// Message Forward
 	rt.router.POST("/chats/:chatId/messages/:messageId/forwards", rt.wrapAuthenticated(rt.forwardMessage))
 
+	// Mark Chat as Read
+	rt.router.POST("/chats/:chatId/read", rt.wrapAuthenticated(rt.markChatRead))
+
 	// Messages Reactions
 	rt.router.POST("/chats/:chatId/messages/:messageId/reactions", rt.wrapAuthenticated(rt.addReactionToMessage))
 	rt.router.DELETE("/chats/:chatId/messages/:messageId/reactions", rt.wrapAuthenticated(rt.removeReactionFromMessage))

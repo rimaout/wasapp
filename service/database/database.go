@@ -61,6 +61,7 @@ type AppDatabase interface {
 	// Members
 	AddChatMember(chatId string, userId string) error
 	GetChatMembers(chatId string) ([]Member, error)
+//	GetActiveChatMembers(chatId string) ([]Member, error)
 //	GetActiveMemberCount(chatId string) (int, error)
 	GetOtherMemberId(chatId string, userId string) (string, error)
 	SetLeaveTime(chatId string, userId string) error
@@ -85,6 +86,12 @@ type AppDatabase interface {
 	// Reactions
 	CreateReaction(messageId, userId string, emojiId int32) error
 	DeleteReaction(messageId, userId string) error
+
+	// Receiver statuses
+	InsertReceiverStatuses(messageId, chatId, senderId string) error
+	MarkMessagesReceivedByUser(chatId, userId string) error
+	MarkMessagesReadByUser(chatId, userId string) error
+	ComputeMessageStatus(messageId string) (MessageStatus, error)
 
 	Ping() error
 }
