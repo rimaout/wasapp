@@ -175,6 +175,7 @@ type ChatPreview struct {
 	Text         *string
 	ImageID      *string
 	ReplyTo      *string
+	UnreadCount  int
 }
 
 // GetMyChats returns a list of chats for the given user, including the last message in each chat.
@@ -193,7 +194,14 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 
 			m.id, m.send_time, m.sender_id, u.name AS sender_name,
 			m.is_deleted, m.is_init_message,
-			m.text, m.image_id, m.reply_to_msg_id
+			m.text, m.image_id, m.reply_to_msg_id,
+
+			-- Count unread messages for this user in this chat
+			(SELECT COUNT(*)
+			 FROM receiver_statuses rs
+			 JOIN messages msg ON rs.message_id = msg.id
+			 WHERE msg.chat_id = c.id AND rs.user_id = ? AND rs.recv_time IS NULL
+			) AS unread_count
 
 		FROM members mem
 		JOIN chats c ON mem.chat_id = c.id
@@ -204,7 +212,7 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 		WHERE mem.user_id = ? AND mem.group_leave_time IS NULL
 		ORDER BY m.send_time DESC
 		LIMIT 50`,
-		userId, userId,
+		userId, userId, userId,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("querying chats: %w", err)
@@ -222,6 +230,7 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			&cp.MessageID, &cp.SendTime, &cp.SenderID, &cp.SenderName,
 			&cp.IsDeleted, &cp.IsInitMsg,
 			&cp.Text, &cp.ImageID, &cp.ReplyTo,
+			&cp.UnreadCount,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scanning chat row: %w", err)

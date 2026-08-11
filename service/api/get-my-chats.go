@@ -19,6 +19,7 @@ type chatPreviewResponse struct {
 	DisplayName string                 `json:"displayName"`
 	IsGroupChat bool                   `json:"isGroupChat"`
 	LastMessage chatLastMessagePreview `json:"lastMessage"`
+	UnreadCount int                    `json:"unreadCount"`
 }
 
 type chatLastMessagePreview struct {
@@ -47,6 +48,7 @@ func (rt *_router) getMyChats(w http.ResponseWriter, r *http.Request, ps httprou
 			ID:          cp.ChatID,
 			DisplayName: cp.DisplayName,
 			IsGroupChat: cp.IsGroupChat,
+			UnreadCount: cp.UnreadCount,
 			LastMessage: chatLastMessagePreview{
 				Status:        "delivered", //TODO: use real receiver status when implemented
 				SendTime:      cp.SendTime.UTC().Format(time.RFC3339),

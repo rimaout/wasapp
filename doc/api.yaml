@@ -1207,12 +1207,16 @@ components:
       description: >-
         Represents a chat. Standard chats include two users;
         group chats can be created with the group flag.
-      required: [id, displayName, lastMessage]
+      required: [id, displayName, lastMessage, unreadCount]
       properties:
         id:           { $ref: '#/components/schemas/ChatId'          }
         displayName:  { $ref: '#/components/schemas/ChatDisplayName' }
         isGroupChat:  { $ref: '#/components/schemas/IsGroupChat'     }
         lastMessage:  { $ref: '#/components/schemas/ChatLastMessage' }
+        unreadCount:
+          type: integer
+          description: Number of unread messages in this chat for the authenticated user.
+          readOnly: true
 
     ChatDisplayName:
       allOf:
