@@ -16,27 +16,8 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 	chatId    := ps.ByName("chatId")
 	messageId := ps.ByName("messageId")
 
-	// Check if chat exists (404)
-	_, err := rt.db.GetChatById(chatId)
-	if err == database.ErrChatNotFound {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found")
-		return
-	}
-	if err != nil {
-		ctx.Logger.WithError(err).Error("error getting chat by id")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error")
-		return
-	}
-
-	// Check if logged user is a member of the chat (403)
-	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
-	if err != nil {
-		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error")
-		return
-	}
-	if !isMember {
-		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "user is not a member of the chat")
+	if !rt.validateChatAccess(w, r, ctx, chatId) {
+		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return
 	}
 

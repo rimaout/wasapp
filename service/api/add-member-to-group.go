@@ -1,11 +1,10 @@
 package api
 
 import (
-	"net/http"
 	"encoding/json"
-	"github.com/julienschmidt/httprouter"
+	"net/http"
 
-	"github.com/rimaout/wasapp/service/database"
+	"github.com/julienschmidt/httprouter"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
@@ -25,15 +24,8 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	}
 	newMemberId := req.UserID
 
-	// Check if chat exist (404 error)
-	_, err := rt.db.GetChatById(chatId)
-	if err == database.ErrChatNotFound {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
-		return
-	}
-	if err != nil {
-		ctx.Logger.WithError(err).Error("error getting chat by id")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+	if !rt.validateChatAccess(w, r, ctx, chatId) {
+		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return
 	}
 
@@ -46,18 +38,6 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	}
 	if !isGroup {
 		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat") //409
-		return
-	}
-
-	// Check if logged user ia a member of the group chat (403 error)
-	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
-	if err != nil {
-		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
-		return
-	}
-	if !isMember {
-		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "you are not a member of this group chat") //403
 		return
 	}
 

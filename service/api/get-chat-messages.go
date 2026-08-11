@@ -16,27 +16,8 @@ type chatMessagesResponse struct {
 func (rt *_router) getChatMessages(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	chatId := ps.ByName("chatId")
 
-	// Check if the chat exists
-	_, err := rt.db.GetChatById(chatId)
-	if err == database.ErrChatNotFound {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
-		return
-	}
-	if err != nil {
-		ctx.Logger.WithError(err).Error("error getting chat by id")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
-		return
-	}
-
-	// Check if logged user is a member of the chat
-	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
-	if err != nil {
-		ctx.Logger.WithError(err).Error("error checking if user is member of chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
-		return
-	}
-	if !isMember {
-		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "user is not a member of the chat") //403
+	if !rt.validateChatAccess(w, r, ctx, chatId) {
+		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return
 	}
 
