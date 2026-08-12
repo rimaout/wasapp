@@ -1,7 +1,11 @@
-import { getUserName } from './auth.js';
+import { getUserName, getUserId } from './auth.js';
 
 export function isMyMessage(senderName) {
 	return senderName === getUserName();
+}
+
+export function isMyMessageById(senderId) {
+	return senderId === getUserId();
 }
 
 export function formatTime(isoString) {
@@ -38,9 +42,10 @@ export function getStatusColor(status) {
 export function getChatSnippet(chat) {
 	let lm = chat.lastMessage;
 	if (lm.isInitMessage) {
+		let who = isMyMessage(lm.senderName) ? 'You' : lm.senderName;
 		return chat.isGroupChat
-			? 'Group created by ' + lm.senderName
-			: lm.senderName + ' started a chat';
+			? 'Group created by ' + who
+			: who + ' started this chat';
 	}
 	if (lm.isDeleted) return 'Message deleted';
 	if (lm.content && lm.content.text) {

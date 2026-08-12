@@ -112,7 +112,7 @@ export default {
 							:class="{ 'text-muted fst-italic': chat.lastMessage.isDeleted }"
 						>
 							<span v-if="chat.isGroupChat && !chat.lastMessage.isInitMessage" class="text-muted">
-								{{ chat.lastMessage.senderName }}:
+								{{ isMyMessage(chat.lastMessage.senderName) ? 'You' : chat.lastMessage.senderName }}:
 							</span>
 							{{ getChatSnippet(chat) }}
 						</small>
