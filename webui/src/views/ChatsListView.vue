@@ -4,6 +4,9 @@ import { isMyMessage, formatTime, getStatusIcon, getStatusColor, getChatSnippet 
 
 export default {
 	components: { ChatAvatar },
+	props: {
+		searchQuery: { type: String, default: '' },
+	},
 	data() {
 		return {
 			chats: [],
@@ -12,6 +15,13 @@ export default {
 			intervalId: null,
 			pollVersion: 0,
 		}
+	},
+	computed: {
+		filteredChats() {
+			if (!this.searchQuery) return this.chats;
+			let q = this.searchQuery.toLowerCase();
+			return this.chats.filter(c => c.displayName.toLowerCase().includes(q));
+		},
 	},
 	methods: {
 		isMyMessage,
@@ -61,14 +71,19 @@ export default {
 		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 		<LoadingSpinner v-if="loading && chats.length === 0" />
 
-		<div v-if="!loading && chats.length === 0" class="text-muted text-center py-5">
+		<div v-if="!loading && searchQuery && filteredChats.length === 0 && chats.length > 0" class="text-muted text-center py-5">
+			<p class="mb-2 fs-5">No results found</p>
+			<p>Try a different search or start a new chat</p>
+		</div>
+
+		<div v-if="!loading && !searchQuery && chats.length === 0" class="text-muted text-center py-5">
 			<p class="mb-2 fs-5">No conversations yet</p>
 			<p>Start a new chat to begin messaging</p>
 		</div>
 
-		<div v-if="chats.length > 0" class="list-group list-group-flush">
+		<div v-if="filteredChats.length > 0" class="list-group list-group-flush">
 			<a
-				v-for="chat in chats"
+				v-for="chat in filteredChats"
 				:key="chat.id"
 				class="list-group-item list-group-item-action d-flex align-items-center px-3 py-3 chat-row"
 				:class="{ active: isActive(chat.id) }"

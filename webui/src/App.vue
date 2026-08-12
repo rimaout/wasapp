@@ -1,6 +1,10 @@
 <script setup>
 import { RouterView } from 'vue-router'
+import { ref } from 'vue'
 import ChatsListView from './views/ChatsListView.vue'
+import SearchBar from './components/SearchBar.vue'
+
+const searchQuery = ref('')
 </script>
 
 <script>
@@ -17,7 +21,9 @@ export default {}
 		<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
 			<a class="navbar-brand col-md-4 col-lg-3 me-0 px-3 fs-5 fw-bold d-flex justify-content-between align-items-center gap-2" href="#/chats">
 				<span>WASApp</span>
-				<button type="button" class="plus-btn" @click.prevent><svg class="feather" style="width: 26px; height: 26px;"><use href="/feather-sprite-v4.29.0.svg#plus-square"/></svg></button>
+				<button type="button" class="plus-btn" @click.prevent>
+					<svg class="feather plus-icon"><use href="/feather-sprite-v4.29.0.svg#plus-square"/></svg>
+				</button>
 			</a>
 			<button class="navbar-toggler d-md-none me-2 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
@@ -28,7 +34,8 @@ export default {}
 			<div class="row">
 				<nav id="sidebarMenu" class="col-md-4 col-lg-3 d-md-block bg-light sidebar collapse">
 					<div class="position-sticky sidebar-sticky pt-2">
-						<ChatsListView />
+						<SearchBar v-model="searchQuery" />
+						<ChatsListView :searchQuery="searchQuery" />
 					</div>
 				</nav>
 
@@ -56,5 +63,10 @@ export default {}
 
 .plus-btn:active {
 	color: var(--tn-cyan);
+}
+
+.plus-icon {
+	width: 26px;
+	height: 26px;
 }
 </style>
