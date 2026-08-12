@@ -44,7 +44,7 @@ export default {
 		<div class="login-box">
 			<div class="card card-body shadow p-4">
 				<div class="text-center mb-4">
-					<h1 class="display-5">WASAText</h1>
+					<h1 class="display-5">WASApp</h1>
 					<p class="text-muted mb-0">Enter your username to sign in</p>
 				</div>
 
