@@ -294,7 +294,8 @@ a:hover {
 
 .sidebar {
 	background-color: var(--tn-bg-dark);
-	box-shadow: inset -1px 0 0 var(--tn-border);
+	box-shadow: none;
+	border-right: 1px solid var(--tn-border);
 }
 
 .sidebar .nav-link {

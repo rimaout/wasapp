@@ -1,15 +1,17 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { getToken } from '../services/auth.js'
 
-import HomeView  from '../views/HomeView.vue'
-import LoginView from '../views/LoginView.vue'
+import WelcomeView from '../views/WelcomeView.vue'
+import LoginView   from '../views/LoginView.vue'
+import ChatView    from '../views/ChatView.vue'
 
 const router = createRouter({
 	history: createWebHashHistory(import.meta.env.BASE_URL),
 	routes: [
-		{ path: '/',      redirect: '/chats'   },
-		{ path: '/login', component: LoginView },
-		{ path: '/chats', component: HomeView  },
+		{ path: '/',              redirect: '/chats'   },
+		{ path: '/login',         component: LoginView },
+		{ path: '/chats',         component: WelcomeView },
+		{ path: '/chats/:chatId', component: ChatView },
 	]
 })
 
