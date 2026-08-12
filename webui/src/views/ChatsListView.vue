@@ -1,7 +1,9 @@
 <script>
+import ChatAvatar from '../components/ChatAvatar.vue';
 import { isMyMessage, formatTime, getStatusIcon, getStatusColor, getChatSnippet } from '../services/utils.js';
 
 export default {
+	components: { ChatAvatar },
 	data() {
 		return {
 			chats: [],
@@ -71,7 +73,7 @@ export default {
 				@click.prevent="openChat(chat.id)"
 				href="#"
 			>
-				<div class="avatar-circle me-3 flex-shrink-0"></div>
+				<ChatAvatar :chatId="chat.id" :displayName="chat.displayName" :size="48" :isGroup="chat.isGroupChat" class="me-3" />
 
 				<div class="chat-info flex-grow-1 min-w-0">
 					<div class="d-flex justify-content-between align-items-baseline">
@@ -134,14 +136,6 @@ export default {
 .chat-time {
 	color: var(--tn-comment);
 	white-space: nowrap;
-}
-
-.avatar-circle {
-	width: 48px;
-	height: 48px;
-	border-radius: 50%;
-	background-color: var(--tn-bg-light);
-	flex-shrink: 0;
 }
 
 .chat-check {
