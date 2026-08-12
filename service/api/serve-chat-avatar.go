@@ -1,11 +1,6 @@
 package api
 
 import (
-	// We use the "_" to silence the "unused import" warning.
-	// The embed package is required to enable the //go:embed compiler directive,
-	// but because directives look like standard comments, the Go import checker
-	// doesn't recognize it as a "real" usage.
-	_ "embed"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -13,12 +8,6 @@ import (
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 	"github.com/rimaout/wasapp/service/database"
 )
-
-// Embed the default avatar image into the binary, in the defaultGroupAvatar variable.
-// This allows us to serve a default image without needing to read from disk.
-//
-//go:embed assets/default-group-avatar.png
-var defaultGroupAvatar []byte
 
 func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// Extract target chat id form url (http params)
@@ -70,13 +59,8 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 			return
 		}
 
-		// If the group doesn't have an avatar, serve the default avatar.
 		if imagePath == "" {
-			w.Header().Set("Content-Type", "image/png")
-			_, err = w.Write(defaultGroupAvatar)
-			if err != nil {
-				ctx.Logger.WithError(err).Error("error writing default avatar to response")
-			}
+			rt.respondWithError(w, http.StatusNotFound, ErrCodeNoChatAvatar, "no avatar set for this chat") //404
 			return
 		}
 	} else {
@@ -98,13 +82,8 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 			return
 		}
 
-		// If the user doesn't have an avatar, serve the default user avatar.
 		if imagePath == "" {
-			w.Header().Set("Content-Type", "image/png")
-			_, err = w.Write(defaultUserAvatar)
-			if err != nil {
-				ctx.Logger.WithError(err).Error("error writing default avatar to response")
-			}
+			rt.respondWithError(w, http.StatusNotFound, ErrCodeNoChatAvatar, "no avatar set for this chat") //404
 			return
 		}
 	}

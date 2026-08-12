@@ -290,7 +290,7 @@ paths:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
         '404':
-          description: Resource not found - Returns code `USER_NOT_FOUND` if the specified user does not exist.
+          description: Resource not found - Returns code `USER_NOT_FOUND` if the specified user does not exist, or `NO_USER_AVATAR` if the user has no avatar set.
           content:
             application/json:
               schema:
@@ -479,7 +479,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '404':
-          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist.
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist, or `NO_CHAT_AVATAR` if the chat/group has no avatar set.
           content:
             application/json:
               schema:
@@ -1497,6 +1497,8 @@ components:
             - USER_NOT_FOUND
             - ALREADY_IN_GROUP
             - NOT_A_GROUP_CHAT
+            - NO_CHAT_AVATAR
+            - NO_USER_AVATAR
             - FORBIDDEN_NOT_MEMBER
             - INVALID_INPUT
             - INTERNAL_SERVER_ERROR

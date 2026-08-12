@@ -12,6 +12,8 @@ const (
 	ErrCodeUserNotFound        = "USER_NOT_FOUND"
 	ErrCodeAlreadyInGroup      = "ALREADY_IN_GROUP"
 	ErrCodeNotAGroupChat       = "NOT_A_GROUP_CHAT"
+	ErrCodeNoChatAvatar        = "NO_CHAT_AVATAR"
+	ErrCodeNoUserAvatar        = "NO_USER_AVATAR"
 	ErrCodeForbiddenNotMember  = "FORBIDDEN_NOT_MEMBER"
 	ErrCodeInvalidInput        = "INVALID_INPUT"
 	ErrCodeInternalError       = "INTERNAL_SERVER_ERROR"
