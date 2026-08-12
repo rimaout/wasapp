@@ -10,6 +10,7 @@ export default {
 			errormsg: null,
 			loading: false,
 			intervalId: null,
+			pollVersion: 0,
 		}
 	},
 	methods: {
@@ -24,6 +25,7 @@ export default {
 			try {
 				let response = await this.$axios.get('/chats');
 				this.chats = response.data.chatsPreviewList;
+				this.pollVersion++;
 			} catch (e) {
 				this.errormsg = e.response?.data?.message || e.toString();
 			}
@@ -73,7 +75,7 @@ export default {
 				@click.prevent="openChat(chat.id)"
 				href="#"
 			>
-				<ChatAvatar :chatId="chat.id" :displayName="chat.displayName" :size="48" :isGroup="chat.isGroupChat" class="me-3" />
+				<ChatAvatar :chatId="chat.id" :displayName="chat.displayName" :size="48" :isGroup="chat.isGroupChat" :version="pollVersion" class="me-3" />
 
 				<div class="chat-info flex-grow-1 min-w-0">
 					<div class="d-flex justify-content-between align-items-baseline">

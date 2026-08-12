@@ -30,6 +30,7 @@ export default {
 		displayName: { type: String, required: true },
 		size: { type: Number, default: 48 },
 		isGroup: { type: Boolean, default: false },
+		version: { type: Number, default: 0 },	// Used to trigger avatar reload when the avatar is updated
 	},
 
 	// Component Data
@@ -74,6 +75,13 @@ export default {
 			} catch (e) {
 				this.showImage = false;
 			}
+		},
+	},
+	watch: {
+		version: {
+			// If the version prop changes, reload the avatar image
+			handler: 'loadImage',
+			immediate: true,
 		},
 	},
 	mounted() {
