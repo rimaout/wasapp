@@ -42,8 +42,10 @@ export default {
 			this.loading = false;
 		},
 
-		openChat(chatId) {
-			this.$router.push('/chats/' + chatId);
+		openChat(chat) {
+			this.$router.push('/chats/' + chat.id +
+				'?name=' + encodeURIComponent(chat.displayName) +
+				'&group=' + (chat.isGroupChat ? '1' : '0'));
 			let sidebar = document.getElementById('sidebarMenu');
 			if (sidebar && window.innerWidth < 768) {
 				let bsCollapse = bootstrap.Collapse.getOrCreateInstance(sidebar);
@@ -87,7 +89,7 @@ export default {
 				:key="chat.id"
 				class="list-group-item list-group-item-action d-flex align-items-center px-3 py-3 chat-row"
 				:class="{ active: isActive(chat.id) }"
-				@click.prevent="openChat(chat.id)"
+				@click.prevent="openChat(chat)"
 				href="#"
 			>
 				<ChatAvatar :chatId="chat.id" :displayName="chat.displayName" :size="48" :isGroup="chat.isGroupChat" :version="pollVersion" class="me-3" />

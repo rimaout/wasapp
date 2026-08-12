@@ -3,6 +3,7 @@ import { RouterView } from 'vue-router'
 import { ref } from 'vue'
 import ChatsListView from './views/ChatsListView.vue'
 import SearchBar from './components/SearchBar.vue'
+import ChatAvatar from './components/ChatAvatar.vue'
 
 const searchQuery = ref('')
 </script>
@@ -25,6 +26,10 @@ export default {}
 					<svg class="feather plus-icon"><use href="/feather-sprite-v4.29.0.svg#plus-square"/></svg>
 				</button>
 			</a>
+			<div v-if="$route.params.chatId" class="chat-nav d-flex align-items-center flex-grow-1 px-3">
+				<ChatAvatar :chatId="$route.params.chatId" :displayName="$route.query.name || 'Chat'" :size="32" :isGroup="$route.query.group === '1'" class="me-2" />
+				<span class="fw-semibold text-truncate chat-nav-name">{{ $route.query.name || 'Chat' }}</span>
+			</div>
 			<button class="navbar-toggler d-md-none me-2 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
 			</button>
@@ -65,8 +70,13 @@ export default {}
 	color: var(--tn-cyan);
 }
 
-.plus-icon {
-	width: 26px;
-	height: 26px;
+.plus-btn .plus-icon {
+	width: 23px;
+	height: 23px;
+}
+
+.chat-nav-name {
+	color: var(--tn-fg);
+	font-size: 1rem;
 }
 </style>
