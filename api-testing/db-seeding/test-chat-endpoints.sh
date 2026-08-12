@@ -11,6 +11,10 @@ FAIL=0
 
 UUID_RE='^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
 
+# Minimal 1x1 red PNG for test image uploads
+TEST_IMG="/tmp/test-image.png"
+printf '\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x02\x00\x00\x00\x90wS\xde\x00\x00\x00\x0cIDATx\x9cc\xf8\x0f\x00\x00\x01\x01\x00\x05\x18\xd8N\x00\x00\x00\x00IEND\xaeB`\x82' > "$TEST_IMG"
+
 # --- Helper ---
 check() {
 	local label="$1" method="$2" url="$3" auth="$4" body="$5" expect="$6" extra="${7:-}"
@@ -147,7 +151,7 @@ check "Set name (not a group)" PATCH "$API_URL/chats/$DCID/name" "$TOKA" \
 # --- Avatar ---
 echo ""
 echo "=== Avatar ==="
-cp service/api/assets/default-group-avatar.png /tmp/test-avatar.png
+cp "$TEST_IMG" /tmp/test-avatar.png
 
 # Avatar upload uses direct curl (not the check helper) because check() only handles JSON bodies
 AVATAR_CODE=$(curl -s -o /tmp/test-avatar-resp.png -w "%{http_code}" -X PUT "$API_URL/chats/$GCID/avatar" \
@@ -161,8 +165,7 @@ fi
 
 check "Get group avatar" GET "$API_URL/chats/$GCID/avatar" "$TOKA" "" "200" \
 	'file /tmp/test-resp.json | grep -qi "PNG image"'
-check "Get direct chat avatar" GET "$API_URL/chats/$DCID/avatar" "$TOKA" "" "200" \
-	'file /tmp/test-resp.json | grep -qi "PNG image"'
+check "Get direct chat avatar (no avatar set)" GET "$API_URL/chats/$DCID/avatar" "$TOKA" "" "404"
 check "Get avatar (non-member)" GET "$API_URL/chats/$GCID/avatar" "$TOKD" "" "403"
 check "Get avatar (not found)" GET "$API_URL/chats/00000000-0000-0000-0000-000000000000/avatar" "$TOKA" "" "404"
 
@@ -189,7 +192,7 @@ else
 	echo "  ✗ Seed MSG_A2 (expected 201, got $MSG_A2_CODE)"; FAIL=$((FAIL + 1)); MSG_A2=""
 fi
 
-cp service/api/assets/default-group-avatar.png /tmp/test-msg-image.png
+cp "$TEST_IMG" /tmp/test-msg-image.png
 MSG_IMG_CODE=$(curl -s -o /tmp/msg-img.json -w "%{http_code}" -X POST "$API_URL/chats/$DCID/messages" \
 	-H "Authorization: $TOKA" -F "text=Image message" -F "imageFile=@/tmp/test-msg-image.png;type=image/png" --max-time 5)
 if [[ "$MSG_IMG_CODE" == "201" ]]; then
@@ -464,14 +467,10 @@ check "List all users" GET "$API_URL/users" "" "" "200" \
 	'python3 -c "import json; d=json.load(open(\"/tmp/test-resp.json\"))[\"usersList\"]; assert len(d)>=4, f\"expected >=4, got {len(d)}\""'
 
 AVATAR_CODE=$(curl -s -o /tmp/test-avatar-resp.png -w "%{http_code}" "$API_URL/users/$UIDA/avatar" --max-time 5)
-if [[ "$AVATAR_CODE" == "200" ]]; then
-	if file /tmp/test-avatar-resp.png | grep -qi "PNG image"; then
-		echo "  ✓ Get user avatar (200)"; PASS=$((PASS + 1))
-	else
-		echo "  ✗ Get user avatar (not a PNG)"; FAIL=$((FAIL + 1))
-	fi
+if [[ "$AVATAR_CODE" == "404" ]]; then
+	echo "  ✓ Get user avatar (404, no avatar set)"; PASS=$((PASS + 1))
 else
-	echo "  ✗ Get user avatar (expected 200, got $AVATAR_CODE)"; FAIL=$((FAIL + 1))
+	echo "  ✗ Get user avatar (expected 404, got $AVATAR_CODE)"; FAIL=$((FAIL + 1))
 fi
 
 check "Set my name" PATCH "$API_URL/me/name" "$TOKA" \
@@ -480,11 +479,19 @@ check "Set my name" PATCH "$API_URL/me/name" "$TOKA" \
 check "Set my name bad" PATCH "$API_URL/me/name" "$TOKA" \
 	"{\"userName\":\"!!\"}" "400"
 
-cp service/api/assets/default-group-avatar.png /tmp/test-user-avatar.png
+cp "$TEST_IMG" /tmp/test-user-avatar.png
 USER_AV_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X PUT "$API_URL/me/avatar" \
 	-H "Authorization: $TOKA" -F "binaryImage=@/tmp/test-user-avatar.png;type=image/png" --max-time 5)
 if [[ "$USER_AV_CODE" == "204" ]]; then
 	echo "  ✓ Upload user avatar (204)"; PASS=$((PASS + 1))
+
+	# Verify the avatar is now served
+	AVATAR_GET_CODE=$(curl -s -o /tmp/test-avatar-resp.png -w "%{http_code}" "$API_URL/users/$UIDA/avatar" --max-time 5)
+	if [[ "$AVATAR_GET_CODE" == "200" ]] && file /tmp/test-avatar-resp.png | grep -qi "PNG image"; then
+		echo "  ✓ Get user avatar after upload (200)"; PASS=$((PASS + 1))
+	else
+		echo "  ✗ Get user avatar after upload (expected 200 PNG, got $AVATAR_GET_CODE)"; FAIL=$((FAIL + 1))
+	fi
 else
 	echo "  ✗ Upload user avatar (expected 204, got $USER_AV_CODE)"; FAIL=$((FAIL + 1))
 fi
