@@ -14,7 +14,18 @@ export function setAuth(token, userId) {
   localStorage.setItem(USER_ID_KEY, userId)
 }
 
+const USERNAME_KEY = 'wasapp_username'
+
+export function getUserName() {
+  return localStorage.getItem(USERNAME_KEY)
+}
+
+export function setUserName(name) {
+  localStorage.setItem(USERNAME_KEY, name)
+}
+
 export function clearAuth() {
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_ID_KEY)
+  localStorage.removeItem(USERNAME_KEY)
 }

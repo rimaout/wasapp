@@ -1,5 +1,5 @@
 <script>
-import { setAuth } from '../services/auth.js';
+import { setAuth, setUserName } from '../services/auth.js';
 
 export default {
 	data() {
@@ -26,6 +26,7 @@ export default {
 				// Extract the token from the response and remove the 'Bearer ' prefix
 				let token = response.data.token.replace('Bearer ', '');
 				setAuth(token, response.data.userId);
+				setUserName(this.username.trim());
 
 				// Redirect to the /chats route after successful login
 				this.$router.push('/chats');
