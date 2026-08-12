@@ -17,7 +17,7 @@ export default {}
 		<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
 			<a class="navbar-brand col-md-4 col-lg-3 me-0 px-3 fs-5 fw-bold d-flex justify-content-between align-items-center gap-2" href="#/chats">
 				<span>WASApp</span>
-				<button type="button" class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center" @click.prevent style="width: 30px; height: 30px;">+</button>
+				<button type="button" class="plus-btn" @click.prevent><svg class="feather" style="width: 26px; height: 26px;"><use href="/feather-sprite-v4.29.0.svg#plus-square"/></svg></button>
 			</a>
 			<button class="navbar-toggler d-md-none me-2 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
 				<span class="navbar-toggler-icon"></span>
@@ -41,4 +41,20 @@ export default {}
 </template>
 
 <style>
+.plus-btn {
+	background: none;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	color: var(--tn-fg-dark);
+	line-height: 1;
+}
+
+.plus-btn:hover {
+	color: var(--tn-blue);
+}
+
+.plus-btn:active {
+	color: var(--tn-cyan);
+}
 </style>
