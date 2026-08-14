@@ -268,7 +268,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         "409":
-          description: Conflict - Returns code `CHAT_ALREADY_EXISTS` if you already have a direct chat with this user.
+          description: Conflict - Returns code `CHAT_ALREADY_EXISTS` if you already have a direct chat with this user. The response also includes the `chatId` of the existing chat.
           content:
             application/json:
               schema:
@@ -1527,6 +1527,12 @@ components:
           type: string
           description: Human-readable error message.
           example: The specified user ID does not exist.
+        chatId:
+          type: string
+          format: uuid
+          description: >-
+            Optional. Only present on CHAT_ALREADY_EXISTS when creating a direct chat.
+            The ID of the existing direct chat.
 
     AuthResponse:
       type: object

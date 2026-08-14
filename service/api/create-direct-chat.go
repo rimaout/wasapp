@@ -40,7 +40,7 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 	if existingChatId != "" {
-		rt.respondWithError(w, http.StatusConflict, ErrCodeChatAlreadyExists, "you already have a direct chat with this user") //409
+		rt.respondWithChatAlreadyExists(w, existingChatId)
 		return
 	}
 

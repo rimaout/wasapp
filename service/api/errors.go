@@ -59,3 +59,22 @@ func (rt *_router) respondWithError(w http.ResponseWriter, status int, code stri
 		Message: message,
 	})
 }
+
+// respondWithChatAlreadyExists responds with a 409 Conflict, including the
+// ID of the existing chat so the client can open it directly.
+func (rt *_router) respondWithChatAlreadyExists(w http.ResponseWriter, chatId string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusConflict)
+
+	// We ignore the error here because encoding a basic hardcoded struct
+	// to a client response stream will practically never fail.
+	_ = json.NewEncoder(w).Encode(struct {
+		Code    string `json:"code"`
+		Message string `json:"message"`
+		ChatId  string `json:"chatId"`
+	}{
+		Code:    ErrCodeChatAlreadyExists,
+		Message: "you already have a direct chat with this user",
+		ChatId:  chatId,
+	})
+}

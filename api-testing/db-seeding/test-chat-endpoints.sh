@@ -86,7 +86,8 @@ check "Create A→B" POST "$API_URL/user/$UIDB/chats" "$TOKA" "" "201" \
 DCID=$(grep -o '"id":"[^"]*"' /tmp/test-resp.json | head -1 | cut -d'"' -f4)
 DCID="${DCID//[$'\t\r\n ']/}"
 
-check "Create duplicate" POST "$API_URL/user/$UIDB/chats" "$TOKA" "" "409"
+check "Create duplicate" POST "$API_URL/user/$UIDB/chats" "$TOKA" "" "409" \
+	'python3 -c "import json; d=json.load(open(\"/tmp/test-resp.json\")); assert d[\"code\"]==\"CHAT_ALREADY_EXISTS\", f\"wrong code: {d}\"; assert d[\"chatId\"]==\"$DCID\", f\"wrong chatId: {d}\""'
 check "Create self" POST "$API_URL/user/$UIDA/chats" "$TOKA" "" "400"
 check "Create unknown user" POST "$API_URL/user/00000000-0000-0000-0000-000000000000/chats" "$TOKA" "" "404"
 
