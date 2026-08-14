@@ -39,6 +39,31 @@ export function getStatusColor(status) {
 	return status === 'read' ? 'text-primary' : 'text-muted';
 }
 
+// Returns a formatted string for the day of the message, e.g. "Today", "Yesterday", "March 5", "March 5, 2023"
+export function formatDay(isoString) {
+	let date = new Date(isoString);
+	let now = new Date();
+	let today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	let msgDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+	let diffDays = Math.floor((today - msgDay) / 86400000);
+
+	if (diffDays === 0) return 'Today';
+	if (diffDays === 1) return 'Yesterday';
+	if (date.getFullYear() === now.getFullYear()) {
+		return date.toLocaleDateString([], { day: 'numeric', month: 'long' });
+	}
+	return date.toLocaleDateString([], { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// Returns true if the two messages are on different days
+export function isNewDay(prevMsg, currMsg) {
+	let prev = new Date(prevMsg.sendTime);
+	let curr = new Date(currMsg.sendTime);
+	return prev.getFullYear() !== curr.getFullYear()
+		|| prev.getMonth() !== curr.getMonth()
+		|| prev.getDate() !== curr.getDate();
+}
+
 export function getChatSnippet(chat) {
 	let lm = chat.lastMessage;
 	if (lm.isInitMessage) {
