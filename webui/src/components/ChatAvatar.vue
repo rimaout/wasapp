@@ -1,25 +1,5 @@
 <script>
-const AVATAR_COLORS = [ //Tokyo Night color palette
-	'#7aa2f7', '#bb9af7', '#9ece6a', '#e0af68', '#f7768e',
-	'#7dcfff', '#ff9e64', '#c0caf5', '#565f89', '#414868',
-];
-
-// Generate a color based on the name string
-function getAvatarColor(name) {
-	let hash = 0;
-	for (let i = 0; i < name.length; i++) {
-		hash = name.charCodeAt(i) + ((hash << 5) - hash);
-	}
-	return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
-}
-
-// Get the first letter of the name, or '?' if name is empty
-function getAvatarLetter(name) {
-
-	if (!name || name.length === 0) return '?';
-
-	return name[0].toUpperCase();
-}
+import { getAvatarColor, getAvatarLetter } from '../services/utils.js';
 
 // Vue component for displaying a chat avatar
 export default {

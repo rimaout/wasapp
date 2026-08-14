@@ -4,6 +4,7 @@ import { ref, watch } from 'vue';
 export default {
 	props: {
 		modelValue: { type: String, default: '' },
+		placeholder: { type: String, default: 'Search chats...' },
 	},
 	emits: ['update:modelValue'],
 	setup(props, { emit }) {
@@ -22,7 +23,7 @@ export default {
 				<use href="/feather-sprite-v4.29.0.svg#search"/>
 			</svg>
 			<input type="text" class="form-control form-control-sm search-input"
-				placeholder="Search chats..." v-model="query" />
+				:placeholder="placeholder" v-model="query" />
 			<button v-if="query" class="search-clear" @click="query = ''">
 				<svg class="feather" style="width: 14px; height: 14px; stroke-width: 2.5;">
 					<use href="/feather-sprite-v4.29.0.svg#x"/>
