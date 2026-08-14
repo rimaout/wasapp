@@ -8,7 +8,7 @@ export function isMyMessageById(senderId) {
 	return senderId === getUserId();
 }
 
-export function formatTime(isoString) {
+export function formatPreviewTime(isoString) {
 	let date = new Date(isoString);
 	let now = new Date();
 	let diffMins = Math.floor((now - date) / 60000);
@@ -33,6 +33,17 @@ export function formatTime(isoString) {
 
 export function getStatusIcon(status) {
 	return status === 'delivered' ? '✓' : '✓✓';
+}
+
+export function formatMessageTime(isoString) {
+	let date = new Date(isoString);
+	let now = new Date();
+	let diffMins = Math.floor((now - date) / 60000);
+
+	if (diffMins < 1) return 'now';
+	if (diffMins < 60) return diffMins + 'm';
+
+	return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 export function getStatusColor(status) {

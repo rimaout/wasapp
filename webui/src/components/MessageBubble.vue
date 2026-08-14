@@ -1,5 +1,5 @@
 <script>
-import { formatTime, getStatusIcon, getStatusColor, isMyMessageById } from '../services/utils.js';
+import { formatMessageTime, getStatusIcon, getStatusColor, isMyMessageById } from '../services/utils.js';
 
 export default {
 	props: {
@@ -12,7 +12,7 @@ export default {
 		},
 	},
 	methods: {
-		formatTime,
+		formatMessageTime,
 		getStatusIcon,
 		getStatusColor,
 
@@ -36,7 +36,7 @@ export default {
 			<div v-if="isGroup && !isMine" class="message-sender">{{ message.sender.name }}</div>
 			<div class="message-text">{{ message.content?.text || '' }}</div>
 			<div class="message-meta">
-				<span class="message-time">{{ formatTime(message.sendTime) }}</span>
+				<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
 				<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
 					{{ getStatusIcon(message.status) }}
 				</span>

@@ -1,6 +1,6 @@
 <script>
 import ChatAvatar from '../components/ChatAvatar.vue';
-import { isMyMessage, formatTime, getStatusIcon, getStatusColor, getChatSnippet } from '../services/utils.js';
+import { isMyMessage, formatPreviewTime, getStatusIcon, getStatusColor, getChatSnippet } from '../services/utils.js';
 import { usePolling } from '../composables/usePolling.js';
 
 export default {
@@ -25,7 +25,7 @@ export default {
 	},
 	methods: {
 		isMyMessage,
-		formatTime,
+		formatPreviewTime,
 		getStatusIcon,
 		getStatusColor,
 		getChatSnippet,
@@ -105,7 +105,7 @@ export default {
 								:class="getStatusColor(chat.lastMessage.status)"
 								class="me-1 chat-check"
 							>{{ getStatusIcon(chat.lastMessage.status) }}</span>
-							<small class="chat-time">{{ formatTime(chat.lastMessage.sendTime) }}</small>
+							<small class="chat-time">{{ formatPreviewTime(chat.lastMessage.sendTime) }}</small>
 						</div>
 					</div>
 					<div class="d-flex justify-content-between align-items-center">
