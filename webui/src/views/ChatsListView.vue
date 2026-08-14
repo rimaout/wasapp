@@ -1,6 +1,7 @@
 <script>
 import ChatAvatar from '../components/ChatAvatar.vue';
 import { isMyMessage, formatTime, getStatusIcon, getStatusColor, getChatSnippet } from '../services/utils.js';
+import { usePolling } from '../composables/usePolling.js';
 
 export default {
 	components: { ChatAvatar },
@@ -12,7 +13,6 @@ export default {
 			chats: [],
 			errormsg: null,
 			loading: false,
-			intervalId: null,
 			pollVersion: 0,
 		}
 	},
@@ -60,10 +60,10 @@ export default {
 	mounted() {
 		this.loading = true;
 		this.fetchChats();
-		this.intervalId = setInterval(() => this.fetchChats(), 10000);
+		this.stopPolling = usePolling(() => this.fetchChats(), 10000);
 	},
 	beforeUnmount() {
-		if (this.intervalId) clearInterval(this.intervalId);
+		if (this.stopPolling) this.stopPolling();
 	},
 };
 </script>
