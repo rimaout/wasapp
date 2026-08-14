@@ -44,8 +44,7 @@ export default {
 <style scoped>
 .chat-input {
 	flex-shrink: 0;
-	border-top: 1px solid var(--tn-border);
-	padding: 10px 10px 14px;
+	padding: 0 0 14px;
 }
 
 .message-input-group {

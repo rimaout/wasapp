@@ -77,6 +77,6 @@ export default {}
 
 .chat-nav-name {
 	color: var(--tn-fg);
-	font-size: 1rem;
+	font-size: 1.15rem;
 }
 </style>

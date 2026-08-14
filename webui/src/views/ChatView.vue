@@ -116,7 +116,7 @@ export default {
 
 .chat-messages {
 	overflow-y: auto;
-	padding: 16px;
+	padding: 16px 16px 0;
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
