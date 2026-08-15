@@ -1,82 +1,57 @@
-<script>
+<script setup>
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import axios from '../services/axios.js';
 import SearchBar from '../components/SearchBar.vue';
 import UserAvatar from '../components/UserAvatar.vue';
-import { getUserId } from '../services/auth.js';
+import { useUsers } from '../composables/useUsers.js';
 
-export default {
-	components: { SearchBar, UserAvatar },
-	emits: ['close'],
-	data() {
-		return {
-			query: '',
-			users: [],
-			errormsg: null,
-			loading: false,
-			creating: null,
-		};
-	},
-	computed: {
-		filteredUsers() {
-			let selfId = getUserId();
-			let list = this.users.filter(u => u.id !== selfId);
-			if (!this.query) return list;
-			let q = this.query.toLowerCase();
-			return list.filter(u => u.name.toLowerCase().includes(q));
-		},
-	},
-	methods: {
-		async fetchUsers() {
-			this.errormsg = null;
-			try {
-				let response = await this.$axios.get('/users');
-				this.users = response.data.usersList;
-			} catch (e) {
-				this.errormsg = e.response?.data?.message || e.toString();
-			}
-			this.loading = false;
-		},
+const emit = defineEmits(['close', 'create-group']);
+const router = useRouter();
 
-		async selectUser(user) {
-			if (this.creating) return;
-			this.creating = user.id;
-			this.errormsg = null;
-			try {
-				let response = await this.$axios.post('/user/' + user.id + '/chats');
-				this.openChat(response.data.id, response.data.displayName, false);
-			} catch (e) {
-				if (e.response && e.response.status === 409 && e.response.data && e.response.data.chatId) {
-					this.openChat(e.response.data.chatId, user.name, false);
-				} else {
-					this.errormsg = e.response?.data?.message || e.toString();
-				}
-			} finally {
-				this.creating = null;
-			}
-		},
+const query = ref('');
+const creating = ref(null);
 
-		openChat(chatId, displayName, isGroup) {
-			this.$router.push('/chats/' + chatId +
-				'?name=' + encodeURIComponent(displayName) +
-				'&group=' + (isGroup ? '1' : '0'));
-			let sidebar = document.getElementById('sidebarMenu');
-			if (sidebar && window.innerWidth < 768) {
-				let bsCollapse = bootstrap.Collapse.getOrCreateInstance(sidebar);
-				bsCollapse.hide();
-			}
-			this.$emit('close');
-		},
-	},
-	mounted() {
-		this.loading = true;
-		this.fetchUsers();
-	},
-};
+const { users, loading, errormsg, fetchUsers, filteredUsers } = useUsers();
+fetchUsers();
+
+const visibleUsers = computed(() => filteredUsers(query.value));
+
+async function selectUser(user) {
+	if (creating.value) return;
+	creating.value = user.id;
+	errormsg.value = null;
+	try {
+		const response = await axios.post('/user/' + user.id + '/chats');
+		openChat(response.data.id, response.data.displayName, false);
+	} catch (e) {
+		if (e.response && e.response.status === 409 && e.response.data && e.response.data.chatId) {
+			openChat(e.response.data.chatId, user.name, false);
+		} else {
+			errormsg.value = e.response?.data?.message || e.toString();
+		}
+	} finally {
+		creating.value = null;
+	}
+}
+
+function openChat(chatId, displayName, isGroup) {
+	router.push('/chats/' + chatId +
+		'?name=' + encodeURIComponent(displayName) +
+		'&group=' + (isGroup ? '1' : '0'));
+	let sidebar = document.getElementById('sidebarMenu');
+	if (sidebar && window.innerWidth < 768) {
+		let bsCollapse = bootstrap.Collapse.getOrCreateInstance(sidebar);
+		bsCollapse.hide();
+	}
+	emit('close');
+}
 </script>
 
 <template>
 	<div>
 		<div class="d-flex align-items-center px-3 pt-3 pb-2 user-search-header">
-			<button type="button" class="back-btn" @click="$emit('close')">
+			<button type="button" class="back-btn" @click="emit('close')">
 				<svg class="feather back-icon"><use href="/feather-sprite-v4.29.0.svg#arrow-left"/></svg>
 			</button>
 			<span class="fw-semibold user-search-title">New chat</span>
@@ -84,21 +59,26 @@ export default {
 
 		<SearchBar v-model="query" placeholder="Search users..." />
 
+		<button type="button" class="new-group-btn" @click="emit('create-group')">
+			<svg class="feather new-group-icon"><use href="/feather-sprite-v4.29.0.svg#users"/></svg>
+			<span>Create new group</span>
+		</button>
+
 		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 		<LoadingSpinner v-if="loading && users.length === 0" />
 
-		<div v-if="!loading && query && filteredUsers.length === 0" class="text-muted text-center py-5">
+		<div v-if="!loading && query && visibleUsers.length === 0" class="text-muted text-center py-5">
 			<p class="mb-2 fs-5">No users found</p>
 			<p>Try a different search</p>
 		</div>
 
-		<div v-if="!loading && !query && filteredUsers.length === 0" class="text-muted text-center py-5">
+		<div v-if="!loading && !query && visibleUsers.length === 0" class="text-muted text-center py-5">
 			<p class="mb-2 fs-5">No users found</p>
 		</div>
 
-		<div v-if="filteredUsers.length > 0" class="list-group list-group-flush">
+		<div v-if="visibleUsers.length > 0" class="list-group list-group-flush">
 			<a
-				v-for="user in filteredUsers"
+				v-for="user in visibleUsers"
 				:key="user.id"
 				class="list-group-item list-group-item-action d-flex align-items-center px-3 py-2 user-row"
 				:class="{ disabled: creating }"
@@ -140,6 +120,30 @@ export default {
 .back-btn .back-icon {
 	width: 22px;
 	height: 22px;
+}
+
+.new-group-btn {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+	border: none;
+	background: none;
+	padding: 10px 16px;
+	color: var(--tn-fg);
+	cursor: pointer;
+	text-align: left;
+	border-bottom: 1px solid var(--tn-border);
+}
+
+.new-group-btn:hover {
+	background-color: var(--tn-bg-highlight);
+}
+
+.new-group-btn .new-group-icon {
+	width: 20px;
+	height: 20px;
+	color: var(--tn-blue);
 }
 
 .user-row {

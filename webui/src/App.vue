@@ -3,11 +3,24 @@ import { RouterView } from 'vue-router'
 import { ref } from 'vue'
 import ChatsListView from './views/ChatsListView.vue'
 import UserSearchView from './views/UserSearchView.vue'
+import GroupMembersView from './views/GroupMembersView.vue'
+import GroupDetailsView from './views/GroupDetailsView.vue'
 import SearchBar from './components/SearchBar.vue'
 import ChatAvatar from './components/ChatAvatar.vue'
 
 const searchQuery = ref('')
-const showUserSearch = ref(false)
+const sidebarMode = ref('chats')
+const groupMembers = ref([])
+
+function startGroupCreation() {
+	groupMembers.value = [];
+	sidebarMode.value = 'group-members';
+}
+
+function finishGroupCreation() {
+	groupMembers.value = [];
+	sidebarMode.value = 'chats';
+}
 </script>
 
 <script>
@@ -24,7 +37,7 @@ export default {}
 		<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
 			<a class="navbar-brand col-md-4 col-lg-3 me-0 px-3 fs-5 fw-bold d-flex justify-content-between align-items-center gap-2" href="#/chats">
 				<span>WASApp</span>
-				<button type="button" class="plus-btn" @click.prevent="showUserSearch = true">
+				<button type="button" class="plus-btn" @click.prevent="sidebarMode = 'users'">
 					<svg class="feather plus-icon"><use href="/feather-sprite-v4.29.0.svg#plus-square"/></svg>
 				</button>
 			</a>
@@ -41,7 +54,9 @@ export default {}
 			<div class="row">
 				<nav id="sidebarMenu" class="col-md-4 col-lg-3 d-md-block bg-light sidebar collapse">
 					<div class="position-sticky sidebar-sticky pt-2">
-						<UserSearchView v-if="showUserSearch" @close="showUserSearch = false" />
+						<UserSearchView v-if="sidebarMode === 'users'" @close="sidebarMode = 'chats'" @create-group="startGroupCreation" />
+						<GroupMembersView v-else-if="sidebarMode === 'group-members'" v-model:members="groupMembers" @close="sidebarMode = 'users'" @create="sidebarMode = 'group-details'" />
+						<GroupDetailsView v-else-if="sidebarMode === 'group-details'" :members="groupMembers" @close="sidebarMode = 'group-members'" @done="finishGroupCreation" />
 						<template v-else>
 							<SearchBar v-model="searchQuery" />
 							<ChatsListView :searchQuery="searchQuery" />
