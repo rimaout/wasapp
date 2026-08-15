@@ -121,6 +121,10 @@ export default {
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
+	background-color: var(--tn-bg-dark);
+	background-image: url('/chat-bg.svg');
+	background-repeat: repeat;
+	background-size: 500px;
 }
 
 .chat-header {
