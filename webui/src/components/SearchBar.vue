@@ -19,7 +19,7 @@ export default {
 <template>
 	<div class="px-3 pt-3 pb-2">
 		<div class="search-wrapper">
-			<svg class="feather search-icon" style="width: 16px; height: 16px;">
+			<svg class="feather search-icon" style="width: 18px; height: 18px;">
 				<use href="/feather-sprite-v4.29.0.svg#search"/>
 			</svg>
 			<input type="text" class="form-control form-control-sm search-input"
@@ -49,9 +49,12 @@ export default {
 }
 
 .search-input {
-	padding-left: 32px;
-	padding-right: 32px;
+	height: 40px;
+	padding-left: 36px;
+	padding-right: 36px;
 	border-radius: 20px;
+	border: none;
+	font-size: 0.95rem;
 }
 
 .search-clear {

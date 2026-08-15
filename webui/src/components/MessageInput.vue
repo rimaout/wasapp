@@ -23,7 +23,7 @@ export default {
 <template>
 	<div class="chat-input">
 		<div class="message-input-group">
-			<svg class="feather image-icon" style="width: 18px; height: 18px;">
+			<svg class="feather image-icon" style="width: 20px; height: 20px;">
 				<use href="/feather-sprite-v4.29.0.svg#image"/>
 			</svg>
 			<input
@@ -44,14 +44,13 @@ export default {
 <style scoped>
 .chat-input {
 	flex-shrink: 0;
-	padding: 0 0 14px;
+	padding: 0 16px 14px;
 }
 
 .message-input-group {
 	display: flex;
 	align-items: center;
 	background: var(--tn-bg-highlight);
-	border: 1px solid var(--tn-border);
 	border-radius: 999px;
 	height: 52px;
 	padding: 6px 6px 6px 18px;
@@ -69,7 +68,7 @@ export default {
 	border: none;
 	outline: none;
 	color: var(--tn-fg);
-	font-size: 0.95rem;
+	font-size: 1rem;
 	min-width: 0;
 }
 
