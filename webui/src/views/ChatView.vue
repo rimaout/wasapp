@@ -121,6 +121,7 @@ export default {
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
+	position: relative;
 	background-color: var(--tn-bg-dark);
 	background-image: url('/chat-bg.svg');
 	background-repeat: repeat;
@@ -148,12 +149,14 @@ export default {
 
 .chat-messages {
 	overflow-y: auto;
-	padding: 16px 16px 0;
+	padding: 16px 16px 110px;
 	display: flex;
 	flex-direction: column;
 	gap: 6px;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
+	-webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 64px), transparent 100%);
+	mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 64px), transparent 100%);
 }
 
 .chat-messages::-webkit-scrollbar {

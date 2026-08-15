@@ -43,8 +43,11 @@ export default {
 
 <style scoped>
 .chat-input {
-	flex-shrink: 0;
-	padding: 0 16px 14px;
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	padding: 0 24px 14px;
 }
 
 .message-input-group {
@@ -54,6 +57,7 @@ export default {
 	border-radius: 999px;
 	height: 52px;
 	padding: 6px 6px 6px 18px;
+	box-shadow: 0 3px 16px rgba(0, 0, 0, 0.3);
 }
 
 .image-icon {
