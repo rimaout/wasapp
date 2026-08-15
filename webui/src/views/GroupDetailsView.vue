@@ -6,7 +6,7 @@ import axios from '../services/axios.js';
 const props = defineProps({
 	members: { type: Array, default: () => [] },
 });
-const emit = defineEmits(['close', 'done']);
+const emit = defineEmits(['done']);
 const router = useRouter();
 
 const name = ref('');
@@ -92,13 +92,6 @@ async function createGroup() {
 
 <template>
 	<div class="group-details-view">
-		<div class="d-flex align-items-center px-3 pt-3 pb-2 view-header">
-			<button type="button" class="back-btn" @click="emit('close')">
-				<svg class="feather back-icon"><use href="/feather-sprite-v4.29.0.svg#arrow-left"/></svg>
-			</button>
-			<span class="fw-semibold view-title">New group</span>
-		</div>
-
 		<div class="body flex-grow-1 px-3 py-3">
 			<label class="form-label field-label">Group name</label>
 			<input type="text" class="form-control name-input" v-model="name" maxlength="24" placeholder="Enter group name" />
@@ -138,35 +131,6 @@ async function createGroup() {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-}
-
-.view-header {
-	color: var(--tn-fg);
-}
-
-.view-title {
-	font-size: 1.05rem;
-}
-
-.back-btn {
-	background: none;
-	border: none;
-	padding: 0;
-	margin-right: 12px;
-	cursor: pointer;
-	color: var(--tn-fg-dark);
-	line-height: 1;
-	display: flex;
-	align-items: center;
-}
-
-.back-btn:hover {
-	color: var(--tn-blue);
-}
-
-.back-btn .back-icon {
-	width: 22px;
-	height: 22px;
 }
 
 .body {

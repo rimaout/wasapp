@@ -11,13 +11,31 @@ export default {
 </script>
 
 <template>
-	<div class="d-flex align-items-center justify-content-center min-vh-100">
-		<div class="text-center">
-			<h2 class="fw-normal" style="color: var(--tn-fg-dark);">Hi 👋 {{ userName }}!!</h2>
-			<p class="text-muted">Choose a chat or tap + to start a new one</p>
+	<div class="welcome-view">
+		<div class="welcome-header"></div>
+		<div class="welcome-body d-flex align-items-center justify-content-center">
+			<div class="text-center">
+				<h2 class="fw-normal" style="color: var(--tn-fg-dark);">Hi 👋 {{ userName }}!!</h2>
+				<p class="text-muted">Choose a chat or tap + to start a new one</p>
+			</div>
 		</div>
 	</div>
 </template>
 
 <style scoped>
+.welcome-view {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+}
+
+.welcome-header {
+	height: 56px;
+	flex-shrink: 0;
+	background: var(--tn-bg-darker);
+}
+
+.welcome-body {
+	flex: 1 1 auto;
+}
 </style>

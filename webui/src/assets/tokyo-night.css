@@ -261,35 +261,6 @@ a:hover {
 	box-shadow: 0 0 0 0.25rem rgba(122, 162, 247, 0.25);
 }
 
-/* ===== Navbar ===== */
-
-.navbar-dark {
-	background-color: var(--tn-bg-darker) !important;
-}
-
-.navbar-dark .navbar-brand {
-	color: var(--tn-fg);
-}
-
-.navbar-dark .navbar-brand:hover,
-.navbar-dark .navbar-brand:focus {
-	color: var(--tn-blue);
-}
-
-.navbar-dark .nav-link {
-	color: var(--tn-fg-dark);
-}
-
-.navbar-dark .nav-link:hover,
-.navbar-dark .nav-link:focus {
-	color: var(--tn-fg);
-}
-
-.navbar-brand {
-	background-color: rgba(0, 0, 0, 0.25);
-	box-shadow: inset -1px 0 0 var(--tn-border);
-}
-
 /* ===== Sidebar ===== */
 
 .sidebar {

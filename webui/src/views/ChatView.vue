@@ -1,11 +1,12 @@
 <script>
 import MessageBubble from '../components/MessageBubble.vue';
 import MessageInput from '../components/MessageInput.vue';
+import ChatAvatar from '../components/ChatAvatar.vue';
 import { usePolling } from '../composables/usePolling.js';
 import { formatDay, isNewDay } from '../services/utils.js';
 
 export default {
-	components: { MessageBubble, MessageInput },
+	components: { MessageBubble, MessageInput, ChatAvatar },
 	data() {
 		return {
 			messages: [],
@@ -22,6 +23,9 @@ export default {
 		},
 		isGroup() {
 			return this.$route.query.group === '1';
+		},
+		chatName() {
+			return this.$route.query.name || 'Chat';
 		},
 	},
 	methods: {
@@ -91,6 +95,11 @@ export default {
 
 <template>
 	<div class="chat-view">
+		<div class="chat-header">
+			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" />
+			<span class="chat-header-name">{{ chatName }}</span>
+		</div>
+
 		<div ref="messagesArea" class="chat-messages flex-grow-1">
 			<LoadingSpinner v-if="loading" />
 			<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
@@ -111,7 +120,27 @@ export default {
 .chat-view {
 	display: flex;
 	flex-direction: column;
-	height: calc(100vh - 48px);
+	height: 100vh;
+}
+
+.chat-header {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	height: 56px;
+	padding: 0 16px;
+	border-bottom: 1px solid var(--tn-border);
+	background: var(--tn-bg-darker);
+	flex-shrink: 0;
+}
+
+.chat-header-name {
+	color: var(--tn-fg);
+	font-size: 1.15rem;
+	font-weight: 600;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
 }
 
 .chat-messages {

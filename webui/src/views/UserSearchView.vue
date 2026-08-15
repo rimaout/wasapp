@@ -49,14 +49,7 @@ function openChat(chatId, displayName, isGroup) {
 </script>
 
 <template>
-	<div>
-		<div class="d-flex align-items-center px-3 pt-3 pb-2 user-search-header">
-			<button type="button" class="back-btn" @click="emit('close')">
-				<svg class="feather back-icon"><use href="/feather-sprite-v4.29.0.svg#arrow-left"/></svg>
-			</button>
-			<span class="fw-semibold user-search-title">New chat</span>
-		</div>
-
+	<div class="user-search-view">
 		<SearchBar v-model="query" placeholder="Search users..." />
 
 		<button type="button" class="new-group-btn" @click="emit('create-group')">
@@ -64,62 +57,41 @@ function openChat(chatId, displayName, isGroup) {
 			<span>Create new group</span>
 		</button>
 
-		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
-		<LoadingSpinner v-if="loading && users.length === 0" />
+		<div class="user-list flex-grow-1">
+			<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
+			<LoadingSpinner v-if="loading && users.length === 0" />
 
-		<div v-if="!loading && query && visibleUsers.length === 0" class="text-muted text-center py-5">
-			<p class="mb-2 fs-5">No users found</p>
-			<p>Try a different search</p>
-		</div>
+			<div v-if="!loading && query && visibleUsers.length === 0" class="text-muted text-center py-5">
+				<p class="mb-2 fs-5">No users found</p>
+				<p>Try a different search</p>
+			</div>
 
-		<div v-if="!loading && !query && visibleUsers.length === 0" class="text-muted text-center py-5">
-			<p class="mb-2 fs-5">No users found</p>
-		</div>
+			<div v-if="!loading && !query && visibleUsers.length === 0" class="text-muted text-center py-5">
+				<p class="mb-2 fs-5">No users found</p>
+			</div>
 
-		<div v-if="visibleUsers.length > 0" class="list-group list-group-flush">
-			<a
-				v-for="user in visibleUsers"
-				:key="user.id"
-				class="list-group-item list-group-item-action d-flex align-items-center px-3 py-2 user-row"
-				:class="{ disabled: creating }"
-				href="#"
-				@click.prevent="selectUser(user)"
-			>
-				<UserAvatar :userId="user.id" :displayName="user.name" :size="48" class="me-3" />
-				<span class="user-name fw-semibold text-truncate">{{ user.name }}</span>
-			</a>
+			<div v-if="visibleUsers.length > 0" class="list-group list-group-flush">
+				<a
+					v-for="user in visibleUsers"
+					:key="user.id"
+					class="list-group-item list-group-item-action d-flex align-items-center px-3 py-2 user-row"
+					:class="{ disabled: creating }"
+					href="#"
+					@click.prevent="selectUser(user)"
+				>
+					<UserAvatar :userId="user.id" :displayName="user.name" :size="48" class="me-3" />
+					<span class="user-name fw-semibold text-truncate">{{ user.name }}</span>
+				</a>
+			</div>
 		</div>
 	</div>
 </template>
 
 <style scoped>
-.user-search-header {
-	color: var(--tn-fg);
-}
-
-.user-search-title {
-	font-size: 1.05rem;
-}
-
-.back-btn {
-	background: none;
-	border: none;
-	padding: 0;
-	margin-right: 12px;
-	cursor: pointer;
-	color: var(--tn-fg-dark);
-	line-height: 1;
+.user-search-view {
 	display: flex;
-	align-items: center;
-}
-
-.back-btn:hover {
-	color: var(--tn-blue);
-}
-
-.back-btn .back-icon {
-	width: 22px;
-	height: 22px;
+	flex-direction: column;
+	height: 100%;
 }
 
 .new-group-btn {
@@ -134,6 +106,7 @@ function openChat(chatId, displayName, isGroup) {
 	cursor: pointer;
 	text-align: left;
 	border-bottom: 1px solid var(--tn-border);
+	flex-shrink: 0;
 }
 
 .new-group-btn:hover {
@@ -144,6 +117,16 @@ function openChat(chatId, displayName, isGroup) {
 	width: 20px;
 	height: 20px;
 	color: var(--tn-blue);
+}
+
+.user-list {
+	overflow-y: auto;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.user-list::-webkit-scrollbar {
+	display: none;
 }
 
 .user-row {

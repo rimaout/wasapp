@@ -5,8 +5,8 @@ import ChatsListView from './views/ChatsListView.vue'
 import UserSearchView from './views/UserSearchView.vue'
 import GroupMembersView from './views/GroupMembersView.vue'
 import GroupDetailsView from './views/GroupDetailsView.vue'
+import SidebarHeader from './components/SidebarHeader.vue'
 import SearchBar from './components/SearchBar.vue'
-import ChatAvatar from './components/ChatAvatar.vue'
 
 const searchQuery = ref('')
 const sidebarMode = ref('chats')
@@ -21,82 +21,43 @@ function finishGroupCreation() {
 	groupMembers.value = [];
 	sidebarMode.value = 'chats';
 }
-</script>
 
-<script>
-export default {}
+function handleBack() {
+	if (sidebarMode.value === 'users') {
+		sidebarMode.value = 'chats';
+	} else if (sidebarMode.value === 'group-members') {
+		sidebarMode.value = 'users';
+	} else if (sidebarMode.value === 'group-details') {
+		sidebarMode.value = 'group-members';
+	}
+}
 </script>
 
 <template>
-
 	<div v-if="$route.path === '/login'">
 		<RouterView />
 	</div>
 
-	<div v-else>
-		<header class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
-			<a class="navbar-brand col-md-4 col-lg-3 me-0 px-3 fs-5 fw-bold d-flex justify-content-between align-items-center gap-2" href="#/chats">
-				<span>WASApp</span>
-				<button type="button" class="plus-btn" @click.prevent="sidebarMode = 'users'">
-					<svg class="feather plus-icon"><use href="/feather-sprite-v4.29.0.svg#plus-square"/></svg>
-				</button>
-			</a>
-			<div v-if="$route.params.chatId" class="chat-nav d-flex align-items-center flex-grow-1 px-3">
-				<ChatAvatar :chatId="$route.params.chatId" :displayName="$route.query.name || 'Chat'" :size="32" :isGroup="$route.query.group === '1'" class="me-2" />
-				<span class="fw-semibold text-truncate chat-nav-name">{{ $route.query.name || 'Chat' }}</span>
-			</div>
-			<button class="navbar-toggler d-md-none me-2 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
-				<span class="navbar-toggler-icon"></span>
-			</button>
-		</header>
-
-		<div class="container-fluid">
-			<div class="row">
-				<nav id="sidebarMenu" class="col-md-4 col-lg-3 d-md-block bg-light sidebar collapse">
-					<div class="position-sticky sidebar-sticky pt-2">
-						<UserSearchView v-if="sidebarMode === 'users'" @close="sidebarMode = 'chats'" @create-group="startGroupCreation" />
-						<GroupMembersView v-else-if="sidebarMode === 'group-members'" v-model:members="groupMembers" @close="sidebarMode = 'users'" @create="sidebarMode = 'group-details'" />
-						<GroupDetailsView v-else-if="sidebarMode === 'group-details'" :members="groupMembers" @close="sidebarMode = 'group-members'" @done="finishGroupCreation" />
-						<template v-else>
+	<div v-else class="container-fluid">
+		<div class="row">
+			<nav id="sidebarMenu" class="col-md-4 col-lg-3 d-md-block sidebar p-0">
+				<div class="sidebar-inner">
+					<SidebarHeader :mode="sidebarMode" @new-chat="sidebarMode = 'users'" @back="handleBack" @home="sidebarMode = 'chats'" />
+					<div class="sidebar-sticky">
+						<template v-if="sidebarMode === 'chats'">
 							<SearchBar v-model="searchQuery" />
 							<ChatsListView :searchQuery="searchQuery" />
 						</template>
+						<UserSearchView v-else-if="sidebarMode === 'users'" @close="sidebarMode = 'chats'" @create-group="startGroupCreation" />
+						<GroupMembersView v-else-if="sidebarMode === 'group-members'" v-model:members="groupMembers" @create="sidebarMode = 'group-details'" />
+						<GroupDetailsView v-else-if="sidebarMode === 'group-details'" :members="groupMembers" @done="finishGroupCreation" />
 					</div>
-				</nav>
+				</div>
+			</nav>
 
-				<main class="col-md-8 ms-sm-auto col-lg-9 px-md-4">
-					<RouterView />
-				</main>
-			</div>
+			<main class="col-md-8 ms-sm-auto col-lg-9 p-0">
+				<RouterView />
+			</main>
 		</div>
 	</div>
 </template>
-
-<style>
-.plus-btn {
-	background: none;
-	border: none;
-	padding: 0;
-	cursor: pointer;
-	color: var(--tn-fg-dark);
-	line-height: 1;
-}
-
-.plus-btn:hover {
-	color: var(--tn-blue);
-}
-
-.plus-btn:active {
-	color: var(--tn-cyan);
-}
-
-.plus-btn .plus-icon {
-	width: 23px;
-	height: 23px;
-}
-
-.chat-nav-name {
-	color: var(--tn-fg);
-	font-size: 1.15rem;
-}
-</style>

@@ -23,19 +23,20 @@ body {
 	/* rtl:remove */
 
 	left: 0;
-	z-index: 100; /* Behind the navbar */
-	padding: 48px 0 0; /* Height of navbar */
+	z-index: 100;
+	padding: 0;
 	box-shadow: inset -1px 0 0 rgba(0 0 0 / 10%);
 }
 
-@media (max-width: 767.98px) {
-	.sidebar {
-		top: 5rem;
-	}
+.sidebar-inner {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
 }
 
 .sidebar-sticky {
-	height: calc(100vh - 48px);
+	flex: 1 1 auto;
+	min-height: 0;
 	overflow-x: hidden;
 	overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
 }
@@ -61,35 +62,4 @@ body {
 
 .sidebar-heading {
 	font-size: 0.75rem;
-}
-
-/*
- * Navbar
- */
-
-.navbar-brand {
-	padding-top: 0.75rem;
-	padding-bottom: 0.75rem;
-	background-color: rgba(0 0 0 / 25%);
-	box-shadow: inset -1px 0 0 rgba(0 0 0 / 25%);
-}
-
-.navbar .navbar-toggler {
-	top: 0.25rem;
-	right: 1rem;
-}
-
-.navbar .form-control {
-	padding: 0.75rem 1rem;
-}
-
-.form-control-dark {
-	color: #fff;
-	background-color: rgba(255 255 255 / 10%);
-	border-color: rgba(255 255 255 / 10%);
-}
-
-.form-control-dark:focus {
-	border-color: transparent;
-	box-shadow: 0 0 0 3px rgba(255 255 255 / 25%);
 }
