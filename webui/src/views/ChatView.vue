@@ -129,7 +129,6 @@ export default {
 	gap: 12px;
 	height: var(--topbar-height);
 	padding: 0 16px;
-	border-bottom: 1px solid var(--tn-border);
 	background: var(--tn-bg-darker);
 	flex-shrink: 0;
 }

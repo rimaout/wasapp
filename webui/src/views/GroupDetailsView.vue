@@ -190,7 +190,6 @@ async function createGroup() {
 }
 
 .footer {
-	border-top: 1px solid var(--tn-border);
 	flex-shrink: 0;
 }
 

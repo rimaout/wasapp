@@ -125,7 +125,7 @@ export default {
 
 <style scoped>
 .chat-row {
-	border-color: var(--tn-border) !important;
+	border: 0 !important;
 }
 
 .chat-row:hover {

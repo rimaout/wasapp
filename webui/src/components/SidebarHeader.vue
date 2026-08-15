@@ -41,7 +41,6 @@ const title = computed(() => TITLES[props.mode] || '');
 	align-items: center;
 	gap: 12px;
 	padding: 0 16px;
-	border-bottom: 1px solid var(--tn-border);
 	background: var(--tn-bg-darker);
 	color: var(--tn-fg);
 }

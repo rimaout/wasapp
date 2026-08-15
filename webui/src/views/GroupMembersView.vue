@@ -98,7 +98,6 @@ function create() {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 8px;
-	border-bottom: 1px solid var(--tn-border);
 	flex-shrink: 0;
 }
 
@@ -145,7 +144,7 @@ function create() {
 }
 
 .user-row {
-	border-color: var(--tn-border) !important;
+	border: 0 !important;
 }
 
 .user-row:hover {
@@ -168,7 +167,6 @@ function create() {
 }
 
 .footer {
-	border-top: 1px solid var(--tn-border);
 	flex-shrink: 0;
 }
 

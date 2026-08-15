@@ -100,7 +100,6 @@ function goToChat(chatId, displayName, isGroupChat) {
 	color: var(--tn-fg);
 	cursor: pointer;
 	text-align: left;
-	border-bottom: 1px solid var(--tn-border);
 	flex-shrink: 0;
 }
 
@@ -125,7 +124,7 @@ function goToChat(chatId, displayName, isGroupChat) {
 }
 
 .user-row {
-	border-color: var(--tn-border) !important;
+	border: 0 !important;
 }
 
 .user-row:hover {
