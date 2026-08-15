@@ -30,7 +30,7 @@ export default {
 }
 
 .welcome-header {
-	height: 56px;
+	height: var(--topbar-height);
 	flex-shrink: 0;
 	background: var(--tn-bg-darker);
 }

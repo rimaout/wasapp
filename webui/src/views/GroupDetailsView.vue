@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '../services/axios.js';
+import { navigateToChat } from '../services/chatNavigation.js';
+import { getErrorMessage } from '../services/utils.js';
 
 const props = defineProps({
 	members: { type: Array, default: () => [] },
@@ -73,17 +75,10 @@ async function createGroup() {
 			await axios.put('/chats/' + chat.id + '/avatar', formData);
 		}
 
-		router.push('/chats/' + chat.id +
-			'?name=' + encodeURIComponent(chat.displayName) +
-			'&group=1');
-		let sidebar = document.getElementById('sidebarMenu');
-		if (sidebar && window.innerWidth < 768) {
-			let bsCollapse = bootstrap.Collapse.getOrCreateInstance(sidebar);
-			bsCollapse.hide();
-		}
+		navigateToChat(router, chat);
 		emit('done');
 	} catch (e) {
-		errormsg.value = e.response?.data?.message || e.toString();
+		errormsg.value = getErrorMessage(e);
 	} finally {
 		creating.value = false;
 	}

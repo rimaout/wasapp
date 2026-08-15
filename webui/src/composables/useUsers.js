@@ -1,6 +1,7 @@
 import { ref } from 'vue';
 import axios from '../services/axios.js';
 import { getUserId } from '../services/auth.js';
+import { getErrorMessage } from '../services/utils.js';
 
 export function useUsers() {
 	const users = ref([]);
@@ -14,7 +15,7 @@ export function useUsers() {
 			const response = await axios.get('/users');
 			users.value = response.data.usersList;
 		} catch (e) {
-			errormsg.value = e.response?.data?.message || e.toString();
+			errormsg.value = getErrorMessage(e);
 		}
 		loading.value = false;
 	}

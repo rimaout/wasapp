@@ -1,5 +1,6 @@
 <script>
 import { setAuth, setUserName } from '../services/auth.js';
+import { getErrorMessage } from '../services/utils.js';
 
 export default {
 	data() {
@@ -31,7 +32,7 @@ export default {
 				// Redirect to the /chats route after successful login
 				this.$router.push('/chats');
 			} catch (e) {
-				this.errormsg = e.response?.data?.message || e.toString();
+				this.errormsg = getErrorMessage(e);
 			}
 			this.loading = false;
 		},

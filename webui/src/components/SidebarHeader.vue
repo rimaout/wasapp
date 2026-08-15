@@ -35,7 +35,7 @@ const title = computed(() => TITLES[props.mode] || '');
 
 <style scoped>
 .sidebar-header {
-	height: 56px;
+	height: var(--topbar-height);
 	flex-shrink: 0;
 	display: flex;
 	align-items: center;

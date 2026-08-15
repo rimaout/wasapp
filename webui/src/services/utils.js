@@ -20,6 +20,11 @@ export function getAvatarLetter(name) {
 	return name[0].toUpperCase();
 }
 
+// Extract a human-readable message from an axios error.
+export function getErrorMessage(e) {
+	return e.response?.data?.message || e.toString();
+}
+
 export function isMyMessage(senderName) {
 	return senderName === getUserName();
 }

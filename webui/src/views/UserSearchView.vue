@@ -5,6 +5,8 @@ import axios from '../services/axios.js';
 import SearchBar from '../components/SearchBar.vue';
 import UserAvatar from '../components/UserAvatar.vue';
 import { useUsers } from '../composables/useUsers.js';
+import { navigateToChat } from '../services/chatNavigation.js';
+import { getErrorMessage } from '../services/utils.js';
 
 const emit = defineEmits(['close', 'create-group']);
 const router = useRouter();
@@ -23,27 +25,20 @@ async function selectUser(user) {
 	errormsg.value = null;
 	try {
 		const response = await axios.post('/user/' + user.id + '/chats');
-		openChat(response.data.id, response.data.displayName, false);
+		goToChat(response.data.id, response.data.displayName, false);
 	} catch (e) {
 		if (e.response && e.response.status === 409 && e.response.data && e.response.data.chatId) {
-			openChat(e.response.data.chatId, user.name, false);
+			goToChat(e.response.data.chatId, user.name, false);
 		} else {
-			errormsg.value = e.response?.data?.message || e.toString();
+			errormsg.value = getErrorMessage(e);
 		}
 	} finally {
 		creating.value = null;
 	}
 }
 
-function openChat(chatId, displayName, isGroup) {
-	router.push('/chats/' + chatId +
-		'?name=' + encodeURIComponent(displayName) +
-		'&group=' + (isGroup ? '1' : '0'));
-	let sidebar = document.getElementById('sidebarMenu');
-	if (sidebar && window.innerWidth < 768) {
-		let bsCollapse = bootstrap.Collapse.getOrCreateInstance(sidebar);
-		bsCollapse.hide();
-	}
+function goToChat(chatId, displayName, isGroupChat) {
+	navigateToChat(router, { id: chatId, displayName, isGroupChat });
 	emit('close');
 }
 </script>

@@ -1,102 +1,23 @@
 <script>
-import { getAvatarColor, getAvatarLetter } from '../services/utils.js';
+import BaseAvatar from './BaseAvatar.vue';
 
-// Vue component for displaying a user avatar
+// Avatar for a user, loading from /users/{id}/avatar.
 export default {
-
-	// Input User Data Needed
+	components: { BaseAvatar },
 	props: {
 		userId: { type: String, required: true },
 		displayName: { type: String, required: true },
 		size: { type: Number, default: 48 },
-		version: { type: Number, default: 0 },	// Used to trigger avatar reload when the avatar is updated
+		version: { type: Number, default: 0 },
 	},
-
-	// Component Data
-	data() {
-		return {
-			imgSrc: null,
-			showImage: false,
-		};
-	},
-
-	// Computed Properties
 	computed: {
-		style() {
-			let px = this.size + 'px';
-			return {
-				width: px,
-				height: px,
-				minWidth: px,
-				fontSize: (this.size * 0.45) + 'px',
-				borderRadius: '50%',
-			};
+		imageUrl() {
+			return '/users/' + this.userId + '/avatar';
 		},
-		letter() {
-			return getAvatarLetter(this.displayName);
-		},
-		bgColor() {
-			return getAvatarColor(this.displayName);
-		},
-	},
-
-	// Component Methods
-	methods: {
-		async loadImage() {
-			// Load the avatar image from the server
-			try {
-				let response = await this.$axios.get('/users/' + this.userId + '/avatar', {
-					responseType: 'blob',
-				});
-				this.imgSrc = URL.createObjectURL(response.data);
-				this.showImage = true;
-			} catch (e) {
-				this.showImage = false;
-			}
-		},
-	},
-	watch: {
-		version: {
-			// If the version prop changes, reload the avatar image
-			handler: 'loadImage',
-			immediate: true,
-		},
-	},
-	mounted() {
-		this.loadImage();
-	},
-	beforeUnmount() {
-		if (this.imgSrc) URL.revokeObjectURL(this.imgSrc);
 	},
 };
 </script>
 
 <template>
-	<div class="avatar-circle" :style="style">
-		<img v-if="showImage" :src="imgSrc" class="avatar-img" />
-		<span v-else class="avatar-letter" :style="{ backgroundColor: bgColor }">{{ letter }}</span>
-	</div>
+	<BaseAvatar :image-url="imageUrl" :display-name="displayName" :size="size" :is-group="false" :version="version" />
 </template>
-
-<style scoped>
-.avatar-circle {
-	overflow: hidden;
-	flex-shrink: 0;
-}
-
-.avatar-img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
-
-.avatar-letter {
-	width: 100%;
-	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	font-weight: 600;
-	color: var(--tn-bg-darker);
-}
-</style>

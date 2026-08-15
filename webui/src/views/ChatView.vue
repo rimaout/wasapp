@@ -3,7 +3,7 @@ import MessageBubble from '../components/MessageBubble.vue';
 import MessageInput from '../components/MessageInput.vue';
 import ChatAvatar from '../components/ChatAvatar.vue';
 import { usePolling } from '../composables/usePolling.js';
-import { formatDay, isNewDay } from '../services/utils.js';
+import { formatDay, isNewDay, getErrorMessage } from '../services/utils.js';
 
 export default {
 	components: { MessageBubble, MessageInput, ChatAvatar },
@@ -42,7 +42,7 @@ export default {
 					this.$axios.post('/chats/' + this.chatId + '/read').catch(() => {});
 				}
 			} catch (e) {
-				this.errormsg = e.response?.data?.message || e.toString();
+				this.errormsg = getErrorMessage(e);
 			}
 			this.loading = false;
 			if (scroll) this.scrollToBottom();
@@ -62,7 +62,7 @@ export default {
 				this.newMsg = '';
 				this.scrollToBottom();
 			} catch (e) {
-				this.errormsg = e.response?.data?.message || e.toString();
+				this.errormsg = getErrorMessage(e);
 			}
 			this.sending = false;
 		},
@@ -127,7 +127,7 @@ export default {
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	height: 56px;
+	height: var(--topbar-height);
 	padding: 0 16px;
 	border-bottom: 1px solid var(--tn-border);
 	background: var(--tn-bg-darker);

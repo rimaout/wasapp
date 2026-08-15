@@ -1,7 +1,8 @@
 <script>
 import ChatAvatar from '../components/ChatAvatar.vue';
-import { isMyMessage, formatPreviewTime, getStatusIcon, getStatusColor, getChatSnippet } from '../services/utils.js';
+import { isMyMessage, formatPreviewTime, getStatusIcon, getStatusColor, getChatSnippet, getErrorMessage } from '../services/utils.js';
 import { usePolling } from '../composables/usePolling.js';
+import { navigateToChat } from '../services/chatNavigation.js';
 
 export default {
 	components: { ChatAvatar },
@@ -37,20 +38,13 @@ export default {
 				this.chats = response.data.chatsPreviewList;
 				this.pollVersion++;
 			} catch (e) {
-				this.errormsg = e.response?.data?.message || e.toString();
+				this.errormsg = getErrorMessage(e);
 			}
 			this.loading = false;
 		},
 
 		openChat(chat) {
-			this.$router.push('/chats/' + chat.id +
-				'?name=' + encodeURIComponent(chat.displayName) +
-				'&group=' + (chat.isGroupChat ? '1' : '0'));
-			let sidebar = document.getElementById('sidebarMenu');
-			if (sidebar && window.innerWidth < 768) {
-				let bsCollapse = bootstrap.Collapse.getOrCreateInstance(sidebar);
-				bsCollapse.hide();
-			}
+			navigateToChat(this.$router, chat);
 		},
 
 		isActive(chatId) {
