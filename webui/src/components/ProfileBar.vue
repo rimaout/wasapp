@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import UserAvatar from './UserAvatar.vue';
 import PopupMenu from './PopupMenu.vue';
-import { getUserId, getUserName } from '../services/auth.js';
+import { getUserId, getUserName, clearAuth } from '../services/auth.js';
 
 const userId = getUserId();
 const name = ref(getUserName() || 'User');
@@ -13,13 +13,20 @@ const profileItems = [
 	{ id: 'image', label: 'Change Profile Image', icon: 'image' },
 	{ id: 'logout', label: 'Logout', icon: 'log-out', danger: true },
 ];
+
+function onSelect(item) {
+	if (item.id === 'logout') {
+		clearAuth();
+		window.location.hash = '#/login';
+	}
+}
 </script>
 
 <template>
 	<div class="profile-bar">
 		<UserAvatar :userId="userId" :displayName="name" :size="40" :version="avatarVersion" />
 		<span class="profile-greeting">Hi 👋 {{ name }}</span>
-		<PopupMenu class="ms-auto" icon="settings" label="Profile options" direction="up" :items="profileItems" />
+		<PopupMenu class="ms-auto" icon="settings" label="Profile options" direction="up" :items="profileItems" @select="onSelect" />
 	</div>
 </template>
 
