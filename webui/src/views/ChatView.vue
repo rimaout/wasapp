@@ -118,6 +118,9 @@ export default {
 <template>
 	<div class="chat-view">
 		<div class="chat-header">
+			<button class="chat-back-btn d-md-none" @click="$router.push('/chats')" aria-label="Back" title="Back">
+				<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#arrow-left"/></svg>
+			</button>
 			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" :version="avatarVersion" />
 			<span class="chat-header-name">{{ chatName }}</span>
 			<PopupMenu v-if="isGroup" class="ms-auto" icon="edit-2" label="Chat options" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" @done="onChatAction" />
@@ -155,6 +158,25 @@ export default {
 	background-image: url('/chat-bg.svg');
 	background-repeat: repeat;
 	background-size: 500px;
+}
+
+.chat-back-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: none;
+	border: none;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	color: var(--tn-fg-dark);
+	cursor: pointer;
+	flex-shrink: 0;
+	margin-left: -8px;
+}
+
+.chat-back-btn:hover {
+	background: rgba(255, 255, 255, 0.08);
 }
 
 .chat-header {
