@@ -7,6 +7,7 @@ import GroupMembersView from './views/GroupMembersView.vue'
 import GroupDetailsView from './views/GroupDetailsView.vue'
 import SidebarHeader from './components/SidebarHeader.vue'
 import SearchBar from './components/SearchBar.vue'
+import ProfileBar from './components/ProfileBar.vue'
 
 const searchQuery = ref('')
 const sidebarMode = ref('chats')
@@ -43,7 +44,7 @@ function handleBack() {
 			<nav id="sidebarMenu" class="col-md-5 col-lg-4 d-md-block sidebar p-0">
 				<div class="sidebar-inner">
 					<SidebarHeader :mode="sidebarMode" @create-direct="sidebarMode = 'users'" @create-group="startGroupCreation" @back="handleBack" @home="sidebarMode = 'chats'" />
-					<div class="sidebar-sticky">
+					<div class="sidebar-sticky" :class="{ 'fade-bottom': sidebarMode === 'chats' }">
 						<template v-if="sidebarMode === 'chats'">
 							<SearchBar v-model="searchQuery" />
 							<ChatsListView :searchQuery="searchQuery" />
@@ -52,6 +53,7 @@ function handleBack() {
 						<GroupMembersView v-else-if="sidebarMode === 'group-members'" v-model:members="groupMembers" @create="sidebarMode = 'group-details'" />
 						<GroupDetailsView v-else-if="sidebarMode === 'group-details'" :members="groupMembers" @done="finishGroupCreation" />
 					</div>
+					<ProfileBar v-if="sidebarMode === 'chats'" />
 				</div>
 			</nav>
 

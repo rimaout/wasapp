@@ -6,6 +6,7 @@ defineProps({
 	icon: { type: String, required: true },
 	label: { type: String, default: '' },
 	items: { type: Array, required: true },
+	direction: { type: String, default: 'down' },
 });
 const emit = defineEmits(['select']);
 
@@ -22,7 +23,7 @@ function choose(item) {
 		<IconButton :icon="icon" :label="label" @click="open = !open" />
 		<template v-if="open">
 			<div class="popup-backdrop" @click="open = false"></div>
-			<div class="popup-panel">
+			<div class="popup-panel" :class="direction">
 				<button
 					v-for="item in items"
 					:key="item.id"
@@ -62,6 +63,11 @@ function choose(item) {
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 	padding: 6px;
 	z-index: 50;
+}
+
+.popup-panel.up {
+	top: auto;
+	bottom: calc(100% + 6px);
 }
 
 .popup-item {
