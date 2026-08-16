@@ -178,6 +178,22 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    delete:
+      tags: ["User Management"]
+      summary: Remove the avatar of the logged-in user
+      description: >-
+        Removes the avatar of the authenticated user, if one is set.
+      operationId: deleteMyUserAvatar
+      security: [ { BearerAuth: [] } ]
+      responses:
+        "204":
+          description: Avatar removed successfully. No content is returned.
+        "401":
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # -------------------- CREATE CHATS --------------------
 
@@ -447,6 +463,42 @@ paths:
                 $ref: '#/components/schemas/Error'
         "415":
           description: Unsupported media type - Returns code `UNSUPPORTED_MEDIA_TYPE` if the image format is not supported. Only JPEG, PNG, WebP allowed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      tags: ["Group Operations"]
+      summary: Remove the avatar of the group
+      description: >-
+        Removes the avatar for the specified group chat, if one is set.
+        Only group members can remove the image.
+        If the given identifier is not associated with a group chat, an error will be returned.
+      operationId: deleteGroupPhoto
+      security: [ { BearerAuth: [] } ]
+      responses:
+        "204":
+          description: Group avatar removed successfully. No content is returned.
+        '401':
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - Returns code `FORBIDDEN_NOT_MEMBER` if the logged-in user is not a member of this group chat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Resource not found - Returns code `CHAT_NOT_FOUND` if the specified chat does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        "409":
+          description: Conflict - Returns code `NOT_A_GROUP_CHAT` if the chat ID belongs to a direct message chat; only the avatar of group chats can be set/changed/removed.
           content:
             application/json:
               schema:

@@ -59,6 +59,8 @@ func (rt *_router) Handler() http.Handler {
 
 	// Image Serving
 	rt.router.PUT("/me/avatar", rt.wrapAuthenticated(rt.setMyUserAvatar))
+	rt.router.DELETE("/me/avatar", rt.wrapAuthenticated(rt.deleteMyUserAvatar))
+	rt.router.DELETE("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.deleteGroupChatAvatar))
 	rt.router.GET("/chats/:chatId/avatar", rt.wrapAuthenticated(rt.getChatAvatar))
 	rt.router.GET("/chats/:chatId/images/:imageId", rt.wrapAuthenticated(rt.getMessageImage))
 
