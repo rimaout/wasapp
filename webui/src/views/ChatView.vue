@@ -2,11 +2,12 @@
 import MessageBubble from '../components/MessageBubble.vue';
 import MessageInput from '../components/MessageInput.vue';
 import ChatAvatar from '../components/ChatAvatar.vue';
+import PopupMenu from '../components/PopupMenu.vue';
 import { usePolling } from '../composables/usePolling.js';
 import { formatDay, isNewDay, getErrorMessage } from '../services/utils.js';
 
 export default {
-	components: { MessageBubble, MessageInput, ChatAvatar },
+	components: { MessageBubble, MessageInput, ChatAvatar, PopupMenu },
 	data() {
 		return {
 			messages: [],
@@ -15,6 +16,11 @@ export default {
 			loading: true,
 			errormsg: null,
 			markedRead: false,
+			chatOptions: [
+				{ id: 'rename', label: 'Change Group Name', icon: 'type' },
+				{ id: 'image', label: 'Change Group Icon', icon: 'image' },
+				{ id: 'leave', label: 'Leave Group', icon: 'log-out', danger: true },
+			],
 		};
 	},
 	computed: {
@@ -98,6 +104,7 @@ export default {
 		<div class="chat-header">
 			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" />
 			<span class="chat-header-name">{{ chatName }}</span>
+			<PopupMenu v-if="isGroup" class="ms-auto" icon="edit-2" label="Chat options" :items="chatOptions" />
 		</div>
 
 		<div ref="messagesArea" class="chat-messages flex-grow-1">
@@ -148,6 +155,8 @@ export default {
 	color: var(--tn-fg);
 	font-size: 1.15rem;
 	font-weight: 600;
+	flex: 1;
+	min-width: 0;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
