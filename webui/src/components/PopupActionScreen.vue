@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import axios from '../services/axios.js';
+import ImagePicker from './ImagePicker.vue';
+import { fetchAvatar, updateName, updateAvatar, deleteAvatar } from '../services/api.js';
 import { getErrorMessage } from '../services/utils.js';
 
 // Inline action panel (rename or image change) shown in place of the popup menu.
@@ -14,7 +15,6 @@ const emit = defineEmits(['done', 'cancel']);
 
 const name = ref(props.initialName || '');
 const imageFile = ref(null);
-const imagePreview = ref(null);
 const currentImageUrl = ref(null);
 const removeRequested = ref(false);
 const errormsg = ref(null);
@@ -29,45 +29,29 @@ const isValid = computed(() => {
 	return imageFile.value != null || removeRequested.value;
 });
 
-const previewSrc = computed(() => {
-	if (removeRequested.value) return null;
-	return imagePreview.value || currentImageUrl.value;
+const previewUrl = computed(() => {
+	return removeRequested.value ? null : currentImageUrl.value;
 });
 
 const canRemove = computed(() => {
 	return currentImageUrl.value != null && imageFile.value == null && !removeRequested.value;
 });
 
-function currentAvatarUrl() {
-	if (props.target.kind === 'me') {
-		return '/users/' + props.target.userId + '/avatar';
-	}
-	return '/chats/' + props.target.chatId + '/avatar';
-}
-
 async function loadCurrentImage() {
 	try {
-		const response = await axios.get(currentAvatarUrl(), { responseType: 'blob' });
-		currentImageUrl.value = URL.createObjectURL(response.data);
+		currentImageUrl.value = URL.createObjectURL(await fetchAvatar(props.target));
 	} catch (e) {
 		currentImageUrl.value = null;
 	}
 }
 
-function onFileChange(e) {
-	const file = e.target.files && e.target.files[0];
-	if (!file) return;
-
-	if (file.size > 5 * 1024 * 1024) {
-		errormsg.value = 'Image must be at most 5 MB';
-		e.target.value = '';
-		return;
-	}
-
+function onFileSelected(file) {
 	imageFile.value = file;
-	removeRequested.value = false;
-	if (imagePreview.value) URL.revokeObjectURL(imagePreview.value);
-	imagePreview.value = URL.createObjectURL(file);
+	if (file) removeRequested.value = false;
+}
+
+function onPickerError(message) {
+	errormsg.value = message;
 }
 
 function requestRemove() {
@@ -81,29 +65,13 @@ async function confirm() {
 	errormsg.value = null;
 	try {
 		if (props.mode === 'rename') {
-			const newName = name.value.trim();
-			if (props.target.kind === 'me') {
-				const res = await axios.patch('/me/name', { userName: newName });
-				emit('done', { action: 'rename', name: res.data.name });
-			} else {
-				const res = await axios.patch('/chats/' + props.target.chatId + '/name', { groupName: newName });
-				emit('done', { action: 'rename', name: res.data.groupName });
-			}
+			const newName = await updateName(props.target, name.value.trim());
+			emit('done', { action: 'rename', name: newName });
 		} else if (imageFile.value) {
-			const formData = new FormData();
-			formData.append('binaryImage', imageFile.value);
-			if (props.target.kind === 'me') {
-				await axios.put('/me/avatar', formData);
-			} else {
-				await axios.put('/chats/' + props.target.chatId + '/avatar', formData);
-			}
+			await updateAvatar(props.target, imageFile.value);
 			emit('done', { action: 'image' });
 		} else if (removeRequested.value) {
-			if (props.target.kind === 'me') {
-				await axios.delete('/me/avatar');
-			} else {
-				await axios.delete('/chats/' + props.target.chatId + '/avatar');
-			}
+			await deleteAvatar(props.target);
 			emit('done', { action: 'image' });
 		}
 	} catch (e) {
@@ -118,7 +86,6 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-	if (imagePreview.value) URL.revokeObjectURL(imagePreview.value);
 	if (currentImageUrl.value) URL.revokeObjectURL(currentImageUrl.value);
 });
 </script>
@@ -132,13 +99,7 @@ onBeforeUnmount(() => {
 		</template>
 
 		<template v-else>
-			<label class="image-picker">
-				<img v-if="previewSrc" :src="previewSrc" class="image-preview" />
-				<span v-else class="image-placeholder">
-					<svg class="feather camera-icon"><use href="/feather-sprite-v4.29.0.svg#camera"/></svg>
-				</span>
-				<input type="file" accept="image/jpeg,image/png,image/webp" class="d-none" @change="onFileChange" />
-			</label>
+			<ImagePicker :model-value="imageFile" :preview-url="previewUrl" @update:model-value="onFileSelected" @error="onPickerError" />
 			<button v-if="canRemove" type="button" class="remove-image-btn" @click="requestRemove">Remove image</button>
 		</template>
 
@@ -188,40 +149,6 @@ onBeforeUnmount(() => {
 	background: var(--tn-bg-highlight);
 	border-color: var(--tn-border);
 	color: var(--tn-fg);
-}
-
-.image-picker {
-	width: 96px;
-	height: 96px;
-	border-radius: 50%;
-	overflow: hidden;
-	cursor: pointer;
-	flex-shrink: 0;
-	align-self: center;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-}
-
-.image-preview {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
-
-.image-placeholder {
-	width: 100%;
-	height: 100%;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: var(--tn-bg-highlight);
-	color: var(--tn-fg-dark);
-}
-
-.camera-icon {
-	width: 28px;
-	height: 28px;
 }
 
 .remove-image-btn {

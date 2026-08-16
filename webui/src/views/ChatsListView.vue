@@ -1,7 +1,8 @@
 <script>
 import ChatAvatar from '../components/ChatAvatar.vue';
-import { isMyMessage, formatPreviewTime, getStatusIcon, getStatusColor, getChatSnippet, getErrorMessage } from '../services/utils.js';
+import { isMyMessage, formatPreviewTime, getStatusIcon, getStatusColor, getChatSnippet } from '../services/utils.js';
 import { usePolling } from '../composables/usePolling.js';
+import { useChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';
 
 export default {
@@ -9,12 +10,13 @@ export default {
 	props: {
 		searchQuery: { type: String, default: '' },
 	},
+	setup() {
+		const { chats, errormsg, version, refreshChats } = useChats();
+		return { chats, errormsg, version, refreshChats };
+	},
 	data() {
 		return {
-			chats: [],
-			errormsg: null,
 			loading: false,
-			pollVersion: 0,
 		}
 	},
 	computed: {
@@ -31,18 +33,6 @@ export default {
 		getStatusColor,
 		getChatSnippet,
 
-		async fetchChats() {
-			this.errormsg = null;
-			try {
-				let response = await this.$axios.get('/chats');
-				this.chats = response.data.chatsPreviewList;
-				this.pollVersion++;
-			} catch (e) {
-				this.errormsg = getErrorMessage(e);
-			}
-			this.loading = false;
-		},
-
 		openChat(chat) {
 			navigateToChat(this.$router, chat);
 		},
@@ -53,8 +43,8 @@ export default {
 	},
 	mounted() {
 		this.loading = true;
-		this.fetchChats();
-		this.stopPolling = usePolling(() => this.fetchChats(), 10000);
+		this.refreshChats().finally(() => this.loading = false);
+		this.stopPolling = usePolling(() => this.refreshChats(), 8000);
 	},
 	beforeUnmount() {
 		if (this.stopPolling) this.stopPolling();
@@ -86,7 +76,7 @@ export default {
 				@click.prevent="openChat(chat)"
 				href="#"
 			>
-				<ChatAvatar :chatId="chat.id" :displayName="chat.displayName" :size="48" :isGroup="chat.isGroupChat" :version="pollVersion" class="me-3" />
+				<ChatAvatar :chatId="chat.id" :displayName="chat.displayName" :size="48" :isGroup="chat.isGroupChat" :version="version" class="me-3" />
 
 				<div class="chat-info flex-grow-1 min-w-0">
 					<div class="d-flex justify-content-between align-items-baseline">

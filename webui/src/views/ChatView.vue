@@ -4,6 +4,7 @@ import MessageInput from '../components/MessageInput.vue';
 import ChatAvatar from '../components/ChatAvatar.vue';
 import PopupMenu from '../components/PopupMenu.vue';
 import { usePolling } from '../composables/usePolling.js';
+import { refreshChats } from '../composables/useChats.js';
 import { formatDay, isNewDay, getErrorMessage } from '../services/utils.js';
 
 export default {
@@ -69,6 +70,7 @@ export default {
 				this.messages.push(response.data);
 				this.newMsg = '';
 				this.scrollToBottom();
+				refreshChats().catch(() => {});
 			} catch (e) {
 				this.errormsg = getErrorMessage(e);
 			}
@@ -88,6 +90,7 @@ export default {
 			} else if (payload.action === 'image') {
 				this.avatarVersion++;
 			}
+			refreshChats().catch(() => {});
 		},
 	},
 	watch: {

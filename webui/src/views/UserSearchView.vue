@@ -5,6 +5,7 @@ import axios from '../services/axios.js';
 import SearchBar from '../components/SearchBar.vue';
 import UserAvatar from '../components/UserAvatar.vue';
 import { useUsers } from '../composables/useUsers.js';
+import { refreshChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';
 import { getErrorMessage } from '../services/utils.js';
 
@@ -25,9 +26,11 @@ async function selectUser(user) {
 	errormsg.value = null;
 	try {
 		const response = await axios.post('/user/' + user.id + '/chats');
+		refreshChats().catch(() => {});
 		goToChat(response.data.id, response.data.displayName, false);
 	} catch (e) {
 		if (e.response && e.response.status === 409 && e.response.data && e.response.data.chatId) {
+			refreshChats().catch(() => {});
 			goToChat(e.response.data.chatId, user.name, false);
 		} else {
 			errormsg.value = getErrorMessage(e);
