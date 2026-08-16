@@ -16,7 +16,7 @@ export default {
 		<div class="welcome-body d-flex align-items-center justify-content-center">
 			<div class="text-center">
 				<h2 class="fw-normal" style="color: var(--tn-fg-dark);">Hi 👋 {{ userName }}!!</h2>
-				<p class="text-muted">Choose a chat or tap + to start a new one</p>
+				<p class="welcome-hint">Choose a chat or tap + to start a new one</p>
 			</div>
 		</div>
 	</div>
@@ -27,6 +27,10 @@ export default {
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
+	background-color: var(--tn-bg-dark);
+	background-image: url('/chat-bg.svg');
+	background-repeat: repeat;
+	background-size: 500px;
 }
 
 .welcome-header {
@@ -37,5 +41,13 @@ export default {
 
 .welcome-body {
 	flex: 1 1 auto;
+}
+
+.welcome-hint {
+	display: inline-block;
+	background: var(--tn-bg-highlight);
+	color: var(--tn-fg-dark);
+	padding: 4px 10px;
+	border-radius: 999px;
 }
 </style>
