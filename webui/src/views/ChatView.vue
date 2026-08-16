@@ -105,10 +105,16 @@ export default {
 			<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 
 			<template v-for="(msg, i) in messages" :key="msg.id">
-				<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
-					{{ formatDay(msg.sendTime) }}
-				</div>
-				<MessageBubble :message="msg" :isGroup="isGroup" />
+				<template v-if="msg.isInitMessage">
+					<MessageBubble :message="msg" :isGroup="isGroup" />
+					<div class="date-divider">{{ formatDay(msg.sendTime) }}</div>
+				</template>
+				<template v-else>
+					<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
+						{{ formatDay(msg.sendTime) }}
+					</div>
+					<MessageBubble :message="msg" :isGroup="isGroup" />
+				</template>
 			</template>
 		</div>
 

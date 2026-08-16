@@ -40,7 +40,7 @@ function handleBack() {
 
 	<div v-else class="container-fluid">
 		<div class="row">
-			<nav id="sidebarMenu" class="col-md-4 col-lg-3 d-md-block sidebar p-0">
+			<nav id="sidebarMenu" class="col-md-5 col-lg-4 d-md-block sidebar p-0">
 				<div class="sidebar-inner">
 					<SidebarHeader :mode="sidebarMode" @new-chat="sidebarMode = 'users'" @back="handleBack" @home="sidebarMode = 'chats'" />
 					<div class="sidebar-sticky">
@@ -55,7 +55,7 @@ function handleBack() {
 				</div>
 			</nav>
 
-			<main class="col-md-8 ms-sm-auto col-lg-9 p-0">
+			<main class="col-md-7 ms-sm-auto col-lg-8 p-0">
 				<RouterView />
 			</main>
 		</div>
