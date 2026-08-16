@@ -81,7 +81,7 @@ export default {
 			<a
 				v-for="chat in filteredChats"
 				:key="chat.id"
-				class="list-group-item list-group-item-action d-flex align-items-center px-3 py-3 chat-row"
+				class="list-group-item list-group-item-action d-flex align-items-center chat-row"
 				:class="{ active: isActive(chat.id) }"
 				@click.prevent="openChat(chat)"
 				href="#"
@@ -129,6 +129,7 @@ export default {
 	border-radius: 12px !important;
 	margin: 4px 12px !important;
 	width: auto;
+	padding: 10px 16px;
 }
 
 .chat-row:hover {

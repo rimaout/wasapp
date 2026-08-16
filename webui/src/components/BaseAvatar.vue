@@ -20,13 +20,12 @@ export default {
 	computed: {
 		style() {
 			let px = this.size + 'px';
-			let radius = this.isGroup ? '33%' : '50%';
 			return {
 				width: px,
 				height: px,
 				minWidth: px,
 				fontSize: (this.size * 0.45) + 'px',
-				borderRadius: radius,
+				borderRadius: '50%',
 			};
 		},
 		letter() {
@@ -40,7 +39,11 @@ export default {
 		async loadImage() {
 			try {
 				let response = await this.$axios.get(this.imageUrl, { responseType: 'blob' });
-				this.imgSrc = URL.createObjectURL(response.data);
+				let url = URL.createObjectURL(response.data);
+				// Release the previous blob URL before swapping to the new one
+				// (the image source can change without a component remount).
+				if (this.imgSrc) URL.revokeObjectURL(this.imgSrc);
+				this.imgSrc = url;
 				this.showImage = true;
 			} catch (e) {
 				this.showImage = false;
@@ -48,6 +51,9 @@ export default {
 		},
 	},
 	watch: {
+		// Reload when the image URL changes (e.g. switching to another chat).
+		imageUrl: 'loadImage',
+		// Reload when the version prop is bumped (e.g. avatar was re-uploaded).
 		version: {
 			handler: 'loadImage',
 			immediate: true,
