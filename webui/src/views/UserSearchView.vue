@@ -100,9 +100,9 @@ function goToChat(chatId, displayName, isGroupChat) {
 .user-row {
 	border: 0 !important;
 	border-radius: 12px !important;
-	margin: 4px 12px;
+	margin: 2px 12px;
 	width: auto;
-	padding: 12px 16px;
+	padding: 8px 16px;
 }
 
 .user-row:hover {
