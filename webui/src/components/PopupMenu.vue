@@ -1,20 +1,39 @@
 <script setup>
 import { ref } from 'vue';
 import IconButton from './IconButton.vue';
+import PopupActionScreen from './PopupActionScreen.vue';
 
 defineProps({
 	icon: { type: String, required: true },
 	label: { type: String, default: '' },
 	items: { type: Array, required: true },
 	direction: { type: String, default: 'down' },
+	target: { type: Object, default: null },
+	initialName: { type: String, default: '' },
 });
-const emit = defineEmits(['select']);
+const emit = defineEmits(['select', 'done']);
 
 const open = ref(false);
+const activeAction = ref(null);
+
+function closeAll() {
+	open.value = false;
+	activeAction.value = null;
+}
 
 function choose(item) {
-	open.value = false;
+	// Items with an `action` morph the menu into the action screen in place.
+	if (item.action) {
+		activeAction.value = { mode: item.action, title: item.label };
+		return;
+	}
+	closeAll();
 	emit('select', item);
+}
+
+function onDone(payload) {
+	emit('done', payload);
+	closeAll();
 }
 </script>
 
@@ -22,19 +41,30 @@ function choose(item) {
 	<div class="popup-menu">
 		<IconButton :icon="icon" :label="label" @click="open = !open" />
 		<template v-if="open">
-			<div class="popup-backdrop" @click="open = false"></div>
+			<div class="popup-backdrop" @click="closeAll"></div>
 			<div class="popup-panel" :class="direction">
-				<button
-					v-for="item in items"
-					:key="item.id"
-					type="button"
-					class="popup-item"
-					:class="{ danger: item.danger }"
-					@click="choose(item)"
-				>
-					<svg class="feather popup-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + item.icon"/></svg>
-					<span>{{ item.label }}</span>
-				</button>
+				<PopupActionScreen
+					v-if="activeAction"
+					:mode="activeAction.mode"
+					:title="activeAction.title"
+					:target="target"
+					:initial-name="initialName"
+					@done="onDone"
+					@cancel="closeAll"
+				/>
+				<template v-else>
+					<button
+						v-for="item in items"
+						:key="item.id"
+						type="button"
+						class="popup-item"
+						:class="{ danger: item.danger }"
+						@click="choose(item)"
+					>
+						<svg class="feather popup-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + item.icon"/></svg>
+						<span>{{ item.label }}</span>
+					</button>
+				</template>
 			</div>
 		</template>
 	</div>

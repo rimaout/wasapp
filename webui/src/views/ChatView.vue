@@ -16,9 +16,11 @@ export default {
 			loading: true,
 			errormsg: null,
 			markedRead: false,
+			nameOverride: null,
+			avatarVersion: 0,
 			chatOptions: [
-				{ id: 'rename', label: 'Change Group Name', icon: 'type' },
-				{ id: 'image', label: 'Change Group Icon', icon: 'image' },
+				{ id: 'rename', label: 'Change Group Name', icon: 'type', action: 'rename' },
+				{ id: 'image', label: 'Change Group Image', icon: 'image', action: 'image' },
 				{ id: 'leave', label: 'Leave Group', icon: 'log-out', danger: true },
 			],
 		};
@@ -31,7 +33,7 @@ export default {
 			return this.$route.query.group === '1';
 		},
 		chatName() {
-			return this.$route.query.name || 'Chat';
+			return this.nameOverride || this.$route.query.name || 'Chat';
 		},
 	},
 	methods: {
@@ -79,6 +81,14 @@ export default {
 				if (el) el.scrollTop = el.scrollHeight;
 			});
 		},
+
+		onChatAction(payload) {
+			if (payload.action === 'rename') {
+				this.nameOverride = payload.name;
+			} else if (payload.action === 'image') {
+				this.avatarVersion++;
+			}
+		},
 	},
 	watch: {
 		chatId() {
@@ -86,6 +96,7 @@ export default {
 			this.loading = true;
 			this.markedRead = false;
 			this.errormsg = null;
+			this.nameOverride = null;
 			this.fetchMessages(true);
 		},
 	},
@@ -102,9 +113,9 @@ export default {
 <template>
 	<div class="chat-view">
 		<div class="chat-header">
-			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" />
+			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" :version="avatarVersion" />
 			<span class="chat-header-name">{{ chatName }}</span>
-			<PopupMenu v-if="isGroup" class="ms-auto" icon="edit-2" label="Chat options" :items="chatOptions" />
+			<PopupMenu v-if="isGroup" class="ms-auto" icon="edit-2" label="Chat options" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" @done="onChatAction" />
 		</div>
 
 		<div ref="messagesArea" class="chat-messages flex-grow-1">
