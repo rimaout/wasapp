@@ -69,7 +69,7 @@ function goToChat(chatId, displayName, isGroupChat) {
 				<a
 					v-for="user in visibleUsers"
 					:key="user.id"
-					class="list-group-item list-group-item-action d-flex align-items-center px-3 py-2 user-row"
+					class="list-group-item list-group-item-action d-flex align-items-center user-row"
 					:class="{ disabled: creating }"
 					href="#"
 					@click.prevent="selectUser(user)"
@@ -125,6 +125,10 @@ function goToChat(chatId, displayName, isGroupChat) {
 
 .user-row {
 	border: 0 !important;
+	border-radius: 12px !important;
+	margin: 4px 12px;
+	width: auto;
+	padding: 12px 16px;
 }
 
 .user-row:hover {

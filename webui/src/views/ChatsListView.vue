@@ -126,6 +126,9 @@ export default {
 <style scoped>
 .chat-row {
 	border: 0 !important;
+	border-radius: 12px !important;
+	margin: 4px 12px !important;
+	width: auto;
 }
 
 .chat-row:hover {
@@ -134,7 +137,6 @@ export default {
 
 .chat-row.active {
 	background-color: var(--tn-bg-highlight) !important;
-	border-color: var(--tn-border) !important;
 }
 
 .chat-name {
