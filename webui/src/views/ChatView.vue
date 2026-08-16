@@ -48,7 +48,9 @@ export default {
 
 				if (!this.markedRead) {
 					this.markedRead = true;
-					this.$axios.post('/chats/' + this.chatId + '/read').catch(() => {});
+					this.$axios.post('/chats/' + this.chatId + '/read')
+					.then(() => refreshChats())
+					.catch(() => {});
 				}
 			} catch (e) {
 				this.errormsg = getErrorMessage(e);
