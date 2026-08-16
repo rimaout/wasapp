@@ -1,5 +1,8 @@
 <script>
+import IconButton from './IconButton.vue';
+
 export default {
+	components: { IconButton },
 	props: {
 		modelValue: { type: String, default: '' },
 		sending: { type: Boolean, default: false },
@@ -23,9 +26,7 @@ export default {
 <template>
 	<div class="chat-input">
 		<div class="message-input-group">
-			<svg class="feather image-icon" style="width: 20px; height: 20px;">
-				<use href="/feather-sprite-v4.29.0.svg#image"/>
-			</svg>
+			<IconButton class="me-3" icon="image" label="Attach image" />
 			<input
 				type="text"
 				class="message-field"
@@ -56,14 +57,8 @@ export default {
 	background: var(--tn-bg-highlight);
 	border-radius: 999px;
 	height: 52px;
-	padding: 6px 6px 6px 18px;
+	padding: 6px 6px 6px 8px;
 	box-shadow: 0 3px 16px rgba(0, 0, 0, 0.3);
-}
-
-.image-icon {
-	color: var(--tn-comment);
-	flex-shrink: 0;
-	margin-right: 12px;
 }
 
 .message-field {
@@ -92,12 +87,10 @@ export default {
 	color: var(--tn-bg-darker);
 	cursor: pointer;
 	flex-shrink: 0;
-	box-shadow: 0 0 10px rgba(122, 162, 247, 0.5);
 }
 
 .send-btn:hover {
-	background-color: var(--tn-cyan);
-	box-shadow: 0 0 14px rgba(125, 207, 255, 0.7);
+	filter: brightness(1.1);
 }
 
 .send-btn:disabled {

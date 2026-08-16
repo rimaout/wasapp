@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue';
+import IconButton from './IconButton.vue';
 
 const props = defineProps({
 	mode: { type: String, required: true },
@@ -20,9 +21,7 @@ const title = computed(() => TITLES[props.mode] || '');
 	<div class="sidebar-header">
 		<template v-if="isChats">
 			<a href="#/chats" class="sidebar-logo fw-bold" @click="emit('home')">WASApp</a>
-			<button type="button" class="plus-btn ms-auto" @click="emit('new-chat')">
-				<svg class="feather plus-icon"><use href="/feather-sprite-v4.29.0.svg#plus-square"/></svg>
-			</button>
+			<IconButton class="ms-auto" icon="plus-square" label="New chat" @click="emit('new-chat')" />
 		</template>
 		<template v-else>
 			<button type="button" class="back-btn" @click="emit('back')">
@@ -57,28 +56,6 @@ const title = computed(() => TITLES[props.mode] || '');
 
 .header-title {
 	font-size: 1.05rem;
-}
-
-.plus-btn {
-	background: none;
-	border: none;
-	padding: 0;
-	cursor: pointer;
-	color: var(--tn-fg-dark);
-	line-height: 1;
-}
-
-.plus-btn:hover {
-	color: var(--tn-blue);
-}
-
-.plus-btn:active {
-	color: var(--tn-cyan);
-}
-
-.plus-btn .plus-icon {
-	width: 23px;
-	height: 23px;
 }
 
 .back-btn {
