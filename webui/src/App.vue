@@ -26,7 +26,7 @@ function handleBack() {
 	if (sidebarMode.value === 'users') {
 		sidebarMode.value = 'chats';
 	} else if (sidebarMode.value === 'group-members') {
-		sidebarMode.value = 'users';
+		sidebarMode.value = 'chats';
 	} else if (sidebarMode.value === 'group-details') {
 		sidebarMode.value = 'group-members';
 	}
@@ -42,13 +42,13 @@ function handleBack() {
 		<div class="row">
 			<nav id="sidebarMenu" class="col-md-5 col-lg-4 d-md-block sidebar p-0">
 				<div class="sidebar-inner">
-					<SidebarHeader :mode="sidebarMode" @new-chat="sidebarMode = 'users'" @back="handleBack" @home="sidebarMode = 'chats'" />
+					<SidebarHeader :mode="sidebarMode" @create-direct="sidebarMode = 'users'" @create-group="startGroupCreation" @back="handleBack" @home="sidebarMode = 'chats'" />
 					<div class="sidebar-sticky">
 						<template v-if="sidebarMode === 'chats'">
 							<SearchBar v-model="searchQuery" />
 							<ChatsListView :searchQuery="searchQuery" />
 						</template>
-						<UserSearchView v-else-if="sidebarMode === 'users'" @close="sidebarMode = 'chats'" @create-group="startGroupCreation" />
+						<UserSearchView v-else-if="sidebarMode === 'users'" @close="sidebarMode = 'chats'" />
 						<GroupMembersView v-else-if="sidebarMode === 'group-members'" v-model:members="groupMembers" @create="sidebarMode = 'group-details'" />
 						<GroupDetailsView v-else-if="sidebarMode === 'group-details'" :members="groupMembers" @done="finishGroupCreation" />
 					</div>

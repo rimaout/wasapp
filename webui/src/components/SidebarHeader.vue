@@ -1,27 +1,36 @@
 <script setup>
 import { computed } from 'vue';
-import IconButton from './IconButton.vue';
+import PopupMenu from './PopupMenu.vue';
 
 const props = defineProps({
 	mode: { type: String, required: true },
 });
-const emit = defineEmits(['new-chat', 'back', 'home']);
+const emit = defineEmits(['back', 'home', 'create-direct', 'create-group']);
 
 const TITLES = {
-	users: 'New chat',
+	users: 'New direct chat',
 	'group-members': 'Add group members',
 	'group-details': 'New group',
 };
 
 const isChats = computed(() => props.mode === 'chats');
 const title = computed(() => TITLES[props.mode] || '');
+
+const newChatItems = [
+	{ id: 'direct', label: 'Create Direct Chat', icon: 'message-circle' },
+	{ id: 'group', label: 'Create Group', icon: 'users' },
+];
+
+function onNewChatSelect(item) {
+	emit(item.id === 'group' ? 'create-group' : 'create-direct');
+}
 </script>
 
 <template>
 	<div class="sidebar-header">
 		<template v-if="isChats">
 			<a href="#/chats" class="sidebar-logo fw-bold" @click="emit('home')">WASApp</a>
-			<IconButton class="ms-auto" icon="plus-square" label="New chat" @click="emit('new-chat')" />
+			<PopupMenu class="ms-auto" icon="plus-square" label="New chat" :items="newChatItems" @select="onNewChatSelect" />
 		</template>
 		<template v-else>
 			<button type="button" class="back-btn" @click="emit('back')">

@@ -8,7 +8,7 @@ import { useUsers } from '../composables/useUsers.js';
 import { navigateToChat } from '../services/chatNavigation.js';
 import { getErrorMessage } from '../services/utils.js';
 
-const emit = defineEmits(['close', 'create-group']);
+const emit = defineEmits(['close']);
 const router = useRouter();
 
 const query = ref('');
@@ -47,11 +47,6 @@ function goToChat(chatId, displayName, isGroupChat) {
 	<div class="user-search-view">
 		<SearchBar v-model="query" placeholder="Search users..." />
 
-		<button type="button" class="new-group-btn" @click="emit('create-group')">
-			<svg class="feather new-group-icon"><use href="/feather-sprite-v4.29.0.svg#users"/></svg>
-			<span>Create new group</span>
-		</button>
-
 		<div class="user-list flex-grow-1">
 			<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 			<LoadingSpinner v-if="loading && users.length === 0" />
@@ -87,30 +82,6 @@ function goToChat(chatId, displayName, isGroupChat) {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-}
-
-.new-group-btn {
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	width: 100%;
-	border: none;
-	background: none;
-	padding: 10px 16px;
-	color: var(--tn-fg);
-	cursor: pointer;
-	text-align: left;
-	flex-shrink: 0;
-}
-
-.new-group-btn:hover {
-	background-color: var(--tn-bg-highlight);
-}
-
-.new-group-btn .new-group-icon {
-	width: 20px;
-	height: 20px;
-	color: var(--tn-blue);
 }
 
 .user-list {
