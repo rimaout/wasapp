@@ -70,6 +70,7 @@ type AppDatabase interface {
 
 	// Messages
 	CreateMessage(chatId, senderId, sendTime, text, imageId, replyTo string, isInit, isForward bool, forwardFromChat, forwardFromMsg string) (string, error)
+	CreateSystemMessage(chatId, senderId string, isJoin bool) (string, error)
 	GetMessageById(chatId, messageId string) (Message, error)
 	SaveMessageImagePath(path string) (string, error)
 	DeleteMessageImagePath(imageId string) error
@@ -187,6 +188,8 @@ func New(db *sql.DB) (AppDatabase, error) {
 			"send_time"       DATETIME NOT NULL,
 			"is_deleted"      BOOLEAN NOT NULL,
 			"is_init_message" BOOLEAN NOT NULL,
+			"is_join_message" BOOLEAN NOT NULL DEFAULT 0,
+			"is_leave_message" BOOLEAN NOT NULL DEFAULT 0,
 
 			"text"      TEXT,
 			"image_id"  TEXT,
@@ -206,9 +209,9 @@ func New(db *sql.DB) (AppDatabase, error) {
 			FOREIGN KEY (forwarded_from_msg_id) REFERENCES messages(id)
 
 			-- Constraint 1.1: Minimum Content Requirement
-			-- Must have text or image, unless it's an init message, deleted, or a forward
+			-- Must have text or image, unless it's an init message, deleted, a forward, or a system message
 			CONSTRAINT chk_msg_minimum_content CHECK (
-				(is_init_message = 1 OR is_deleted = 1 OR is_forward_message = 1) OR
+				(is_init_message = 1 OR is_deleted = 1 OR is_forward_message = 1 OR is_join_message = 1 OR is_leave_message = 1) OR
 				(text IS NOT NULL OR image_id IS NOT NULL)
 			),
 
@@ -243,6 +246,32 @@ func New(db *sql.DB) (AppDatabase, error) {
 					forwarded_from_chat_id IS NULL AND
 					forwarded_from_msg_id IS NULL AND
 					is_init_message = 0
+				)
+			),
+
+			-- Constraint 1.6: Join Message Constraints
+			-- A join message cannot have content, be deleted, forwarded, or be any other message type.
+			CONSTRAINT chk_join_msg_fields CHECK (
+				NOT (is_join_message = 1) OR (
+					text IS NULL AND
+					image_id IS NULL AND
+					is_deleted = 0 AND
+					is_forward_message = 0 AND
+					is_init_message = 0 AND
+					is_leave_message = 0
+				)
+			),
+
+			-- Constraint 1.7: Leave Message Constraints
+			-- A leave message cannot have content, be deleted, forwarded, or be any other message type.
+			CONSTRAINT chk_leave_msg_fields CHECK (
+				NOT (is_leave_message = 1) OR (
+					text IS NULL AND
+					image_id IS NULL AND
+					is_deleted = 0 AND
+					is_forward_message = 0 AND
+					is_init_message = 0 AND
+					is_join_message = 0
 				)
 			)
 

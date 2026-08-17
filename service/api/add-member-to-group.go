@@ -72,6 +72,17 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 		return
 	}
 
+	// Create a join system message (sender is the new member)
+	joinMsgId, err := rt.db.CreateSystemMessage(chatId, newMemberId, true)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("error creating join message")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		return
+	}
+
+	// Create the receiver statuses for the join message (one for each member of the chat)
+	_ = rt.db.InsertReceiverStatuses(joinMsgId, chatId, newMemberId)
+
 	// Get updated list of members
 	updatedMembers, err := rt.db.GetChatMembers(chatId)
 	if err != nil {

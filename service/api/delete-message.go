@@ -51,6 +51,12 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
+	// Check if message is a join/leave system message (400)
+	if msg.IsJoinMessage || msg.IsLeaveMessage {
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeItsInitMessage, "cannot delete a system message")
+		return
+	}
+
 	// Mark the db record as delete message from
 	updatedMsg, err := rt.db.SetMessageAsDeleted(chatId, messageId)
 	if err != nil {

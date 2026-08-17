@@ -42,6 +42,8 @@ type Message struct {
 	Status        MessageStatus      `json:"status"`
 	IsDeleted     bool               `json:"isDeleted"`
 	IsInitMessage bool               `json:"isInitMessage"`
+	IsJoinMessage bool               `json:"isJoinMessage"`
+	IsLeaveMessage bool              `json:"isLeaveMessage"`
 	ReactionsList []EmojiReaction    `json:"reactionsList"`
 	ForwardedFrom *ForwardedFromInfo `json:"forwardedFrom,omitempty"`
 	ReplyTo       *string            `json:"replyTo,omitempty"`
@@ -99,6 +101,33 @@ func (db *appdbimpl) CreateMessage(
 	return msgId, nil
 }
 
+// CreateSystemMessage inserts a join or leave system message (no content) and returns its ID.
+// `isJoin` selects between a join message (true) and a leave message (false).
+func (db *appdbimpl) CreateSystemMessage(chatId, senderId string, isJoin bool) (string, error) {
+	id, err := uuid.NewV4()
+	if err != nil {
+		return "", fmt.Errorf("error generating message UUID: %w", err)
+	}
+	msgId := id.String()
+
+	sendTime := time.Now().UTC().Format(time.RFC3339)
+
+	_, err = db.c.Exec(
+		`INSERT INTO messages
+			(id, chat_id, sender_id, send_time, is_deleted, is_init_message,
+			 is_join_message, is_leave_message,
+			 text, image_id, reply_to_msg_id,
+			 is_forward_message, forwarded_from_chat_id, forwarded_from_msg_id)
+		 VALUES (?, ?, ?, ?, 0, 0, ?, ?, NULL, NULL, NULL, 0, NULL, NULL)`,
+		msgId, chatId, senderId, sendTime, isJoin, !isJoin,
+	)
+	if err != nil {
+		return "", fmt.Errorf("inserting system message into database: %w", err)
+	}
+
+	return msgId, nil
+}
+
 // SaveMessageImagePath inserts an image path into the images table and returns its generated UUID.
 func (db *appdbimpl) SaveMessageImagePath(path string) (string, error) {
 	id, err := uuid.NewV4()
@@ -135,6 +164,7 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 
 	// Query the message and its sender from the database
 	query := `SELECT m.id, m.chat_id, m.send_time, m.is_deleted, m.is_init_message,
+		m.is_join_message, m.is_leave_message,
 		m.text, m.image_id, m.reply_to_msg_id,
 		m.is_forward_message, m.forwarded_from_chat_id, m.forwarded_from_msg_id,
 		u.id, u.name
@@ -145,12 +175,13 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 	// Save the results into variables
 	var (
 		id, targetChatId, sendTimeStr, senderId, senderName string
-		isDeleted, isInit, isForward                        bool
-		dbText, dbImageId, dbReplyTo                        *string
-		dbFwdChatId, dbFwdMsgId                             *string
+		isDeleted, isInit, isForward, isJoin, isLeave        bool
+		dbText, dbImageId, dbReplyTo                         *string
+		dbFwdChatId, dbFwdMsgId                              *string
 	)
 	err := db.c.QueryRow(query, messageId, chatId).Scan(
 		&id, &targetChatId, &sendTimeStr, &isDeleted, &isInit,
+		&isJoin, &isLeave,
 		&dbText, &dbImageId, &dbReplyTo,
 		&isForward, &dbFwdChatId, &dbFwdMsgId,
 		&senderId, &senderName,
@@ -169,16 +200,18 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 
 	// Construct the Message object
 	msg := Message{
-		ID:            id,
-		ChatID:        targetChatId,
-		SendTime:      sendTime,
-		Sender:        User{Id: senderId, Name: senderName},
-		IsDeleted:     isDeleted,
-		IsInitMessage: isInit,
+		ID:             id,
+		ChatID:         targetChatId,
+		SendTime:       sendTime,
+		Sender:         User{Id: senderId, Name: senderName},
+		IsDeleted:      isDeleted,
+		IsInitMessage:  isInit,
+		IsJoinMessage:  isJoin,
+		IsLeaveMessage: isLeave,
 	}
 
-	// Only include content if the message is not deleted and not an init message
-	if !isDeleted && !isInit {
+	// Only include content if the message is not deleted, not an init message, and not a system message
+	if !isDeleted && !isInit && !isJoin && !isLeave {
 		content := MessageContent{}
 		hasContent := false
 
@@ -330,6 +363,7 @@ func (db *appdbimpl) IsImageInChat(chatId, imageId string) (bool, error) {
 func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 	rows, err := db.c.Query(
 		`SELECT m.id, m.chat_id, m.send_time, m.is_deleted, m.is_init_message,
+			m.is_join_message, m.is_leave_message,
 			m.text, m.image_id, m.reply_to_msg_id,
 			m.is_forward_message, m.forwarded_from_chat_id, m.forwarded_from_msg_id,
 			u.id, u.name
@@ -350,12 +384,13 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 	for rows.Next() {
 		var (
 			id, targetChatId, sendTimeStr, senderId, senderName string
-			isDeleted, isInit, isForward                        bool
-			dbText, dbImageId, dbReplyTo                        *string
-			dbFwdChatId, dbFwdMsgId                             *string
+			isDeleted, isInit, isForward, isJoin, isLeave        bool
+			dbText, dbImageId, dbReplyTo                         *string
+			dbFwdChatId, dbFwdMsgId                              *string
 		)
 		err := rows.Scan(
 			&id, &targetChatId, &sendTimeStr, &isDeleted, &isInit,
+			&isJoin, &isLeave,
 			&dbText, &dbImageId, &dbReplyTo,
 			&isForward, &dbFwdChatId, &dbFwdMsgId,
 			&senderId, &senderName,
@@ -370,16 +405,18 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 		}
 
 		msg := Message{
-			ID:            id,
-			ChatID:        targetChatId,
-			SendTime:      sendTime,
-			Sender:        User{Id: senderId, Name: senderName},
-			IsDeleted:     isDeleted,
-			IsInitMessage: isInit,
+			ID:             id,
+			ChatID:         targetChatId,
+			SendTime:       sendTime,
+			Sender:         User{Id: senderId, Name: senderName},
+			IsDeleted:      isDeleted,
+			IsInitMessage:  isInit,
+			IsJoinMessage:  isJoin,
+			IsLeaveMessage: isLeave,
 		}
 
-		// Only include content if the message is not deleted and not an init message
-		if !isDeleted && !isInit {
+		// Only include content if the message is not deleted, not an init message, and not a system message
+		if !isDeleted && !isInit && !isJoin && !isLeave {
 			content := MessageContent{}
 			hasContent := false
 			if dbText != nil {

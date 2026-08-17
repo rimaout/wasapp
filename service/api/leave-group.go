@@ -36,6 +36,18 @@ func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
+	// Create a leave system message (sender is the leaving user)
+	leaveMsgId, err := rt.db.CreateSystemMessage(chatId, ctx.UserID, false)
+	if err != nil {
+		ctx.Logger.WithError(err).Error("error creating leave message")
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		return
+	}
+
+	// Create the receiver statuses for the leave message (the leaver is excluded,
+	// as their group_leave_time is already set)
+	_ = rt.db.InsertReceiverStatuses(leaveMsgId, chatId, ctx.UserID)
+
 	// Return 204 No Content on success
 	w.WriteHeader(http.StatusNoContent)
 }

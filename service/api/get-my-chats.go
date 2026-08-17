@@ -23,12 +23,14 @@ type chatPreviewResponse struct {
 }
 
 type chatLastMessagePreview struct {
-	Status        string                   `json:"status"`
-	SendTime      string                   `json:"sendTime"`
-	SenderName    string                   `json:"senderName"`
-	IsDeleted     bool                     `json:"isDeleted"`
-	IsInitMessage bool                     `json:"isInitMessage"`
-	Content       *database.MessageContent `json:"content,omitempty"`
+	Status         string                   `json:"status"`
+	SendTime       string                   `json:"sendTime"`
+	SenderName     string                   `json:"senderName"`
+	IsDeleted      bool                     `json:"isDeleted"`
+	IsInitMessage  bool                     `json:"isInitMessage"`
+	IsJoinMessage  bool                     `json:"isJoinMessage"`
+	IsLeaveMessage bool                     `json:"isLeaveMessage"`
+	Content        *database.MessageContent `json:"content,omitempty"`
 }
 
 func (rt *_router) getMyChats(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
@@ -50,16 +52,18 @@ func (rt *_router) getMyChats(w http.ResponseWriter, r *http.Request, ps httprou
 			IsGroupChat: cp.IsGroupChat,
 			UnreadCount: cp.UnreadCount,
 			LastMessage: chatLastMessagePreview{
-				Status:        "delivered", //TODO: use real receiver status when implemented
-				SendTime:      cp.SendTime.UTC().Format(time.RFC3339),
-				SenderName:    cp.SenderName,
-				IsDeleted:     cp.IsDeleted,
-				IsInitMessage: cp.IsInitMsg,
+				Status:         "delivered", //TODO: use real receiver status when implemented
+				SendTime:       cp.SendTime.UTC().Format(time.RFC3339),
+				SenderName:     cp.SenderName,
+				IsDeleted:      cp.IsDeleted,
+				IsInitMessage:  cp.IsInitMsg,
+				IsJoinMessage:  cp.IsJoinMsg,
+				IsLeaveMessage: cp.IsLeaveMsg,
 			},
 		}
 
-		// Only include the content if the message is not deleted and not an init message
-		if !cp.IsDeleted && !cp.IsInitMsg {
+		// Only include the content if the message is not deleted, not an init message, and not a system message
+		if !cp.IsDeleted && !cp.IsInitMsg && !cp.IsJoinMsg && !cp.IsLeaveMsg {
 			content := &database.MessageContent{}
 			hasContent := false
 			if cp.Text != nil {

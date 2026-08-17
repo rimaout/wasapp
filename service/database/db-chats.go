@@ -172,6 +172,8 @@ type ChatPreview struct {
 	SenderName   string
 	IsDeleted    bool
 	IsInitMsg    bool
+	IsJoinMsg    bool
+	IsLeaveMsg   bool
 	Text         *string
 	ImageID      *string
 	ReplyTo      *string
@@ -193,7 +195,7 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			END AS display_name,
 
 			m.id, m.send_time, m.sender_id, u.name AS sender_name,
-			m.is_deleted, m.is_init_message,
+			m.is_deleted, m.is_init_message, m.is_join_message, m.is_leave_message,
 			m.text, m.image_id, m.reply_to_msg_id,
 
 			-- Count unread messages for this user in this chat
@@ -228,7 +230,7 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			&cp.ChatID, &cp.IsGroupChat, &groupName,
 			&cp.DisplayName,
 			&cp.MessageID, &cp.SendTime, &cp.SenderID, &cp.SenderName,
-			&cp.IsDeleted, &cp.IsInitMsg,
+			&cp.IsDeleted, &cp.IsInitMsg, &cp.IsJoinMsg, &cp.IsLeaveMsg,
 			&cp.Text, &cp.ImageID, &cp.ReplyTo,
 			&cp.UnreadCount,
 		)
