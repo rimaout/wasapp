@@ -46,3 +46,8 @@ export async function createGroup(groupName, membersList) {
 	const res = await axios.post('/chats', { groupName, membersList });
 	return res.data;
 }
+
+// Leave a group chat.
+export function leaveGroup(chatId) {
+	return axios.delete('/chats/' + chatId + '/members/me');
+}

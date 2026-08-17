@@ -5,6 +5,7 @@ import ChatAvatar from '../components/ChatAvatar.vue';
 import PopupMenu from '../components/PopupMenu.vue';
 import { usePolling } from '../composables/usePolling.js';
 import { refreshChats } from '../composables/useChats.js';
+import { leaveGroup } from '../services/api.js';
 import { formatDay, isNewDay, getErrorMessage } from '../services/utils.js';
 
 export default {
@@ -94,6 +95,22 @@ export default {
 			}
 			refreshChats().catch(() => {});
 		},
+
+		onChatSelect(item) {
+			if (item.id === 'leave') {
+				this.leaveGroup();
+			}
+		},
+
+		async leaveGroup() {
+			try {
+				await leaveGroup(this.chatId);
+				refreshChats().catch(() => {});
+				this.$router.push('/chats');
+			} catch (e) {
+				this.errormsg = getErrorMessage(e);
+			}
+		},
 	},
 	watch: {
 		chatId() {
@@ -123,7 +140,7 @@ export default {
 			</button>
 			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" :version="avatarVersion" />
 			<span class="chat-header-name">{{ chatName }}</span>
-			<PopupMenu v-if="isGroup" class="ms-auto" icon="edit-2" label="Chat options" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" @done="onChatAction" />
+			<PopupMenu v-if="isGroup" class="ms-auto" icon="edit-2" label="Chat options" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" @done="onChatAction" @select="onChatSelect" />
 		</div>
 
 		<div ref="messagesArea" class="chat-messages flex-grow-1">
