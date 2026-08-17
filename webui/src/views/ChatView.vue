@@ -151,14 +151,14 @@ export default {
 
 			<template v-for="(msg, i) in messages" :key="msg.id">
 				<template v-if="msg.isInitMessage">
-					<MessageBubble :message="msg" :isGroup="isGroup" />
+					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" />
 					<div class="date-divider">{{ formatDay(msg.sendTime) }}</div>
 				</template>
 				<template v-else>
 					<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
 						{{ formatDay(msg.sendTime) }}
 					</div>
-					<MessageBubble :message="msg" :isGroup="isGroup" />
+					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" />
 				</template>
 			</template>
 		</div>

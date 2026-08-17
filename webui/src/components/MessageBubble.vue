@@ -1,10 +1,13 @@
 <script>
 import { formatMessageTime, getStatusIcon, getStatusColor, isMyMessageById } from '../services/utils.js';
+import UserAvatar from './UserAvatar.vue';
 
 export default {
+	components: { UserAvatar },
 	props: {
 		message: { type: Object, required: true },
 		isGroup: { type: Boolean, default: false },
+		showAvatar: { type: Boolean, default: false },
 	},
 	computed: {
 		isMine() {
@@ -32,8 +35,11 @@ export default {
 			{{ isMine ? 'You deleted this message' : 'Message deleted' }}
 		</div>
 
-		<div v-else class="message-bubble" :class="isMine ? 'me' : 'other'">
-			<div v-if="isGroup && !isMine" class="message-sender">{{ message.sender.name }}</div>
+		<div v-else class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': showAvatar }]">
+			<div v-if="isGroup && !isMine" class="message-sender">
+				<UserAvatar v-if="showAvatar" :userId="message.sender.id" :displayName="message.sender.name" :size="18" />
+				<span class="message-sender-name">{{ message.sender.name }}</span>
+			</div>
 			<div class="message-text">{{ message.content?.text || '' }}</div>
 			<div class="message-meta">
 				<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
@@ -87,11 +93,25 @@ export default {
 	border-bottom-left-radius: 4px;
 }
 
+.message-bubble.has-avatar {
+	padding-left: 8px;
+}
+
+.message-bubble.has-avatar .message-sender {
+	margin-bottom: 6px;
+}
+
 .message-sender {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 2px;
+}
+
+.message-sender-name {
 	font-size: 0.75rem;
 	font-weight: 600;
 	color: var(--tn-cyan);
-	margin-bottom: 2px;
 }
 
 .message-text {
