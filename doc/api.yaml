@@ -787,7 +787,7 @@ paths:
       Soft-deletes the message identified by messageId from the chat identified by chatId.
       The authenticated user must be the sender of the message.
         - Subsequent reads of this message will return it with `isDeleted: true` and `content: null`.
-        - System initialization messages (`isInitMessage: true`) cannot be deleted.
+        - System initialization messages (`isInitMessage: true`) and system join/leave messages (`isJoinMessage`/`isLeaveMessage`: true) cannot be deleted.
         - Already deleted messages cannot be deleted again.
     operationId: deleteMessage
     security: [ { BearerAuth: [] } ]
@@ -1291,14 +1291,16 @@ components:
         Preview of the last message sent in the chat. It can be composed by a text or by an image or both in this case the text is used as caption.
         - If the 'isDeleted' flag is true, the message content will not be returned by the server, and the client should render it as a deleted message.
         - If the 'isInitMessage' flag is true, the message content will not be returned by the server, and the client should render it as a "welcome" message.
-      required: [status, sendTime, senderName, isDeleted, isInitMessage]
+      required: [status, sendTime, senderName, isDeleted, isInitMessage, isJoinMessage, isLeaveMessage]
       properties:
-        status:        { $ref: '#/components/schemas/MessageStatus'        }
-        sendTime:      { $ref: '#/components/schemas/BaseDateTime'         }
-        senderName:    { $ref: '#/components/schemas/UserName'             }
-        isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }
-        isInitMessage: { $ref: '#/components/schemas/IsInitMessageFlag'    }
-        content:       { $ref: '#/components/schemas/MessageContent'       } #optional
+        status:         { $ref: '#/components/schemas/MessageStatus'        }
+        sendTime:       { $ref: '#/components/schemas/BaseDateTime'         }
+        senderName:     { $ref: '#/components/schemas/UserName'             }
+        isDeleted:      { $ref: '#/components/schemas/MessageIsDeletedFlag' }
+        isInitMessage:  { $ref: '#/components/schemas/IsInitMessageFlag'    }
+        isJoinMessage:  { $ref: '#/components/schemas/IsJoinMessageFlag'    }
+        isLeaveMessage: { $ref: '#/components/schemas/IsLeaveMessageFlag'   }
+        content:        { $ref: '#/components/schemas/MessageContent'       } #optional
 
     ChatMembersList:
       type: array
@@ -1325,19 +1327,21 @@ components:
           - If the 'isDeleted' flag is true, the message content will not be returned by the server , and the client should render it as a deleted message.
           - If 'forwardedFrom' is not present, the message was composed in this chat. If present, it contains the identifiers (`chatId` and `messageId`) of the original message from another chat which this message forwards. This allows clients to display context about forwarded messages by referencing their original location.
           - If 'replyTo' is not present, this message is not a reply. If it is present, it contains the ID of the message in the same chat that this message is replying to.
-      required: [id, chatId, sendTime, sender, status, isDeleted, isInitMessage, reactionsList]
+      required: [id, chatId, sendTime, sender, status, isDeleted, isInitMessage, isJoinMessage, isLeaveMessage, reactionsList]
       properties:
-        id:            { $ref: '#/components/schemas/MessageId'            }
-        chatId:        { $ref: '#/components/schemas/ChatId'               }
-        sendTime:      { $ref: '#/components/schemas/BaseDateTime'         }
-        sender:        { $ref: '#/components/schemas/User'                 }
-        status:        { $ref: '#/components/schemas/MessageStatus'        }
-        isDeleted:     { $ref: '#/components/schemas/MessageIsDeletedFlag' }
-        isInitMessage: { $ref: '#/components/schemas/IsInitMessageFlag'    }
-        reactionsList: { $ref: '#/components/schemas/EmojiReactionsList'   }
-        forwardedFrom: { $ref: '#/components/schemas/ForwardedFromInfo'    }  #optional
-        replyTo:       { $ref: '#/components/schemas/ReplyToMessageId'     }  #optional
-        content:       { $ref: '#/components/schemas/MessageContent'       }  #optional
+        id:             { $ref: '#/components/schemas/MessageId'            }
+        chatId:         { $ref: '#/components/schemas/ChatId'               }
+        sendTime:       { $ref: '#/components/schemas/BaseDateTime'         }
+        sender:         { $ref: '#/components/schemas/User'                 }
+        status:         { $ref: '#/components/schemas/MessageStatus'        }
+        isDeleted:      { $ref: '#/components/schemas/MessageIsDeletedFlag' }
+        isInitMessage:  { $ref: '#/components/schemas/IsInitMessageFlag'    }
+        isJoinMessage:  { $ref: '#/components/schemas/IsJoinMessageFlag'    }
+        isLeaveMessage: { $ref: '#/components/schemas/IsLeaveMessageFlag'   }
+        reactionsList:  { $ref: '#/components/schemas/EmojiReactionsList'   }
+        forwardedFrom:  { $ref: '#/components/schemas/ForwardedFromInfo'    }  #optional
+        replyTo:        { $ref: '#/components/schemas/ReplyToMessageId'     }  #optional
+        content:        { $ref: '#/components/schemas/MessageContent'       }  #optional
 
     MessageId:
       allOf:
@@ -1391,6 +1395,22 @@ components:
         When this flag is true, the message content should be empty and ignored by the client.
         The client should render the message as a welcome message like "This group was created by {senderOfTheMessage}"
         or "{senderOfTheMessage} started a direct chat with you". A message with the IsInitMessageFlag set to true can't be deleted
+
+    IsJoinMessageFlag:
+      type: boolean
+      description: >-
+        Indicates whether the message is a system message generated when a user joins a group chat.
+        When this flag is true, the message content should be empty and ignored by the client.
+        The client should render the message like "{senderOfTheMessage} joined the group".
+        A message with the IsJoinMessageFlag set to true can't be deleted.
+
+    IsLeaveMessageFlag:
+      type: boolean
+      description: >-
+        Indicates whether the message is a system message generated when a user leaves a group chat.
+        When this flag is true, the message content should be empty and ignored by the client.
+        The client should render the message like "{senderOfTheMessage} left the group".
+        A message with the IsLeaveMessageFlag set to true can't be deleted.
 
     MessageStatus:
       type: string
