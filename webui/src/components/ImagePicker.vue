@@ -6,10 +6,13 @@ const props = defineProps({
 	modelValue: { type: File, default: null },
 	previewUrl: { type: String, default: null },
 	radius: { type: String, default: '50%' },
+	size: { type: Number, default: 96 },
 });
 const emit = defineEmits(['update:modelValue', 'error']);
 
 const objectUrl = ref(null);
+
+const iconSize = computed(() => Math.round(props.size * 28 / 96));
 
 watch(() => props.modelValue, (file) => {
 	if (objectUrl.value) URL.revokeObjectURL(objectUrl.value);
@@ -37,10 +40,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-	<label class="image-picker" :style="{ borderRadius: radius }">
+	<label class="image-picker" :style="{ borderRadius: radius, width: size + 'px', height: size + 'px' }">
 		<img v-if="displaySrc" :src="displaySrc" class="image-preview" />
 		<span v-else class="image-placeholder">
-			<svg class="feather camera-icon"><use href="/feather-sprite-v4.29.0.svg#camera"/></svg>
+			<svg class="feather camera-icon" :style="{ width: iconSize + 'px', height: iconSize + 'px' }"><use href="/feather-sprite-v4.29.0.svg#camera"/></svg>
 		</span>
 		<input type="file" accept="image/jpeg,image/png,image/webp" class="d-none" @change="onFileChange" />
 	</label>
@@ -48,8 +51,6 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .image-picker {
-	width: 96px;
-	height: 96px;
 	overflow: hidden;
 	cursor: pointer;
 	flex-shrink: 0;
@@ -73,10 +74,5 @@ onBeforeUnmount(() => {
 	justify-content: center;
 	background: var(--tn-bg-highlight);
 	color: var(--tn-fg-dark);
-}
-
-.camera-icon {
-	width: 28px;
-	height: 28px;
 }
 </style>

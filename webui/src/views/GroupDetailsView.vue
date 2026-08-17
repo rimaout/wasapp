@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ImagePicker from '../components/ImagePicker.vue';
+import MemberChips from '../components/MemberChips.vue';
+import IconButton from '../components/IconButton.vue';
 import { createGroup as createGroupRequest, updateAvatar } from '../services/api.js';
 import { refreshChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';
@@ -10,7 +12,11 @@ import { getErrorMessage } from '../services/utils.js';
 const props = defineProps({
 	members: { type: Array, default: () => [] },
 });
-const emit = defineEmits(['done']);
+const emit = defineEmits(['done', 'update:members', 'add-members']);
+
+function removeMember(member) {
+	emit('update:members', props.members.filter(m => m.id !== member.id));
+}
 const router = useRouter();
 
 const name = ref('');
@@ -67,27 +73,26 @@ async function createGroup() {
 <template>
 	<div class="group-details-view">
 		<div class="body flex-grow-1 px-3 py-3">
-			<label class="form-label field-label">Group name</label>
-			<input type="text" class="form-control name-input" v-model="name" maxlength="24" placeholder="Enter group name" />
-
-			<label class="form-label field-label mt-4">Group image (optional)</label>
-			<div class="d-flex align-items-center gap-3">
-				<ImagePicker v-model="imageFile" radius="33%" @error="onPickerError" />
-				<div>
-					<div class="text-muted small">JPEG, PNG or WebP, up to 5 MB</div>
-					<button v-if="imageFile" type="button" class="btn btn-sm btn-link remove-btn" @click="imageFile = null">Remove</button>
-				</div>
+			<div class="section-box">
+				<span class="section-title">Info</span>
+				<ImagePicker v-model="imageFile" :size="120" @error="onPickerError" />
+				<button v-if="imageFile" type="button" class="remove-image-btn" @click="imageFile = null">Remove image</button>
+				<input type="text" class="form-control name-input" v-model="name" maxlength="24" placeholder="Group name" />
 			</div>
 
-			<p v-if="members.length > 0" class="text-muted small mt-3">
-				{{ members.length }} member{{ members.length > 1 ? 's' : '' }} selected
-			</p>
+			<div class="section-box">
+				<div class="section-title-row">
+					<span class="section-title">Members</span>
+					<IconButton icon="plus" size="small" label="Add members" @click="emit('add-members')" />
+				</div>
+				<MemberChips :members="members" @remove="removeMember" />
+			</div>
 		</div>
 
 		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 
 		<div class="footer px-3 py-3">
-			<button type="button" class="btn btn-primary w-100 create-btn" :disabled="creating" @click="createGroup">
+			<button type="button" class="create-btn" :disabled="creating || !name.trim()" @click="createGroup">
 				Create group
 			</button>
 		</div>
@@ -102,6 +107,8 @@ async function createGroup() {
 }
 
 .body {
+	display: flex;
+	flex-direction: column;
 	overflow-y: auto;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
@@ -111,10 +118,27 @@ async function createGroup() {
 	display: none;
 }
 
-.field-label {
+.section-box {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	background: var(--tn-bg-light);
+	border: 1px solid var(--tn-border);
+	border-radius: 12px;
+	padding: 16px;
+	margin-bottom: 16px;
+}
+
+.section-title {
 	color: var(--tn-fg);
 	font-weight: 600;
-	font-size: 0.85rem;
+	font-size: 0.9rem;
+}
+
+.section-title-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .name-input {
@@ -123,10 +147,18 @@ async function createGroup() {
 	color: var(--tn-fg);
 }
 
-.remove-btn {
-	padding: 0;
+.remove-image-btn {
+	align-self: center;
+	background: none;
+	border: none;
 	color: var(--tn-red);
-	text-decoration: none;
+	font-size: 0.85rem;
+	cursor: pointer;
+	padding: 0;
+}
+
+.remove-image-btn:hover {
+	text-decoration: underline;
 }
 
 .footer {
@@ -134,6 +166,26 @@ async function createGroup() {
 }
 
 .create-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 40px;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	background: rgba(158, 206, 106, 0.15);
+	color: var(--tn-green);
 	font-weight: 600;
+}
+
+.create-btn:hover:not(:disabled) {
+	background: rgba(158, 206, 106, 0.25);
+}
+
+.create-btn:disabled {
+	background: rgba(255, 255, 255, 0.08);
+	color: var(--tn-fg-dark);
+	cursor: default;
 }
 </style>

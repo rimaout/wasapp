@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import SearchBar from '../components/SearchBar.vue';
 import UserAvatar from '../components/UserAvatar.vue';
+import MemberChips from '../components/MemberChips.vue';
 import { useUsers } from '../composables/useUsers.js';
 
 const props = defineProps({
@@ -46,12 +47,8 @@ function create() {
 	<div class="group-members-view">
 		<SearchBar v-model="query" placeholder="Search users..." />
 
-		<div v-if="members.length > 0" class="member-chips px-3 py-2">
-			<span v-for="m in members" :key="m.id" class="member-chip">
-				<UserAvatar :userId="m.id" :displayName="m.name" :size="24" />
-				<span class="member-chip-name">{{ m.name }}</span>
-				<button type="button" class="member-chip-remove" @click="removeMember(m)">×</button>
-			</span>
+		<div v-if="members.length > 0" class="px-3 py-2">
+			<MemberChips :members="members" @remove="removeMember" />
 		</div>
 
 		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
@@ -80,8 +77,8 @@ function create() {
 		</div>
 
 		<div class="footer px-3 py-3">
-			<button type="button" class="btn btn-primary w-100 create-btn" :disabled="members.length === 0" @click="create">
-				Create
+			<button type="button" class="create-btn" :disabled="members.length === 0" @click="create">
+				Continue
 			</button>
 		</div>
 	</div>
@@ -92,45 +89,6 @@ function create() {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-}
-
-.member-chips {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 8px;
-	flex-shrink: 0;
-}
-
-.member-chip {
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
-	background: var(--tn-bg-highlight);
-	border-radius: 999px;
-	padding: 3px 8px 3px 3px;
-	color: var(--tn-fg);
-}
-
-.member-chip-name {
-	font-size: 0.85rem;
-	max-width: 120px;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-
-.member-chip-remove {
-	background: none;
-	border: none;
-	padding: 0;
-	cursor: pointer;
-	color: var(--tn-fg-dark);
-	line-height: 1;
-	font-size: 1rem;
-}
-
-.member-chip-remove:hover {
-	color: var(--tn-red);
 }
 
 .user-list {
@@ -175,6 +133,26 @@ function create() {
 }
 
 .create-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	height: 40px;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	background: rgba(158, 206, 106, 0.15);
+	color: var(--tn-green);
 	font-weight: 600;
+}
+
+.create-btn:hover:not(:disabled) {
+	background: rgba(158, 206, 106, 0.25);
+}
+
+.create-btn:disabled {
+	background: rgba(255, 255, 255, 0.08);
+	color: var(--tn-fg-dark);
+	cursor: default;
 }
 </style>

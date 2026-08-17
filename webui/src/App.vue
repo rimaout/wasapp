@@ -43,7 +43,7 @@ function handleBack() {
 
 	<div v-else class="container-fluid">
 		<div class="row">
-			<nav id="sidebarMenu" class="col-md-5 col-lg-4 d-md-block sidebar p-0" :class="{ 'd-none d-md-block': isChatRoute }">
+			<nav id="sidebarMenu" class="col-md-4 col-lg-3 d-md-block sidebar p-0" :class="{ 'd-none d-md-block': isChatRoute }">
 				<div class="sidebar-inner">
 					<SidebarHeader :mode="sidebarMode" @create-direct="sidebarMode = 'users'" @create-group="startGroupCreation" @back="handleBack" @home="sidebarMode = 'chats'" />
 					<div class="sidebar-sticky" :class="{ 'fade-bottom': sidebarMode === 'chats' }">
@@ -53,13 +53,13 @@ function handleBack() {
 						</template>
 						<UserSearchView v-else-if="sidebarMode === 'users'" @close="sidebarMode = 'chats'" />
 						<GroupMembersView v-else-if="sidebarMode === 'group-members'" v-model:members="groupMembers" @create="sidebarMode = 'group-details'" />
-						<GroupDetailsView v-else-if="sidebarMode === 'group-details'" :members="groupMembers" @done="finishGroupCreation" />
+						<GroupDetailsView v-else-if="sidebarMode === 'group-details'" v-model:members="groupMembers" @done="finishGroupCreation" @add-members="sidebarMode = 'group-members'" />
 					</div>
 					<ProfileBar v-if="sidebarMode === 'chats'" />
 				</div>
 			</nav>
 
-			<main class="col-md-7 ms-sm-auto col-lg-8 p-0" :class="{ 'd-none d-md-block': !isChatRoute }">
+			<main class="col-md-8 ms-sm-auto col-lg-9 p-0" :class="{ 'd-none d-md-block': !isChatRoute }">
 				<RouterView />
 			</main>
 		</div>
