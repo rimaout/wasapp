@@ -108,6 +108,14 @@ export function getChatSnippet(chat) {
 			? 'Group created by ' + who
 			: who + ' started this chat';
 	}
+	if (lm.isJoinMessage) {
+		let who = isMyMessage(lm.senderName) ? 'You' : lm.senderName;
+		return who + ' joined the group';
+	}
+	if (lm.isLeaveMessage) {
+		let who = isMyMessage(lm.senderName) ? 'You' : lm.senderName;
+		return who + ' left the group';
+	}
 	if (lm.isDeleted) return 'Message deleted';
 	if (lm.content && lm.content.text) {
 		let text = lm.content.text;

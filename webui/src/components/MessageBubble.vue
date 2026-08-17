@@ -42,6 +42,11 @@ export default {
 			let who = this.isMine ? 'You' : this.message.sender.name;
 			return this.isGroup ? 'Group created by ' + who : who + ' started this chat';
 		},
+
+		systemMessageText(action) {
+			let who = this.isMine ? 'You' : this.message.sender.name;
+			return who + ' ' + action;
+		},
 	},
 };
 </script>
@@ -49,6 +54,10 @@ export default {
 <template>
 	<div class="message-wrapper" :class="isMine ? 'me' : 'other'">
 		<div v-if="message.isInitMessage" class="message-init text-muted">{{ initMessageText() }}</div>
+
+		<div v-else-if="message.isJoinMessage" class="message-init text-muted">{{ systemMessageText('joined the group') }}</div>
+
+		<div v-else-if="message.isLeaveMessage" class="message-init text-muted">{{ systemMessageText('left the group') }}</div>
 
 		<div v-else-if="message.isDeleted" class="message-deleted text-muted fst-italic">
 			{{ isMine ? 'You deleted this message' : 'Message deleted' }}

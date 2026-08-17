@@ -154,6 +154,12 @@ export default {
 					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" />
 					<div class="date-divider">{{ formatDay(msg.sendTime) }}</div>
 				</template>
+				<template v-else-if="msg.isJoinMessage || msg.isLeaveMessage">
+					<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
+						{{ formatDay(msg.sendTime) }}
+					</div>
+					<MessageBubble :message="msg" :isGroup="isGroup" />
+				</template>
 				<template v-else>
 					<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
 						{{ formatDay(msg.sendTime) }}

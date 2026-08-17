@@ -97,7 +97,7 @@ export default {
 							class="chat-snippet text-truncate"
 							:class="{ 'text-muted fst-italic': chat.lastMessage.isDeleted }"
 						>
-							<span v-if="chat.isGroupChat && !chat.lastMessage.isInitMessage" class="text-muted">
+							<span v-if="chat.isGroupChat && !chat.lastMessage.isInitMessage && !chat.lastMessage.isJoinMessage && !chat.lastMessage.isLeaveMessage" class="text-muted">
 								{{ isMyMessage(chat.lastMessage.senderName) ? 'You' : chat.lastMessage.senderName }}:
 							</span>
 							{{ getChatSnippet(chat) }}
