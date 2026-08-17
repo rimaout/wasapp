@@ -3,13 +3,14 @@ import MessageBubble from '../components/MessageBubble.vue';
 import MessageInput from '../components/MessageInput.vue';
 import ChatAvatar from '../components/ChatAvatar.vue';
 import PopupMenu from '../components/PopupMenu.vue';
+import ChatMembersPopup from '../components/ChatMembersPopup.vue';
 import { usePolling } from '../composables/usePolling.js';
 import { refreshChats } from '../composables/useChats.js';
 import { leaveGroup } from '../services/api.js';
 import { formatDay, isNewDay, getErrorMessage } from '../services/utils.js';
 
 export default {
-	components: { MessageBubble, MessageInput, ChatAvatar, PopupMenu },
+	components: { MessageBubble, MessageInput, ChatAvatar, PopupMenu, ChatMembersPopup },
 	data() {
 		return {
 			messages: [],
@@ -140,6 +141,7 @@ export default {
 			</button>
 			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" :version="avatarVersion" />
 			<span class="chat-header-name">{{ chatName }}</span>
+			<ChatMembersPopup v-if="isGroup" :chatId="chatId" />
 			<PopupMenu v-if="isGroup" class="ms-auto" icon="edit-2" label="Chat options" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" @done="onChatAction" @select="onChatSelect" />
 		</div>
 

@@ -4,6 +4,7 @@ import UserAvatar from './UserAvatar.vue';
 
 defineProps({
 	members: { type: Array, required: true },
+	removable: { type: Boolean, default: true },
 });
 const emit = defineEmits(['remove']);
 </script>
@@ -13,7 +14,7 @@ const emit = defineEmits(['remove']);
 		<span v-for="m in members" :key="m.id" class="member-chip">
 			<UserAvatar :userId="m.id" :displayName="m.name" :size="24" />
 			<span class="member-chip-name">{{ m.name }}</span>
-			<button type="button" class="member-chip-remove" @click="emit('remove', m)">×</button>
+			<button v-if="removable" type="button" class="member-chip-remove" @click="emit('remove', m)">×</button>
 		</span>
 	</div>
 </template>
