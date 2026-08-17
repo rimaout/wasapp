@@ -95,7 +95,7 @@ watch(() => props.chatId, fetchMembers);
 
 					<UserPicker v-model="selected" :exclude-ids="existingIds" compact light class="user-picker-wrap" />
 
-					<ConfirmBar confirm-text="Confirm" confirm-icon="check" cancel-label="Close" :confirm-disabled="selected.length === 0" @cancel="close" @confirm="confirmAdd" />
+					<ConfirmBar class="confirm-bar-tight" confirm-text="Confirm" confirm-icon="check" cancel-label="Close" :confirm-disabled="selected.length === 0" @cancel="close" @confirm="confirmAdd" />
 				</template>
 			</div>
 		</template>
@@ -150,6 +150,10 @@ watch(() => props.chatId, fetchMembers);
 
 .user-picker-wrap {
 	min-height: 0;
+}
+
+.confirm-bar-tight {
+	margin-top: -12px;
 }
 
 .panel-title {

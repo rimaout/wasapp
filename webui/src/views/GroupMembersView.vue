@@ -17,7 +17,7 @@ function create() {
 	<div class="group-members-view">
 		<UserPicker :model-value="members" @update:model-value="v => emit('update:members', v)" />
 
-		<div class="footer px-3 py-3">
+		<div class="footer px-3 pt-0 pb-3">
 			<ConfirmBar confirm-text="Continue" confirm-icon="arrow-right" icon-right :confirm-disabled="members.length === 0" @cancel="emit('cancel')" @confirm="create" />
 		</div>
 	</div>

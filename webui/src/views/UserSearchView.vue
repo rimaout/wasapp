@@ -50,7 +50,7 @@ function goToChat(chatId, displayName, isGroupChat) {
 	<div class="user-search-view">
 		<SearchBar v-model="query" placeholder="Search users..." />
 
-		<div class="user-list flex-grow-1">
+		<div class="user-list fade-bottom flex-grow-1">
 			<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 			<LoadingSpinner v-if="loading && users.length === 0" />
 
@@ -91,6 +91,7 @@ function goToChat(chatId, displayName, isGroupChat) {
 	overflow-y: auto;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
+	padding-bottom: 48px;
 }
 
 .user-list::-webkit-scrollbar {

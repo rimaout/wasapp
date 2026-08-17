@@ -58,7 +58,7 @@ function removeMember(member) {
 
 		<hr class="list-divider" :class="{ compact: compact }" />
 
-		<div class="user-list">
+		<div class="user-list fade-bottom">
 			<LoadingSpinner v-if="loading && users.length === 0" />
 
 			<div v-if="!loading && visibleUsers.length === 0" class="text-muted text-center py-5">
@@ -107,6 +107,7 @@ function removeMember(member) {
 	overflow-y: auto;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
+	padding-bottom: 48px;
 }
 
 .user-list::-webkit-scrollbar {
