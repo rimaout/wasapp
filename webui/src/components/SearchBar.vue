@@ -5,6 +5,8 @@ export default {
 	props: {
 		modelValue: { type: String, default: '' },
 		placeholder: { type: String, default: 'Search chats...' },
+		compact: { type: Boolean, default: false },
+		light: { type: Boolean, default: false },
 	},
 	emits: ['update:modelValue'],
 	setup(props, { emit }) {
@@ -17,12 +19,12 @@ export default {
 </script>
 
 <template>
-	<div class="px-3 pt-3 pb-2">
+	<div :class="compact ? 'px-3 pb-2' : 'px-3 pt-3 pb-2'">
 		<div class="search-wrapper">
-			<svg class="feather search-icon" style="width: 18px; height: 18px;">
+			<svg class="feather search-icon" :class="{ light: light }" style="width: 18px; height: 18px;">
 				<use href="/feather-sprite-v4.29.0.svg#search"/>
 			</svg>
-			<input type="text" class="form-control form-control-sm search-input"
+			<input type="text" class="form-control form-control-sm search-input" :class="{ light: light }"
 				:placeholder="placeholder" v-model="query" />
 			<button v-if="query" class="search-clear" @click="query = ''">
 				<svg class="feather" style="width: 14px; height: 14px; stroke-width: 2.5;">
@@ -48,6 +50,10 @@ export default {
 	z-index: 1;
 }
 
+.search-icon.light {
+	color: var(--tn-fg-dark);
+}
+
 .search-input {
 	height: 40px;
 	padding-left: 36px;
@@ -55,6 +61,21 @@ export default {
 	border-radius: 20px;
 	border: none;
 	font-size: 0.95rem;
+}
+
+.search-input.light {
+	border: 1px solid var(--tn-border);
+	background-color: rgba(255, 255, 255, 0.08);
+	color: var(--tn-fg);
+}
+
+.search-input.light::placeholder {
+	color: var(--tn-fg-dark);
+}
+
+.search-input.light:focus {
+	background-color: rgba(255, 255, 255, 0.08);
+	color: var(--tn-fg);
 }
 
 .search-clear {

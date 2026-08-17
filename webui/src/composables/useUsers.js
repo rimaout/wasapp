@@ -20,10 +20,15 @@ export function useUsers() {
 		loading.value = false;
 	}
 
-	// Returns all users (excluding the logged-in user), optionally filtered by query.
-	function filteredUsers(query) {
+	// Returns all users (excluding the logged-in user), optionally filtered by
+	// query and by a list of additional user IDs to exclude.
+	function filteredUsers(query, excludeIds) {
 		const selfId = getUserId();
 		let list = users.value.filter(u => u.id !== selfId);
+		if (excludeIds) {
+			const s = new Set(excludeIds);
+			list = list.filter(u => !s.has(u.id));
+		}
 		if (!query) return list;
 		const q = query.toLowerCase();
 		return list.filter(u => u.name.toLowerCase().includes(q));

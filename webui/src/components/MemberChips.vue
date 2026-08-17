@@ -5,13 +5,14 @@ import UserAvatar from './UserAvatar.vue';
 defineProps({
 	members: { type: Array, required: true },
 	removable: { type: Boolean, default: true },
+	light: { type: Boolean, default: false },
 });
 const emit = defineEmits(['remove']);
 </script>
 
 <template>
 	<div v-if="members.length > 0" class="member-chips">
-		<span v-for="m in members" :key="m.id" class="member-chip">
+		<span v-for="m in members" :key="m.id" class="member-chip" :class="{ light: light }">
 			<UserAvatar :userId="m.id" :displayName="m.name" :size="24" />
 			<span class="member-chip-name">{{ m.name }}</span>
 			<button v-if="removable" type="button" class="member-chip-remove" @click="emit('remove', m)">×</button>
@@ -34,6 +35,10 @@ const emit = defineEmits(['remove']);
 	border-radius: 999px;
 	padding: 3px 8px 3px 3px;
 	color: var(--tn-fg);
+}
+
+.member-chip.light {
+	background: rgba(255, 255, 255, 0.08);
 }
 
 .member-chip-name {

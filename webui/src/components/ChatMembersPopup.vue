@@ -2,19 +2,24 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import axios from '../services/axios.js';
 import MemberChips from './MemberChips.vue';
+import UserPicker from './UserPicker.vue';
 import { getErrorMessage } from '../services/utils.js';
 
 // Button in the chat header showing the member count; opens a popup with the
-// group member list and (for now UI-only) Leave / Add members buttons.
+// group member list and an "Add members" view (search + pick new members).
 const props = defineProps({
 	chatId: { type: String, required: true },
 });
 const emit = defineEmits(['add-members']);
 
 const open = ref(false);
+const view = ref('members'); // 'members' | 'add'
 const members = ref([]);
 const loading = ref(false);
 const errormsg = ref(null);
+
+const selected = ref([]);
+const existingIds = computed(() => members.value.map(m => m.id));
 
 const countLabel = computed(() => {
 	if (loading.value) return 'Members';
@@ -40,6 +45,21 @@ function toggle() {
 	open.value = !open.value;
 }
 
+function close() {
+	open.value = false;
+	view.value = 'members';
+}
+
+function openAddView() {
+	selected.value = [];
+	view.value = 'add';
+}
+
+function confirmAdd() {
+	emit('add-members', selected.value);
+	view.value = 'members';
+}
+
 onMounted(fetchMembers);
 watch(() => props.chatId, fetchMembers);
 </script>
@@ -48,20 +68,37 @@ watch(() => props.chatId, fetchMembers);
 	<div class="members-popup">
 		<button type="button" class="members-btn" @click="toggle">{{ countLabel }}</button>
 		<template v-if="open">
-			<div class="popup-backdrop" @click="open = false"></div>
+			<div class="popup-backdrop" @click="close"></div>
 			<div class="popup-panel">
-				<div class="panel-title">Group members</div>
+				<template v-if="view === 'members'">
+					<div class="panel-title">Group members</div>
 
-				<ErrorMsg v-if="errormsg" :msg="errormsg" />
-				<LoadingSpinner v-if="loading" />
-				<MemberChips :members="members" :removable="false" />
+					<ErrorMsg v-if="errormsg" :msg="errormsg" />
+					<LoadingSpinner v-if="loading" />
+					<MemberChips :members="members" :removable="false" light />
 
-				<div class="panel-footer">
-					<button type="button" class="panel-btn close" @click="open = false" aria-label="Close" title="Close">
-						<svg class="feather close-icon"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
-					</button>
-					<button type="button" class="panel-btn add" @click="emit('add-members')">Add members</button>
-				</div>
+					<div class="panel-footer">
+						<button type="button" class="panel-btn close" @click="close" aria-label="Close" title="Close">
+							<svg class="feather close-icon"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
+						</button>
+						<button type="button" class="panel-btn add" @click="openAddView">Add members</button>
+					</div>
+				</template>
+
+				<template v-else>
+					<div class="panel-title">Add members</div>
+
+					<UserPicker v-model="selected" :exclude-ids="existingIds" compact light class="user-picker-wrap" />
+
+					<div class="panel-footer">
+						<button type="button" class="panel-btn close" @click="close" aria-label="Close" title="Close">
+							<svg class="feather close-icon"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
+						</button>
+						<button type="button" class="panel-btn add" :disabled="selected.length === 0" @click="confirmAdd">
+							Add
+						</button>
+					</div>
+				</template>
 			</div>
 		</template>
 	</div>
@@ -100,7 +137,8 @@ watch(() => props.chatId, fetchMembers);
 	position: absolute;
 	top: calc(100% + 6px);
 	right: 0;
-	width: 280px;
+	width: 300px;
+	max-height: 550px;
 	background: var(--tn-bg-light);
 	border: 1px solid var(--tn-border);
 	border-radius: 12px;
@@ -110,6 +148,10 @@ watch(() => props.chatId, fetchMembers);
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
+}
+
+.user-picker-wrap {
+	min-height: 0;
 }
 
 .panel-title {
@@ -152,8 +194,14 @@ watch(() => props.chatId, fetchMembers);
 	color: var(--tn-green);
 }
 
-.panel-btn.add:hover {
+.panel-btn.add:hover:not(:disabled) {
 	background: rgba(158, 206, 106, 0.25);
+}
+
+.panel-btn.add:disabled {
+	background: rgba(255, 255, 255, 0.08);
+	color: var(--tn-fg-dark);
+	cursor: default;
 }
 
 .close-icon {
