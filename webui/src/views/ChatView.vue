@@ -158,7 +158,7 @@ export default {
 					<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
 						{{ formatDay(msg.sendTime) }}
 					</div>
-					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" />
+					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" :previous-message="messages[i - 1]" />
 				</template>
 			</template>
 		</div>

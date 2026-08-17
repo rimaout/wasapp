@@ -8,16 +8,35 @@ export default {
 		message: { type: Object, required: true },
 		isGroup: { type: Boolean, default: false },
 		showAvatar: { type: Boolean, default: false },
+		previousMessage: { type: Object, default: null },
 	},
 	computed: {
 		isMine() {
 			return isMyMessageById(this.message.sender.id);
+		},
+		showSenderHeader() {
+			if (!this.isGroup || this.isMine) return false;
+			if (this.message.isInitMessage || this.message.isDeleted) return false;
+			let prev = this.previousMessage;
+			if (!prev) return true;
+			if (prev.isInitMessage || prev.isDeleted) return true;
+			if (prev.sender.id !== this.message.sender.id) return true;
+			if (this.timeGapExceeded(prev.sendTime, this.message.sendTime)) return true;
+			return false;
+		},
+		hasAvatar() {
+			return this.showSenderHeader && this.showAvatar;
 		},
 	},
 	methods: {
 		formatMessageTime,
 		getStatusIcon,
 		getStatusColor,
+
+		timeGapExceeded(a, b) {
+			let diff = Math.abs(new Date(b) - new Date(a));
+			return diff > 5 * 60 * 1000;
+		},
 
 		initMessageText() {
 			let who = this.isMine ? 'You' : this.message.sender.name;
@@ -35,8 +54,8 @@ export default {
 			{{ isMine ? 'You deleted this message' : 'Message deleted' }}
 		</div>
 
-		<div v-else class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': showAvatar }]">
-			<div v-if="isGroup && !isMine" class="message-sender">
+		<div v-else class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': hasAvatar }]">
+			<div v-if="showSenderHeader" class="message-sender">
 				<UserAvatar v-if="showAvatar" :userId="message.sender.id" :displayName="message.sender.name" :size="18" />
 				<span class="message-sender-name">{{ message.sender.name }}</span>
 			</div>
