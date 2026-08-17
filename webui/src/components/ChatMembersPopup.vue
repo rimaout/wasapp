@@ -11,7 +11,6 @@ import { getErrorMessage } from '../services/utils.js';
 const props = defineProps({
 	chatId: { type: String, required: true },
 });
-const emit = defineEmits(['add-members']);
 
 const open = ref(false);
 const view = ref('members'); // 'members' | 'add'
@@ -56,9 +55,19 @@ function openAddView() {
 	view.value = 'add';
 }
 
-function confirmAdd() {
-	emit('add-members', selected.value);
-	view.value = 'members';
+async function confirmAdd() {
+	errormsg.value = null;
+	for (const user of selected.value) {
+		try {
+			await axios.post('/chats/' + props.chatId + '/members', { userId: user.id });
+		} catch (e) {
+			errormsg.value = getErrorMessage(e);
+			return;
+		}
+	}
+	selected.value = [];
+	await fetchMembers();
+	close();
 }
 
 onMounted(fetchMembers);
