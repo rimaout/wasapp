@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import axios from '../services/axios.js';
 import MemberChips from './MemberChips.vue';
 import UserPicker from './UserPicker.vue';
+import ConfirmBar from './ConfirmBar.vue';
 import { getErrorMessage } from '../services/utils.js';
 
 // Button in the chat header showing the member count; opens a popup with the
@@ -77,12 +78,7 @@ watch(() => props.chatId, fetchMembers);
 					<LoadingSpinner v-if="loading" />
 					<MemberChips :members="members" :removable="false" light />
 
-					<div class="panel-footer">
-						<button type="button" class="panel-btn close" @click="close" aria-label="Close" title="Close">
-							<svg class="feather close-icon"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
-						</button>
-						<button type="button" class="panel-btn add" @click="openAddView">Add members</button>
-					</div>
+					<ConfirmBar confirm-text="Add members" confirm-icon="plus" cancel-label="Close" @cancel="close" @confirm="openAddView" />
 				</template>
 
 				<template v-else>
@@ -90,14 +86,7 @@ watch(() => props.chatId, fetchMembers);
 
 					<UserPicker v-model="selected" :exclude-ids="existingIds" compact light class="user-picker-wrap" />
 
-					<div class="panel-footer">
-						<button type="button" class="panel-btn close" @click="close" aria-label="Close" title="Close">
-							<svg class="feather close-icon"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
-						</button>
-						<button type="button" class="panel-btn add" :disabled="selected.length === 0" @click="confirmAdd">
-							Add
-						</button>
-					</div>
+					<ConfirmBar confirm-text="Confirm" confirm-icon="check" cancel-label="Close" :confirm-disabled="selected.length === 0" @cancel="close" @confirm="confirmAdd" />
 				</template>
 			</div>
 		</template>
@@ -158,54 +147,5 @@ watch(() => props.chatId, fetchMembers);
 	color: var(--tn-fg);
 	font-weight: 600;
 	font-size: 1rem;
-}
-
-.panel-footer {
-	display: flex;
-	gap: 8px;
-}
-
-.panel-btn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 40px;
-	border: none;
-	border-radius: 8px;
-	cursor: pointer;
-	font-weight: 600;
-	font-size: 0.9rem;
-	flex-shrink: 0;
-}
-
-.panel-btn.close {
-	width: 40px;
-	background: rgba(247, 118, 142, 0.12);
-	color: var(--tn-red);
-}
-
-.panel-btn.close:hover {
-	background: rgba(247, 118, 142, 0.22);
-}
-
-.panel-btn.add {
-	flex: 1 1 auto;
-	background: rgba(158, 206, 106, 0.15);
-	color: var(--tn-green);
-}
-
-.panel-btn.add:hover:not(:disabled) {
-	background: rgba(158, 206, 106, 0.25);
-}
-
-.panel-btn.add:disabled {
-	background: rgba(255, 255, 255, 0.08);
-	color: var(--tn-fg-dark);
-	cursor: default;
-}
-
-.close-icon {
-	width: 22px;
-	height: 22px;
 }
 </style>

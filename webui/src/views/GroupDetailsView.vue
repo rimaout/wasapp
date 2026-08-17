@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import ImagePicker from '../components/ImagePicker.vue';
 import MemberChips from '../components/MemberChips.vue';
 import IconButton from '../components/IconButton.vue';
+import ConfirmBar from '../components/ConfirmBar.vue';
 import { createGroup as createGroupRequest, updateAvatar } from '../services/api.js';
 import { refreshChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';
@@ -12,7 +13,7 @@ import { getErrorMessage } from '../services/utils.js';
 const props = defineProps({
 	members: { type: Array, default: () => [] },
 });
-const emit = defineEmits(['done', 'update:members', 'add-members']);
+const emit = defineEmits(['done', 'update:members', 'add-members', 'cancel']);
 
 function removeMember(member) {
 	emit('update:members', props.members.filter(m => m.id !== member.id));
@@ -92,9 +93,7 @@ async function createGroup() {
 		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 
 		<div class="footer px-3 py-3">
-			<button type="button" class="create-btn" :disabled="creating || !name.trim()" @click="createGroup">
-				Create group
-			</button>
+			<ConfirmBar confirm-text="Create group" confirm-icon="check" :confirm-disabled="creating || !name.trim()" @cancel="emit('cancel')" @confirm="createGroup" />
 		</div>
 	</div>
 </template>
@@ -163,29 +162,5 @@ async function createGroup() {
 
 .footer {
 	flex-shrink: 0;
-}
-
-.create-btn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	width: 100%;
-	height: 40px;
-	border: none;
-	border-radius: 8px;
-	cursor: pointer;
-	background: rgba(158, 206, 106, 0.15);
-	color: var(--tn-green);
-	font-weight: 600;
-}
-
-.create-btn:hover:not(:disabled) {
-	background: rgba(158, 206, 106, 0.25);
-}
-
-.create-btn:disabled {
-	background: rgba(255, 255, 255, 0.08);
-	color: var(--tn-fg-dark);
-	cursor: default;
 }
 </style>

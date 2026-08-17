@@ -25,6 +25,11 @@ function finishGroupCreation() {
 	sidebarMode.value = 'chats';
 }
 
+function cancelGroupCreation() {
+	groupMembers.value = [];
+	sidebarMode.value = 'chats';
+}
+
 function handleBack() {
 	if (sidebarMode.value === 'users') {
 		sidebarMode.value = 'chats';
@@ -52,8 +57,8 @@ function handleBack() {
 							<ChatsListView :searchQuery="searchQuery" />
 						</template>
 						<UserSearchView v-else-if="sidebarMode === 'users'" @close="sidebarMode = 'chats'" />
-						<GroupMembersView v-else-if="sidebarMode === 'group-members'" v-model:members="groupMembers" @create="sidebarMode = 'group-details'" />
-						<GroupDetailsView v-else-if="sidebarMode === 'group-details'" v-model:members="groupMembers" @done="finishGroupCreation" @add-members="sidebarMode = 'group-members'" />
+						<GroupMembersView v-else-if="sidebarMode === 'group-members'" v-model:members="groupMembers" @create="sidebarMode = 'group-details'" @cancel="cancelGroupCreation" />
+						<GroupDetailsView v-else-if="sidebarMode === 'group-details'" v-model:members="groupMembers" @done="finishGroupCreation" @add-members="sidebarMode = 'group-members'" @cancel="cancelGroupCreation" />
 					</div>
 					<ProfileBar v-if="sidebarMode === 'chats'" />
 				</div>

@@ -10,7 +10,7 @@ const emit = defineEmits(['back', 'home', 'create-direct', 'create-group']);
 const TITLES = {
 	users: 'New direct chat',
 	'group-members': 'Add group members',
-	'group-details': 'New group',
+	'group-details': 'New group details',
 };
 
 const isChats = computed(() => props.mode === 'chats');

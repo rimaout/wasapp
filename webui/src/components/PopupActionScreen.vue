@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import ImagePicker from './ImagePicker.vue';
+import ConfirmBar from './ConfirmBar.vue';
 import { fetchAvatar, updateName, updateAvatar, deleteAvatar } from '../services/api.js';
 import { getErrorMessage } from '../services/utils.js';
 
@@ -105,15 +106,14 @@ onBeforeUnmount(() => {
 
 		<ErrorMsg v-if="errormsg" :msg="errormsg" />
 
-		<div class="action-footer">
-			<button type="button" class="action-btn cancel" :disabled="busy" aria-label="Cancel" title="Cancel" @click="emit('cancel')">
-				<svg class="feather action-icon"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
-			</button>
-			<button type="button" class="action-btn confirm" :disabled="busy || !isValid" @click="confirm">
-				<svg class="feather confirm-icon"><use href="/feather-sprite-v4.29.0.svg#check"/></svg>
-				<span>Confirm</span>
-			</button>
-		</div>
+		<ConfirmBar
+			:cancel-disabled="busy"
+			:confirm-disabled="busy || !isValid"
+			confirm-text="Confirm"
+			confirm-icon="check"
+			@cancel="emit('cancel')"
+			@confirm="confirm"
+		/>
 	</div>
 </template>
 
@@ -163,68 +163,5 @@ onBeforeUnmount(() => {
 
 .remove-image-btn:hover {
 	text-decoration: underline;
-}
-
-.action-footer {
-	display: flex;
-	gap: 8px;
-	width: 100%;
-	margin-top: 4px;
-}
-
-.action-btn {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	gap: 8px;
-	height: 40px;
-	border: none;
-	border-radius: 8px;
-	cursor: pointer;
-	flex-shrink: 0;
-}
-
-.action-btn:disabled {
-	cursor: default;
-}
-
-.action-btn.cancel:disabled {
-	opacity: 0.5;
-}
-
-.action-btn.cancel {
-	width: 40px;
-	background: rgba(247, 118, 142, 0.12);
-	color: var(--tn-red);
-}
-
-.action-btn.cancel:hover:not(:disabled) {
-	background: rgba(247, 118, 142, 0.22);
-}
-
-.action-btn.confirm {
-	flex: 1 1 auto;
-	background: rgba(158, 206, 106, 0.15);
-	color: var(--tn-green);
-	font-weight: 600;
-}
-
-.action-btn.confirm:hover:not(:disabled) {
-	background: rgba(158, 206, 106, 0.25);
-}
-
-.action-btn.confirm:disabled {
-	background: rgba(255, 255, 255, 0.08);
-	color: var(--tn-fg-dark);
-}
-
-.action-icon {
-	width: 22px;
-	height: 22px;
-}
-
-.confirm-icon {
-	width: 18px;
-	height: 18px;
 }
 </style>
