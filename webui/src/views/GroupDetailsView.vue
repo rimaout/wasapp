@@ -75,7 +75,7 @@ async function createGroup() {
 	<div class="group-details-view">
 		<div class="body flex-grow-1 px-3 py-3">
 			<div class="section-box">
-				<span class="section-title">Info</span>
+				<span class="section-title">Details</span>
 				<ImagePicker v-model="imageFile" :size="120" @error="onPickerError" />
 				<button v-if="imageFile" type="button" class="remove-image-btn" @click="imageFile = null">Remove image</button>
 				<input type="text" class="form-control name-input" v-model="name" maxlength="24" placeholder="Group name" />
@@ -84,9 +84,9 @@ async function createGroup() {
 			<div class="section-box">
 				<div class="section-title-row">
 					<span class="section-title">Members</span>
-					<IconButton icon="plus" size="small" label="Add members" @click="emit('add-members')" />
+					<IconButton icon="plus" size="small" label="Add members" filled @click="emit('add-members')" />
 				</div>
-				<MemberChips :members="members" @remove="removeMember" />
+				<MemberChips :members="members" light @remove="removeMember" />
 			</div>
 		</div>
 
