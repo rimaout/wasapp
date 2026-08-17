@@ -4,6 +4,7 @@ defineProps({
 	size: { type: String, default: 'default' },
 	label: { type: String, default: '' },
 	disabled: { type: Boolean, default: false },
+	filled: { type: Boolean, default: false },
 });
 const emit = defineEmits(['click']);
 </script>
@@ -12,7 +13,7 @@ const emit = defineEmits(['click']);
 	<button
 		type="button"
 		class="icon-btn"
-		:class="size"
+		:class="[size, { filled: filled }]"
 		:disabled="disabled"
 		:aria-label="label || undefined"
 		:title="label || undefined"
@@ -42,6 +43,18 @@ const emit = defineEmits(['click']);
 
 .icon-btn:active {
 	background-color: rgba(255, 255, 255, 0.14);
+}
+
+.icon-btn.filled {
+	background-color: rgba(255, 255, 255, 0.08);
+}
+
+.icon-btn.filled:hover {
+	background-color: rgba(255, 255, 255, 0.14);
+}
+
+.icon-btn.filled:active {
+	background-color: rgba(255, 255, 255, 0.2);
 }
 
 .icon-btn:disabled {

@@ -142,7 +142,7 @@ export default {
 			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" :version="avatarVersion" />
 			<span class="chat-header-name">{{ chatName }}</span>
 			<ChatMembersPopup v-if="isGroup" :chatId="chatId" />
-			<PopupMenu v-if="isGroup" class="ms-auto" icon="edit-2" label="Chat options" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" @done="onChatAction" @select="onChatSelect" />
+			<PopupMenu v-if="isGroup" class="ms-auto" icon="more-vertical" label="Chat options" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" filled @done="onChatAction" @select="onChatSelect" />
 		</div>
 
 		<div ref="messagesArea" class="chat-messages flex-grow-1">

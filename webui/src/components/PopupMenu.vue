@@ -10,6 +10,7 @@ defineProps({
 	direction: { type: String, default: 'down' },
 	target: { type: Object, default: null },
 	initialName: { type: String, default: '' },
+	filled: { type: Boolean, default: false },
 });
 const emit = defineEmits(['select', 'done']);
 
@@ -39,7 +40,7 @@ function onDone(payload) {
 
 <template>
 	<div class="popup-menu">
-		<IconButton :icon="icon" :label="label" @click="open = !open" />
+		<IconButton :icon="icon" :label="label" :filled="filled" @click="open = !open" />
 		<template v-if="open">
 			<div class="popup-backdrop" @click="closeAll"></div>
 			<div class="popup-panel" :class="direction">

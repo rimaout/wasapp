@@ -74,10 +74,11 @@ watch(() => props.chatId, fetchMembers);
 }
 
 .members-btn {
-	background: none;
+	background: rgba(255, 255, 255, 0.08);
 	border: none;
 	color: var(--tn-fg-dark);
 	font-size: 0.9rem;
+	font-weight: 560;
 	cursor: pointer;
 	padding: 6px 14px;
 	border-radius: 999px;
@@ -85,7 +86,7 @@ watch(() => props.chatId, fetchMembers);
 }
 
 .members-btn:hover {
-	background: rgba(255, 255, 255, 0.08);
+	background: rgba(255, 255, 255, 0.14);
 	color: var(--tn-fg);
 }
 
