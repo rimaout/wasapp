@@ -31,6 +31,12 @@ export default {
 		hasImage() {
 			return !!this.message.content?.msgImageId;
 		},
+		hasCaption() {
+			return !!this.message.content?.text;
+		},
+		overlayMeta() {
+			return this.hasImage && !this.hasCaption;
+		},
 	},
 	methods: {
 		formatMessageTime,
@@ -75,7 +81,7 @@ export default {
 
 			<div v-if="hasImage" class="message-image-wrap">
 				<MessageImage :chat-id="message.chatId" :image-id="message.content.msgImageId" />
-				<div class="message-meta message-meta-overlay">
+				<div v-if="overlayMeta" class="message-meta message-meta-overlay">
 					<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
 					<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
 						{{ getStatusIcon(message.status) }}
@@ -83,12 +89,13 @@ export default {
 				</div>
 			</div>
 
-			<div v-if="message.content?.text" class="message-text" :class="{ 'message-caption': hasImage }">{{ message.content.text }}</div>
-
-			<div v-if="!hasImage" class="message-meta">
-				<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
-				<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
-					{{ getStatusIcon(message.status) }}
+			<div v-if="hasCaption" class="message-text" :class="{ 'message-caption': hasImage }">
+				{{ message.content.text }}
+				<span v-if="!overlayMeta" class="message-meta message-meta-inline">
+					<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
+					<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
+						{{ getStatusIcon(message.status) }}
+					</span>
 				</span>
 			</div>
 		</div>
@@ -204,6 +211,12 @@ export default {
 	justify-content: flex-end;
 	gap: 4px;
 	margin-top: 2px;
+}
+
+.message-meta-inline {
+	float: right;
+	display: inline-flex;
+	margin: 0.4em 0 2px 8px;
 }
 
 .message-time {
