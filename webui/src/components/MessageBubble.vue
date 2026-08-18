@@ -17,13 +17,7 @@ export default {
 		},
 		showSenderHeader() {
 			if (!this.isGroup || this.isMine) return false;
-			if (this.message.isInitMessage || this.message.isDeleted) return false;
-			let prev = this.previousMessage;
-			if (!prev) return true;
-			if (prev.isInitMessage || prev.isDeleted) return true;
-			if (prev.sender.id !== this.message.sender.id) return true;
-			if (this.timeGapExceeded(prev.sendTime, this.message.sendTime)) return true;
-			return false;
+			return !this.sameSeries;
 		},
 		hasAvatar() {
 			return this.showSenderHeader && this.showAvatar;
@@ -37,11 +31,28 @@ export default {
 		overlayMeta() {
 			return this.hasImage && !this.hasCaption;
 		},
+		sameSeries() {
+			// true when the previous message is a normal message from the same
+			// sender within the time gap. Used both to hide the sender header and
+			// to tighten the gap between consecutive same-sender messages.
+			if (!this.isNormalMessage(this.message)) return false;
+			let prev = this.previousMessage;
+			if (!this.isNormalMessage(prev)) return false;
+			if (prev.sender.id !== this.message.sender.id) return false;
+			return !this.timeGapExceeded(prev.sendTime, this.message.sendTime);
+		},
+		isContinuation() {
+			return this.sameSeries;
+		},
 	},
 	methods: {
 		formatMessageTime,
 		getStatusIcon,
 		getStatusColor,
+
+		isNormalMessage(m) {
+			return !!m && !m.isInitMessage && !m.isJoinMessage && !m.isLeaveMessage && !m.isDeleted;
+		},
 
 		timeGapExceeded(a, b) {
 			let diff = Math.abs(new Date(b) - new Date(a));
@@ -62,7 +73,7 @@ export default {
 </script>
 
 <template>
-	<div class="message-wrapper" :class="isMine ? 'me' : 'other'">
+	<div class="message-wrapper" :class="[isMine ? 'me' : 'other', { continuation: isContinuation }]">
 		<div v-if="message.isInitMessage" class="message-init text-muted">{{ initMessageText() }}</div>
 
 		<div v-else-if="message.isJoinMessage" class="message-init text-muted">{{ systemMessageText('joined the group') }}</div>
@@ -111,6 +122,10 @@ export default {
 
 .message-wrapper.me {
 	align-items: flex-end;
+}
+
+.message-wrapper.continuation {
+	margin-top: -8px;
 }
 
 .message-init {

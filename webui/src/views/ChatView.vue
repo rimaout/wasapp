@@ -251,7 +251,7 @@ export default {
 	padding: 16px 16px 110px;
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 10px;
 	scrollbar-width: none;
 	-ms-overflow-style: none;
 	-webkit-mask-image: linear-gradient(to bottom, black 0%, black calc(100% - 64px), transparent 100%);
