@@ -15,6 +15,7 @@ export default {
 		return {
 			messages: [],
 			newMsg: '',
+			newImage: null,
 			sending: false,
 			loading: true,
 			errormsg: null,
@@ -63,16 +64,18 @@ export default {
 
 		async sendMessage() {
 			let text = this.newMsg.trim();
-			if (!text || this.sending) return;
+			if ((!text && !this.newImage) || this.sending) return;
 
 			this.sending = true;
 			try {
 				let formData = new FormData();
-				formData.append('text', text);
+				if (text) formData.append('text', text);
+				if (this.newImage) formData.append('imageFile', this.newImage);
 
 				let response = await this.$axios.post('/chats/' + this.chatId + '/messages', formData);
 				this.messages.push(response.data);
 				this.newMsg = '';
+				this.newImage = null;
 				this.scrollToBottom();
 				refreshChats().catch(() => {});
 			} catch (e) {
@@ -86,6 +89,10 @@ export default {
 				let el = this.$refs.messagesArea;
 				if (el) el.scrollTop = el.scrollHeight;
 			});
+		},
+
+		onImageError(message) {
+			this.errormsg = message;
 		},
 
 		onChatAction(payload) {
@@ -169,7 +176,7 @@ export default {
 			</template>
 		</div>
 
-		<MessageInput v-model="newMsg" :sending="sending" @send="sendMessage" />
+		<MessageInput v-model="newMsg" v-model:image="newImage" :sending="sending" @send="sendMessage" @error="onImageError" />
 	</div>
 </template>
 

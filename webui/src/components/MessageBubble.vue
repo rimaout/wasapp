@@ -1,9 +1,10 @@
 <script>
 import { formatMessageTime, getStatusIcon, getStatusColor, isMyMessageById } from '../services/utils.js';
 import UserAvatar from './UserAvatar.vue';
+import MessageImage from './MessageImage.vue';
 
 export default {
-	components: { UserAvatar },
+	components: { UserAvatar, MessageImage },
 	props: {
 		message: { type: Object, required: true },
 		isGroup: { type: Boolean, default: false },
@@ -26,6 +27,9 @@ export default {
 		},
 		hasAvatar() {
 			return this.showSenderHeader && this.showAvatar;
+		},
+		hasImage() {
+			return !!this.message.content?.msgImageId;
 		},
 	},
 	methods: {
@@ -63,13 +67,25 @@ export default {
 			{{ isMine ? 'You deleted this message' : 'Message deleted' }}
 		</div>
 
-		<div v-else class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': hasAvatar }]">
+		<div v-else class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': hasAvatar, 'has-image': hasImage }]">
 			<div v-if="showSenderHeader" class="message-sender">
 				<UserAvatar v-if="showAvatar" :userId="message.sender.id" :displayName="message.sender.name" :size="18" />
 				<span class="message-sender-name">{{ message.sender.name }}</span>
 			</div>
-			<div class="message-text">{{ message.content?.text || '' }}</div>
-			<div class="message-meta">
+
+			<div v-if="hasImage" class="message-image-wrap">
+				<MessageImage :chat-id="message.chatId" :image-id="message.content.msgImageId" />
+				<div class="message-meta message-meta-overlay">
+					<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
+					<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
+						{{ getStatusIcon(message.status) }}
+					</span>
+				</div>
+			</div>
+
+			<div v-if="message.content?.text" class="message-text" :class="{ 'message-caption': hasImage }">{{ message.content.text }}</div>
+
+			<div v-if="!hasImage" class="message-meta">
 				<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
 				<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
 					{{ getStatusIcon(message.status) }}
@@ -127,6 +143,41 @@ export default {
 
 .message-bubble.has-avatar .message-sender {
 	margin-bottom: 6px;
+}
+
+.message-bubble.has-image {
+	padding: 3px;
+	overflow: hidden;
+}
+
+.message-bubble.has-image .message-sender {
+	padding: 4px 6px 2px;
+	margin-bottom: 0;
+}
+
+.message-image-wrap {
+	position: relative;
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.message-caption {
+	padding: 6px 8px 4px;
+}
+
+.message-meta-overlay {
+	position: absolute;
+	right: 6px;
+	bottom: 6px;
+	margin: 0;
+	padding: 2px 7px;
+	border-radius: 999px;
+	background: rgba(0, 0, 0, 0.55);
+}
+
+.message-meta-overlay .message-time {
+	color: #fff;
+	opacity: 0.9;
 }
 
 .message-sender {
