@@ -7,12 +7,13 @@ const props = defineProps({
 	confirmDisabled: { type: Boolean, default: false },
 	cancelDisabled: { type: Boolean, default: false },
 	cancelLabel: { type: String, default: 'Cancel' },
+	danger: { type: Boolean, default: false },
 });
 const emit = defineEmits(['cancel', 'confirm']);
 </script>
 
 <template>
-	<div class="confirm-bar">
+	<div class="confirm-bar" :class="{ danger }">
 		<button type="button" class="footer-x" :disabled="cancelDisabled" :aria-label="cancelLabel" :title="cancelLabel" @click="emit('cancel')">
 			<svg class="feather footer-x-icon"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
 		</button>
@@ -82,6 +83,24 @@ const emit = defineEmits(['cancel', 'confirm']);
 	background: rgba(255, 255, 255, 0.08);
 	color: var(--tn-fg-dark);
 	cursor: default;
+}
+
+.confirm-bar.danger .footer-x {
+	background: rgba(255, 255, 255, 0.08);
+	color: var(--tn-fg-dark);
+}
+
+.confirm-bar.danger .footer-x:hover:not(:disabled) {
+	background: rgba(255, 255, 255, 0.16);
+}
+
+.confirm-bar.danger .confirm-btn {
+	background: rgba(247, 118, 142, 0.15);
+	color: var(--tn-red);
+}
+
+.confirm-bar.danger .confirm-btn:hover:not(:disabled) {
+	background: rgba(247, 118, 142, 0.25);
 }
 
 .confirm-icon {
