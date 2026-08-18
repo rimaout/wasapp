@@ -5,13 +5,13 @@ export default {
 	components: { IconButton },
 	props: {
 		modelValue: { type: String, default: '' },
-		image: { type: File, default: null },
+		images: { type: Array, default: () => [] },
 		sending: { type: Boolean, default: false },
 	},
-	emits: ['update:modelValue', 'update:image', 'send', 'error'],
+	emits: ['update:modelValue', 'update:images', 'send', 'error'],
 	data() {
 		return {
-			objectUrl: null,
+			previewUrls: [],
 		};
 	},
 	computed: {
@@ -20,13 +20,13 @@ export default {
 			set(v) { this.$emit('update:modelValue', v); },
 		},
 		canSend() {
-			return (this.text.trim() || this.image) && !this.sending;
+			return (this.text.trim() || this.images.length > 0) && !this.sending;
 		},
 	},
 	watch: {
-		image(file) {
-			if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
-			this.objectUrl = file ? URL.createObjectURL(file) : null;
+		images(files) {
+			this.previewUrls.forEach(u => URL.revokeObjectURL(u));
+			this.previewUrls = (files || []).map(f => URL.createObjectURL(f));
 		},
 	},
 	methods: {
@@ -34,18 +34,25 @@ export default {
 			this.$refs.fileInput.click();
 		},
 		onFileChange(e) {
-			const file = e.target.files && e.target.files[0];
-			if (!file) return;
-			if (file.size > 5 * 1024 * 1024) {
-				this.$emit('error', 'Image must be at most 5 MB');
+			const files = Array.from(e.target.files || []);
+			if (files.length === 0) return;
+			for (const file of files) {
+				if (file.size > 5 * 1024 * 1024) {
+					this.$emit('error', 'Each image must be at most 5 MB');
+					e.target.value = '';
+					return;
+				}
+			}
+			if (this.images.length + files.length > 10) {
+				this.$emit('error', 'You can attach at most 10 images');
 				e.target.value = '';
 				return;
 			}
-			this.$emit('update:image', file);
+			this.$emit('update:images', this.images.concat(files));
 			e.target.value = '';
 		},
-		removeImage() {
-			this.$emit('update:image', null);
+		removeImage(idx) {
+			this.$emit('update:images', this.images.filter((_, i) => i !== idx));
 		},
 		handleSend() {
 			if (!this.canSend) return;
@@ -53,17 +60,17 @@ export default {
 		},
 	},
 	beforeUnmount() {
-		if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+		this.previewUrls.forEach(u => URL.revokeObjectURL(u));
 	},
 };
 </script>
 
 <template>
 	<div class="chat-input">
-		<div v-if="image" class="image-preview-bar">
-			<div class="image-thumb">
-				<img :src="objectUrl" alt="Attachment preview" />
-				<button type="button" class="remove-image" @click="removeImage" aria-label="Remove image" title="Remove image">
+		<div v-if="images.length > 0" class="image-preview-bar">
+			<div v-for="(img, idx) in images" :key="idx" class="image-thumb">
+				<img :src="previewUrls[idx]" alt="Attachment preview" />
+				<button type="button" class="remove-image" @click="removeImage(idx)" aria-label="Remove image" title="Remove image">
 					<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
 				</button>
 			</div>
@@ -84,7 +91,7 @@ export default {
 			</button>
 		</div>
 
-		<input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp" class="d-none" @change="onFileChange" />
+		<input ref="fileInput" type="file" multiple accept="image/jpeg,image/png,image/webp" class="d-none" @change="onFileChange" />
 	</div>
 </template>
 
@@ -99,7 +106,16 @@ export default {
 
 .image-preview-bar {
 	display: flex;
+	gap: 8px;
 	margin-bottom: 8px;
+	overflow-x: auto;
+	padding-bottom: 2px;
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+}
+
+.image-preview-bar::-webkit-scrollbar {
+	display: none;
 }
 
 .image-thumb {

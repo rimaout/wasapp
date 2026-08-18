@@ -15,7 +15,7 @@ export default {
 		return {
 			messages: [],
 			newMsg: '',
-			newImage: null,
+			newImages: [],
 			sending: false,
 			loading: true,
 			errormsg: null,
@@ -64,18 +64,32 @@ export default {
 
 		async sendMessage() {
 			let text = this.newMsg.trim();
-			if ((!text && !this.newImage) || this.sending) return;
+			if ((!text && this.newImages.length === 0) || this.sending) return;
 
 			this.sending = true;
 			try {
-				let formData = new FormData();
-				if (text) formData.append('text', text);
-				if (this.newImage) formData.append('imageFile', this.newImage);
+				let url = '/chats/' + this.chatId + '/messages';
 
-				let response = await this.$axios.post('/chats/' + this.chatId + '/messages', formData);
-				this.messages.push(response.data);
-				this.newMsg = '';
-				this.newImage = null;
+				if (this.newImages.length === 0) {
+					let formData = new FormData();
+					formData.append('text', text);
+					let response = await this.$axios.post(url, formData);
+					this.messages.push(response.data);
+					this.newMsg = '';
+				} else {
+					while (this.newImages.length > 0) {
+						let image = this.newImages[0];
+						let isLast = this.newImages.length === 1;
+						let formData = new FormData();
+						if (isLast && text) formData.append('text', text);
+						formData.append('imageFile', image);
+
+						let response = await this.$axios.post(url, formData);
+						this.messages.push(response.data);
+						this.newImages = this.newImages.slice(1);
+						if (isLast) this.newMsg = '';
+					}
+				}
 				this.scrollToBottom();
 				refreshChats().catch(() => {});
 			} catch (e) {
@@ -176,7 +190,7 @@ export default {
 			</template>
 		</div>
 
-		<MessageInput v-model="newMsg" v-model:image="newImage" :sending="sending" @send="sendMessage" @error="onImageError" />
+		<MessageInput v-model="newMsg" v-model:images="newImages" :sending="sending" @send="sendMessage" @error="onImageError" />
 	</div>
 </template>
 
