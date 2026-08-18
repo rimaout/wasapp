@@ -2,14 +2,21 @@
 import { formatMessageTime, getStatusIcon, getStatusColor, isMyMessageById } from '../services/utils.js';
 import UserAvatar from './UserAvatar.vue';
 import MessageImage from './MessageImage.vue';
+import ActionMenu from './ActionMenu.vue';
 
 export default {
-	components: { UserAvatar, MessageImage },
+	components: { UserAvatar, MessageImage, ActionMenu },
+	emits: ['action'],
 	props: {
 		message: { type: Object, required: true },
 		isGroup: { type: Boolean, default: false },
 		showAvatar: { type: Boolean, default: false },
 		previousMessage: { type: Object, default: null },
+	},
+	data() {
+		return {
+			hovered: false,
+		};
 	},
 	computed: {
 		isMine() {
@@ -44,6 +51,17 @@ export default {
 		isContinuation() {
 			return this.sameSeries;
 		},
+		actionItems() {
+			const items = [
+				{ id: 'copy', label: 'Copy', icon: 'copy' },
+				{ id: 'reply', label: 'Reply', icon: 'corner-up-left' },
+				{ id: 'forward', label: 'Forward', icon: 'share' },
+			];
+			if (this.isMine) {
+				items.push({ id: 'delete', label: 'Delete', icon: 'trash-2', danger: true, dangerText: 'Are you sure you want to delete this message?' });
+			}
+			return items;
+		},
 	},
 	methods: {
 		formatMessageTime,
@@ -68,6 +86,10 @@ export default {
 			let who = this.isMine ? 'You' : this.message.sender.name;
 			return who + ' ' + action;
 		},
+
+		onMenuSelect(item) {
+			this.$emit('action', { type: item.id, message: this.message });
+		},
 	},
 };
 </script>
@@ -84,31 +106,37 @@ export default {
 			{{ isMine ? 'You deleted this message' : 'Message deleted' }}
 		</div>
 
-		<div v-else class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': hasAvatar, 'has-image': hasImage }]">
-			<div v-if="showSenderHeader" class="message-sender">
-				<UserAvatar v-if="showAvatar" :userId="message.sender.id" :displayName="message.sender.name" :size="18" />
-				<span class="message-sender-name">{{ message.sender.name }}</span>
-			</div>
+		<div v-else class="message-row" @mouseenter="hovered = true" @mouseleave="hovered = false">
+			<ActionMenu v-if="isMine" :items="actionItems" trigger="hover" :visible="hovered" icon="more-vertical" label="Message actions" size="small" placement="down-right" @select="onMenuSelect" />
 
-			<div v-if="hasImage" class="message-image-wrap">
-				<MessageImage :chat-id="message.chatId" :image-id="message.content.msgImageId" />
-				<div v-if="overlayMeta" class="message-meta message-meta-overlay">
-					<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
-					<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
-						{{ getStatusIcon(message.status) }}
+			<div class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': hasAvatar, 'has-image': hasImage }]">
+				<div v-if="showSenderHeader" class="message-sender">
+					<UserAvatar v-if="showAvatar" :userId="message.sender.id" :displayName="message.sender.name" :size="18" />
+					<span class="message-sender-name">{{ message.sender.name }}</span>
+				</div>
+
+				<div v-if="hasImage" class="message-image-wrap">
+					<MessageImage :chat-id="message.chatId" :image-id="message.content.msgImageId" />
+					<div v-if="overlayMeta" class="message-meta message-meta-overlay">
+						<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
+						<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
+							{{ getStatusIcon(message.status) }}
+						</span>
+					</div>
+				</div>
+
+				<div v-if="hasCaption" class="message-text" :class="{ 'message-caption': hasImage }">
+					{{ message.content.text }}
+					<span v-if="!overlayMeta" class="message-meta message-meta-inline">
+						<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
+						<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
+							{{ getStatusIcon(message.status) }}
+						</span>
 					</span>
 				</div>
 			</div>
 
-			<div v-if="hasCaption" class="message-text" :class="{ 'message-caption': hasImage }">
-				{{ message.content.text }}
-				<span v-if="!overlayMeta" class="message-meta message-meta-inline">
-					<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
-					<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
-						{{ getStatusIcon(message.status) }}
-					</span>
-				</span>
-			</div>
+			<ActionMenu v-if="!isMine" :items="actionItems" trigger="hover" :visible="hovered" icon="more-vertical" label="Message actions" size="small" placement="down-left" @select="onMenuSelect" />
 		</div>
 	</div>
 </template>
@@ -126,6 +154,21 @@ export default {
 
 .message-wrapper.continuation {
 	margin-top: -8px;
+}
+
+.message-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+}
+
+.message-wrapper.other .message-row {
+	justify-content: flex-start;
+}
+
+.message-wrapper.me .message-row {
+	justify-content: flex-end;
 }
 
 .message-init {

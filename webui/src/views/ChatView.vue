@@ -2,7 +2,7 @@
 import MessageBubble from '../components/MessageBubble.vue';
 import MessageInput from '../components/MessageInput.vue';
 import ChatAvatar from '../components/ChatAvatar.vue';
-import PopupMenu from '../components/PopupMenu.vue';
+import ActionMenu from '../components/ActionMenu.vue';
 import ChatMembersPopup from '../components/ChatMembersPopup.vue';
 import { usePolling } from '../composables/usePolling.js';
 import { refreshChats } from '../composables/useChats.js';
@@ -10,7 +10,7 @@ import { leaveGroup } from '../services/api.js';
 import { formatDay, isNewDay, getErrorMessage } from '../services/utils.js';
 
 export default {
-	components: { MessageBubble, MessageInput, ChatAvatar, PopupMenu, ChatMembersPopup },
+	components: { MessageBubble, MessageInput, ChatAvatar, ActionMenu, ChatMembersPopup },
 	data() {
 		return {
 			messages: [],
@@ -25,7 +25,7 @@ export default {
 			chatOptions: [
 				{ id: 'rename', label: 'Change Group Name', icon: 'type', action: 'rename' },
 				{ id: 'image', label: 'Change Group Image', icon: 'image', action: 'image' },
-				{ id: 'leave', label: 'Leave Group', icon: 'log-out', danger: true },
+				{ id: 'leave', label: 'Leave Group', icon: 'log-out', danger: true, dangerText: 'Are you sure you want to leave this group?' },
 			],
 		};
 	},
@@ -163,7 +163,7 @@ export default {
 			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" :version="avatarVersion" />
 			<span class="chat-header-name">{{ chatName }}</span>
 			<ChatMembersPopup v-if="isGroup" :chatId="chatId" />
-			<PopupMenu v-if="isGroup" class="ms-auto" icon="more-vertical" label="Chat options" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" filled @done="onChatAction" @select="onChatSelect" />
+			<ActionMenu v-if="isGroup" class="ms-auto" icon="more-vertical" label="Chat options" placement="down-right" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" filled @done="onChatAction" @select="onChatSelect" />
 		</div>
 
 		<div ref="messagesArea" class="chat-messages flex-grow-1">

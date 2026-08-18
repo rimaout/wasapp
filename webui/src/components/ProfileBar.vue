@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import UserAvatar from './UserAvatar.vue';
-import PopupMenu from './PopupMenu.vue';
+import ActionMenu from './ActionMenu.vue';
 import { getUserId, getUserName, setUserName, clearAuth } from '../services/auth.js';
 
 const userId = getUserId();
@@ -11,7 +11,7 @@ const avatarVersion = ref(0);
 const profileItems = [
 	{ id: 'name', label: 'Change Profile Name', icon: 'edit-2', action: 'rename' },
 	{ id: 'image', label: 'Change Profile Image', icon: 'image', action: 'image' },
-	{ id: 'logout', label: 'Logout', icon: 'log-out', danger: true },
+	{ id: 'logout', label: 'Logout', icon: 'log-out', danger: true, dangerText: 'Are you sure you want to log out?' },
 ];
 
 function onSelect(item) {
@@ -35,7 +35,7 @@ function onDone(payload) {
 	<div class="profile-bar">
 		<UserAvatar :userId="userId" :displayName="name" :size="40" :version="avatarVersion" />
 		<span class="profile-greeting">Hi 👋 {{ name }}</span>
-		<PopupMenu class="ms-auto" icon="settings" label="Profile options" direction="up" :items="profileItems" :target="{ kind: 'me', userId }" :initial-name="name" @select="onSelect" @done="onDone" />
+		<ActionMenu class="ms-auto" icon="settings" label="Profile options" placement="top-right" :items="profileItems" :target="{ kind: 'me', userId }" :initial-name="name" @select="onSelect" @done="onDone" />
 	</div>
 </template>
 
