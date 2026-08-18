@@ -370,7 +370,8 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
 		WHERE m.chat_id = ?
-		ORDER BY m.send_time DESC
+		-- send_time has only second precision, so we use rowid as tiebreaker
+		ORDER BY m.send_time DESC, m.rowid DESC
 		LIMIT 50`,
 		chatId,
 	)

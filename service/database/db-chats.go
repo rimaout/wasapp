@@ -208,11 +208,14 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 		FROM members mem
 		JOIN chats c ON mem.chat_id = c.id
 		JOIN messages m ON m.id = (
-			SELECT id FROM messages WHERE chat_id = c.id ORDER BY send_time DESC LIMIT 1
+			-- send_time has second precision, so use rowid as a tiebreaker
+			-- to reliably pick the most recently sent message.
+			SELECT id FROM messages WHERE chat_id = c.id ORDER BY send_time DESC, rowid DESC LIMIT 1
 		)
 		JOIN users u ON m.sender_id = u.id
 		WHERE mem.user_id = ? AND mem.group_leave_time IS NULL
-		ORDER BY m.send_time DESC
+		-- Same tiebreaker workflow as above
+		ORDER BY m.send_time DESC, m.rowid DESC
 		LIMIT 50`,
 		userId, userId, userId,
 	)
