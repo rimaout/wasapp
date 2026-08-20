@@ -53,7 +53,6 @@ export default {
 		},
 		actionItems() {
 			const items = [
-				{ id: 'copy', label: 'Copy', icon: 'copy' },
 				{ id: 'reply', label: 'Reply', icon: 'corner-up-left' },
 				{ id: 'forward', label: 'Forward', icon: 'share' },
 			];
@@ -107,7 +106,7 @@ export default {
 		</div>
 
 		<div v-else class="message-row" @mouseenter="hovered = true" @mouseleave="hovered = false">
-			<ActionMenu v-if="isMine" :items="actionItems" trigger="hover" :visible="hovered" icon="more-vertical" label="Message actions" size="small" placement="down-right" @select="onMenuSelect" />
+			<ActionMenu v-if="isMine" :items="actionItems" trigger="hover" :visible="hovered" icon="more-vertical" label="Message actions" size="small" filled placement="down-right" @select="onMenuSelect" />
 
 			<div class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': hasAvatar, 'has-image': hasImage }]">
 				<div v-if="showSenderHeader" class="message-sender">
@@ -136,7 +135,7 @@ export default {
 				</div>
 			</div>
 
-			<ActionMenu v-if="!isMine" :items="actionItems" trigger="hover" :visible="hovered" icon="more-vertical" label="Message actions" size="small" placement="down-left" @select="onMenuSelect" />
+			<ActionMenu v-if="!isMine" :items="actionItems" trigger="hover" :visible="hovered" icon="more-vertical" label="Message actions" size="small" filled placement="down-left" @select="onMenuSelect" />
 		</div>
 	</div>
 </template>
