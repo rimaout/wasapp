@@ -29,7 +29,7 @@ func (rt *_router) Handler() http.Handler {
 	rt.router.GET("/chats", rt.wrapAuthenticated(rt.getMyChats))
 
 	// Chat Creation
-	rt.router.POST("/user/:userId/chats", rt.wrapAuthenticated(rt.createDirectChat))
+	rt.router.POST("/users/:userId/chats", rt.wrapAuthenticated(rt.createDirectChat))
 	rt.router.POST("/chats", rt.wrapAuthenticated(rt.createGroupChat))
 
 	// Chat Edits

@@ -25,7 +25,7 @@ async function selectUser(user) {
 	creating.value = user.id;
 	errormsg.value = null;
 	try {
-		const response = await axios.post('/user/' + user.id + '/chats');
+		const response = await axios.post('/users/' + user.id + '/chats');
 		refreshChats().catch(() => {});
 		goToChat(response.data.id, response.data.displayName, false);
 	} catch (e) {
