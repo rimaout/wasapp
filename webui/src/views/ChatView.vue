@@ -24,6 +24,7 @@ export default {
 			markedRead: false,
 			nameOverride: null,
 			avatarVersion: 0,
+			replyTo: null,
 		};
 	},
 	computed: {
@@ -72,7 +73,8 @@ export default {
 
 			this.sending = true;
 			try {
-				let url = '/chats/' + this.chatId + '/messages';
+				let base = '/chats/' + this.chatId + '/messages';
+				let url = this.replyTo ? base + '/' + this.replyTo.id + '/reply' : base;
 
 				if (this.newImages.length === 0) {
 					let formData = new FormData();
@@ -94,6 +96,7 @@ export default {
 						if (isLast) this.newMsg = '';
 					}
 				}
+				this.replyTo = null;
 				this.scrollToBottom();
 				refreshChats().catch(() => {});
 			} catch (e) {
@@ -128,6 +131,12 @@ export default {
 			}
 		},
 
+		onMessageAction(action) {
+			if (action.type === 'reply') {
+				this.replyTo = action.message;
+			}
+		},
+
 		async leaveGroup() {
 			try {
 				await leaveGroup(this.chatId);
@@ -145,6 +154,7 @@ export default {
 			this.markedRead = false;
 			this.errormsg = null;
 			this.nameOverride = null;
+			this.replyTo = null;
 			this.fetchMessages(true);
 		},
 	},
@@ -176,25 +186,25 @@ export default {
 
 			<template v-for="(msg, i) in messages" :key="msg.id">
 				<template v-if="msg.isInitMessage">
-					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" />
+					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" @action="onMessageAction" />
 					<div class="date-divider">{{ formatDay(msg.sendTime) }}</div>
 				</template>
 				<template v-else-if="msg.isJoinMessage || msg.isLeaveMessage">
 					<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
 						{{ formatDay(msg.sendTime) }}
 					</div>
-					<MessageBubble :message="msg" :isGroup="isGroup" />
+					<MessageBubble :message="msg" :isGroup="isGroup" @action="onMessageAction" />
 				</template>
 				<template v-else>
 					<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
 						{{ formatDay(msg.sendTime) }}
 					</div>
-					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" :previous-message="messages[i - 1]" />
+					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" :previous-message="messages[i - 1]" @action="onMessageAction" />
 				</template>
 			</template>
 		</div>
 
-		<MessageInput v-model="newMsg" v-model:images="newImages" :sending="sending" @send="sendMessage" @error="onImageError" />
+		<MessageInput v-model="newMsg" v-model:images="newImages" :sending="sending" :chat-id="chatId" :reply-to="replyTo" @send="sendMessage" @error="onImageError" @clear-reply="replyTo = null" />
 	</div>
 </template>
 

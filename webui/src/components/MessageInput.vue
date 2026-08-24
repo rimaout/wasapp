@@ -1,14 +1,17 @@
 <script>
 import IconButton from './ui/IconButton.vue';
+import MessageImage from './MessageImage.vue';
 
 export default {
-	components: { IconButton },
+	components: { IconButton, MessageImage },
 	props: {
 		modelValue: { type: String, default: '' },
 		images: { type: Array, default: () => [] },
 		sending: { type: Boolean, default: false },
+		chatId: { type: String, default: '' },
+		replyTo: { type: Object, default: null },
 	},
-	emits: ['update:modelValue', 'update:images', 'send', 'error'],
+	emits: ['update:modelValue', 'update:images', 'send', 'error', 'clearReply'],
 	data() {
 		return {
 			previewUrls: [],
@@ -21,6 +24,18 @@ export default {
 		},
 		canSend() {
 			return (this.text.trim() || this.images.length > 0) && !this.sending;
+		},
+		replyPreview() {
+			const r = this.replyTo;
+			if (!r) return null;
+			const fwd = r.forwardedFrom || {};
+			const content = r.content || {};
+			return {
+				name: (r.sender && r.sender.name) || '',
+				text: fwd.text || content.text || '',
+				hasImage: !!(fwd.msgImageId || content.msgImageId),
+				imageId: fwd.msgImageId || content.msgImageId,
+			};
 		},
 	},
 	watch: {
@@ -67,6 +82,17 @@ export default {
 
 <template>
 	<div class="chat-input">
+		<div v-if="replyPreview" class="reply-preview-bar">
+			<MessageImage v-if="replyPreview.hasImage" :chat-id="chatId" :image-id="replyPreview.imageId" thumbnail />
+			<div class="reply-info">
+				<span class="reply-name">{{ replyPreview.name }}</span>
+				<span class="reply-text">{{ replyPreview.text || 'Image' }}</span>
+			</div>
+			<button type="button" class="reply-remove" @click="$emit('clearReply')" aria-label="Remove reply" title="Remove reply">
+				<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
+			</button>
+		</div>
+
 		<div v-if="images.length > 0" class="image-preview-bar">
 			<div v-for="(img, idx) in images" :key="idx" class="image-thumb">
 				<img :src="previewUrls[idx]" alt="Attachment preview" />
@@ -102,6 +128,62 @@ export default {
 	right: 0;
 	bottom: 0;
 	padding: 0 24px 14px;
+}
+
+.reply-preview-bar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	background: var(--tn-bg-highlight);
+	border: 1px solid var(--tn-border);
+	border-radius: 12px;
+	padding: 6px 8px;
+	margin-bottom: 8px;
+}
+
+.reply-info {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	flex: 1 1 auto;
+}
+
+.reply-name {
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--tn-blue);
+}
+
+.reply-text {
+	font-size: 0.85rem;
+	color: var(--tn-fg);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.reply-remove {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	flex-shrink: 0;
+	border: none;
+	border-radius: 50%;
+	background: none;
+	color: var(--tn-fg-dark);
+	cursor: pointer;
+}
+
+.reply-remove:hover {
+	background: rgba(255, 255, 255, 0.08);
+	color: var(--tn-red);
+}
+
+.reply-remove .feather {
+	width: 16px;
+	height: 16px;
 }
 
 .image-preview-bar {

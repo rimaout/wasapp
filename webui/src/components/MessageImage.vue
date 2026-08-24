@@ -7,6 +7,7 @@ import axios from '../services/axios.js';
 const props = defineProps({
 	chatId: { type: String, required: true },
 	imageId: { type: String, required: true },
+	thumbnail: { type: Boolean, default: false },
 });
 
 const loading = ref(true);
@@ -37,7 +38,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-	<div class="message-image">
+	<div class="message-image" :class="{ thumbnail }">
 		<LoadingSpinner v-if="loading" :loading="loading" />
 		<img v-else-if="src" :src="src" alt="Message image" class="message-image-img" />
 		<span v-else-if="failed" class="message-image-failed">Image unavailable</span>
@@ -63,5 +64,21 @@ onBeforeUnmount(() => {
 .message-image-failed {
 	color: var(--tn-fg-dark);
 	font-size: 0.85rem;
+}
+
+.message-image.thumbnail {
+	min-width: 0;
+	min-height: 0;
+	width: 40px;
+	height: 40px;
+	flex-shrink: 0;
+	overflow: hidden;
+}
+
+.message-image.thumbnail .message-image-img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	max-height: none;
 }
 </style>
