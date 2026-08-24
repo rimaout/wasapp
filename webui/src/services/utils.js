@@ -116,6 +116,7 @@ export function getChatSnippet(chat) {
 		let who = isMyMessage(lm.senderName) ? 'You' : lm.senderName;
 		return who + ' left the group';
 	}
+	if (lm.isForward) return 'Forwarded message';
 	if (lm.isDeleted) return 'Message deleted';
 	if (lm.content && lm.content.text) {
 		let text = lm.content.text;

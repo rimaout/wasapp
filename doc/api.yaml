@@ -1300,6 +1300,7 @@ components:
         isInitMessage:  { $ref: '#/components/schemas/IsInitMessageFlag'    }
         isJoinMessage:  { $ref: '#/components/schemas/IsJoinMessageFlag'    }
         isLeaveMessage: { $ref: '#/components/schemas/IsLeaveMessageFlag'   }
+        isForward:      { $ref: '#/components/schemas/IsForwardFlag'        } #optional
         content:        { $ref: '#/components/schemas/MessageContent'       } #optional
 
     ChatMembersList:
@@ -1413,6 +1414,13 @@ components:
         When this flag is true, the message content should be empty and ignored by the client.
         The client should render the message like "{senderOfTheMessage} left the group".
         A message with the IsLeaveMessageFlag set to true can't be deleted.
+
+    IsForwardFlag:
+      type: boolean
+      description: >-
+        Indicates whether the message is a forwarded message. When this flag is
+        true, the message has no own content and the client should render it as
+        a forwarded message.
 
     MessageStatus:
       type: string

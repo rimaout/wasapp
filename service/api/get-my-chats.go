@@ -30,6 +30,7 @@ type chatLastMessagePreview struct {
 	IsInitMessage  bool                     `json:"isInitMessage"`
 	IsJoinMessage  bool                     `json:"isJoinMessage"`
 	IsLeaveMessage bool                     `json:"isLeaveMessage"`
+	IsForward      bool                     `json:"isForward"`
 	Content        *database.MessageContent `json:"content,omitempty"`
 }
 
@@ -59,6 +60,7 @@ func (rt *_router) getMyChats(w http.ResponseWriter, r *http.Request, ps httprou
 				IsInitMessage:  cp.IsInitMsg,
 				IsJoinMessage:  cp.IsJoinMsg,
 				IsLeaveMessage: cp.IsLeaveMsg,
+				IsForward:      cp.IsForward,
 			},
 		}
 

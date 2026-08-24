@@ -17,6 +17,7 @@ type Chat struct {
 	GroupName      *string `json:"groupName,omitempty"`
 	GroupImagePath *string `json:"groupImagePath,omitempty"`
 }
+
 // Note: for GroupName & GroupImagePath we use `*string` (pointer to string) instad of `string`
 //		 because `*string` can be null.
 
@@ -163,21 +164,22 @@ func (db *appdbimpl) GetGroupAvatarPath(chatId string) (string, error) {
 }
 
 type ChatPreview struct {
-	ChatID       string
-	IsGroupChat  bool
-	DisplayName  string
-	MessageID    string
-	SendTime     time.Time
-	SenderID     string
-	SenderName   string
-	IsDeleted    bool
-	IsInitMsg    bool
-	IsJoinMsg    bool
-	IsLeaveMsg   bool
-	Text         *string
-	ImageID      *string
-	ReplyTo      *string
-	UnreadCount  int
+	ChatID      string
+	IsGroupChat bool
+	DisplayName string
+	MessageID   string
+	SendTime    time.Time
+	SenderID    string
+	SenderName  string
+	IsDeleted   bool
+	IsInitMsg   bool
+	IsJoinMsg   bool
+	IsLeaveMsg  bool
+	IsForward   bool
+	Text        *string
+	ImageID     *string
+	ReplyTo     *string
+	UnreadCount int
 }
 
 // GetMyChats returns a list of chats for the given user, including the last message in each chat.
@@ -196,6 +198,7 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 
 			m.id, m.send_time, m.sender_id, u.name AS sender_name,
 			m.is_deleted, m.is_init_message, m.is_join_message, m.is_leave_message,
+			m.is_forward_message,
 			m.text, m.image_id, m.reply_to_msg_id,
 
 			-- Count unread messages for this user in this chat
@@ -234,6 +237,7 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			&cp.DisplayName,
 			&cp.MessageID, &cp.SendTime, &cp.SenderID, &cp.SenderName,
 			&cp.IsDeleted, &cp.IsInitMsg, &cp.IsJoinMsg, &cp.IsLeaveMsg,
+			&cp.IsForward,
 			&cp.Text, &cp.ImageID, &cp.ReplyTo,
 			&cp.UnreadCount,
 		)
