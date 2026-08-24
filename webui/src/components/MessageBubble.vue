@@ -46,6 +46,35 @@ export default {
 		overlayMeta() {
 			return this.hasImage && !this.hasCaption;
 		},
+		hasRepliedTo() {
+			return !!this.message.repliedTo;
+		},
+		repliedTo() {
+			return this.message.repliedTo;
+		},
+		repliedToDeleted() {
+			const r = this.repliedTo;
+			return !!r && !r.senderName;
+		},
+		repliedToEmpty() {
+			const r = this.repliedTo;
+			return !!r && !!r.senderName && !r.text && !r.msgImageId;
+		},
+		repliedToHasImage() {
+			const r = this.repliedTo;
+			return !!(r && r.msgImageId);
+		},
+		repliedToText() {
+			const r = this.repliedTo;
+			return (r && r.text) || '';
+		},
+		repliedToName() {
+			const r = this.repliedTo;
+			if (!r) return '';
+			if (!r.senderName) return 'Replied to a deleted message';
+			if (isMyMessageById(r.senderId)) return 'Replied to you';
+			return 'Replied to ' + r.senderName;
+		},
 		sameSeries() {
 			// true when the previous message is a normal message from the same
 			// sender within the time gap. Used both to hide the sender header and
@@ -120,6 +149,18 @@ export default {
 				<div v-if="showSenderHeader" class="message-sender">
 					<UserAvatar v-if="showAvatar" :userId="message.sender.id" :displayName="message.sender.name" :size="18" />
 					<span class="message-sender-name">{{ message.sender.name }}</span>
+				</div>
+
+				<div v-if="hasRepliedTo" class="message-replied-to">
+					<div class="replied-label">
+						<svg class="feather replied-icon"><use href="/feather-sprite-v4.29.0.svg#corner-up-left"/></svg>
+						<span class="replied-name">{{ repliedToName }}</span>
+					</div>
+					<template v-if="!repliedToDeleted">
+						<MessageImage v-if="repliedToHasImage" :chat-id="message.chatId" :image-id="message.repliedTo.msgImageId" thumbnail />
+						<span v-if="repliedToText" class="replied-text">{{ repliedToText }}</span>
+						<span v-else-if="repliedToEmpty" class="replied-text replied-muted">(empty message)</span>
+					</template>
 				</div>
 
 				<div v-if="isForwarded" class="message-forwarded">
@@ -276,6 +317,49 @@ export default {
 .message-forwarded .forwarded-icon {
 	width: 14px;
 	height: 14px;
+}
+
+.message-replied-to {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 4px;
+	margin: 4px 0 6px;
+	padding: 6px 6px;
+	border-radius: 8px;
+	background: rgba(0, 0, 0, 0.12);
+	min-width: 160px;
+}
+
+.replied-label {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.replied-icon {
+	width: 14px;
+	height: 14px;
+}
+
+.replied-name {
+	font-size: 0.8rem;
+	font-weight: 600;
+	color: inherit;
+}
+
+.replied-text {
+	font-size: 0.8rem;
+	opacity: 0.85;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100%;
+}
+
+.replied-muted {
+	opacity: 0.5;
+	font-style: italic;
 }
 
 .message-sender {
