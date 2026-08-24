@@ -33,6 +33,11 @@ export default {
 		isForwarded() {
 			return !!this.message.forwardedFrom;
 		},
+		forwardedEmpty() {
+			if (!this.isForwarded) return false;
+			const f = this.message.forwardedFrom;
+			return !f.text && !f.msgImageId;
+		},
 		hasImage() {
 			return this.isForwarded
 				? !!this.message.forwardedFrom.msgImageId
@@ -166,6 +171,10 @@ export default {
 				<div v-if="isForwarded" class="message-forwarded">
 					<svg class="feather forwarded-icon"><use href="/feather-sprite-v4.29.0.svg#corner-up-right"/></svg>
 					<span>Forwarded</span>
+				</div>
+
+				<div v-if="forwardedEmpty" class="message-text message-forwarded-deleted">
+					The original message was deleted
 				</div>
 
 				<div v-if="hasImage" class="message-image-wrap">
@@ -317,6 +326,12 @@ export default {
 .message-forwarded .forwarded-icon {
 	width: 14px;
 	height: 14px;
+}
+
+.message-forwarded-deleted {
+	font-size: 0.85rem;
+	opacity: 0.6;
+	font-style: italic;
 }
 
 .message-replied-to {
