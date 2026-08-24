@@ -134,6 +134,19 @@ export default {
 		onMessageAction(action) {
 			if (action.type === 'reply') {
 				this.replyTo = action.message;
+			} else if (action.type === 'delete') {
+				this.deleteMessage(action.message);
+			}
+		},
+
+		async deleteMessage(message) {
+			try {
+				const res = await this.$axios.delete('/chats/' + this.chatId + '/messages/' + message.id);
+				const idx = this.messages.findIndex(m => m.id === message.id);
+				if (idx !== -1) this.messages.splice(idx, 1, res.data);
+				refreshChats().catch(() => {});
+			} catch (e) {
+				this.errormsg = getErrorMessage(e);
 			}
 		},
 
