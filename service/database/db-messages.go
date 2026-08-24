@@ -170,25 +170,39 @@ var ErrMessageNotFound = errors.New("message not found")
 
 // resolveRepliedTo returns info about the message being replied to, for a quoted
 // preview. If the parent is missing or deleted, it returns info with only the
-// messageId set (sender/content left empty).
+// messageId set (sender/content left empty). If the parent is a forwarded message,
+// it quotes the original forwarded-from message's content instead.
 func (db *appdbimpl) resolveRepliedTo(replyToId string) (*RepliedToInfo, error) {
 	info := &RepliedToInfo{MessageID: replyToId}
 	var senderId, senderName string
 	var text, imageId *string
+	var isForward bool
+	var fwdMsgId *string
 	err := db.c.QueryRow(
-		`SELECT m.sender_id, u.name, m.text, m.image_id
+		`SELECT m.sender_id, u.name, m.text, m.image_id, m.is_forward_message, m.forwarded_from_msg_id
 		 FROM messages m JOIN users u ON u.id = m.sender_id
 		 WHERE m.id = ? AND m.is_deleted = 0`,
 		replyToId,
-	).Scan(&senderId, &senderName, &text, &imageId)
+	).Scan(&senderId, &senderName, &text, &imageId, &isForward, &fwdMsgId)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return nil, fmt.Errorf("resolving replied-to content: %w", err)
 	}
 	if err == nil {
 		info.SenderID = senderId
 		info.SenderName = senderName
-		info.Text = text
-		info.MsgImageId = imageId
+		if isForward && fwdMsgId != nil {
+			// Parent is a forwarded message: quote the original message's content.
+			var fwdText, fwdImageId *string
+			_ = db.c.QueryRow(
+				"SELECT text, image_id FROM messages WHERE id = ? AND is_deleted = 0",
+				*fwdMsgId,
+			).Scan(&fwdText, &fwdImageId)
+			info.Text = fwdText
+			info.MsgImageId = fwdImageId
+		} else {
+			info.Text = text
+			info.MsgImageId = imageId
+		}
 	}
 	return info, nil
 }
