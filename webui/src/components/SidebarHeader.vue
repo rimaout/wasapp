@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue';
-import ActionMenu from './ActionMenu.vue';
+import ActionMenu from './ui/ActionMenu.vue';
 
 const props = defineProps({
 	mode: { type: String, required: true },

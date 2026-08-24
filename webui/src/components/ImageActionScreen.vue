@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-import ImagePicker from './ImagePicker.vue';
-import ConfirmBar from './ConfirmBar.vue';
+import ImagePicker from './ui/ImagePicker.vue';
+import ConfirmBar from './ui/ConfirmBar.vue';
 import { fetchAvatar, updateAvatar, deleteAvatar } from '../services/api.js';
 import { getErrorMessage } from '../services/utils.js';
 

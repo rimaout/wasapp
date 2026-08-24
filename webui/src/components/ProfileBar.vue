@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
-import UserAvatar from './UserAvatar.vue';
-import ActionMenu from './ActionMenu.vue';
+import UserAvatar from './ui/UserAvatar.vue';
+import ActionMenu from './ui/ActionMenu.vue';
 import RenameActionScreen from './RenameActionScreen.vue';
 import ImageActionScreen from './ImageActionScreen.vue';
 import { getUserId, getUserName, setUserName, clearAuth } from '../services/auth.js';

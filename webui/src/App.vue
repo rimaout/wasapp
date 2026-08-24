@@ -6,7 +6,7 @@ import UserSearchView from './views/UserSearchView.vue'
 import GroupMembersView from './views/GroupMembersView.vue'
 import GroupDetailsView from './views/GroupDetailsView.vue'
 import SidebarHeader from './components/SidebarHeader.vue'
-import SearchBar from './components/SearchBar.vue'
+import SearchBar from './components/ui/SearchBar.vue'
 import ProfileBar from './components/ProfileBar.vue'
 
 const route = useRoute();

@@ -1,8 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue';
-import SearchBar from './SearchBar.vue';
-import UserAvatar from './UserAvatar.vue';
-import MemberChips from './MemberChips.vue';
+import SearchBar from './ui/SearchBar.vue';
+import UserAvatar from './ui/UserAvatar.vue';
+import MemberChips from './ui/MemberChips.vue';
 import { useUsers } from '../composables/useUsers.js';
 
 // Search + select users, shown as removable chips. Excludes the logged-in user

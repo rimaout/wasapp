@@ -1,8 +1,8 @@
 <script>
 import MessageBubble from '../components/MessageBubble.vue';
 import MessageInput from '../components/MessageInput.vue';
-import ChatAvatar from '../components/ChatAvatar.vue';
-import ActionMenu from '../components/ActionMenu.vue';
+import ChatAvatar from '../components/ui/ChatAvatar.vue';
+import ActionMenu from '../components/ui/ActionMenu.vue';
 import RenameActionScreen from '../components/RenameActionScreen.vue';
 import ImageActionScreen from '../components/ImageActionScreen.vue';
 import ChatMembersPopup from '../components/ChatMembersPopup.vue';

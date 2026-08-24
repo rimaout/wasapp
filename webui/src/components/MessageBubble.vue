@@ -1,8 +1,8 @@
 <script>
 import { formatMessageTime, getStatusIcon, getStatusColor, isMyMessageById } from '../services/utils.js';
-import UserAvatar from './UserAvatar.vue';
+import UserAvatar from './ui/UserAvatar.vue';
 import MessageImage from './MessageImage.vue';
-import ActionMenu from './ActionMenu.vue';
+import ActionMenu from './ui/ActionMenu.vue';
 import ForwardActionScreen from './ForwardActionScreen.vue';
 
 export default {

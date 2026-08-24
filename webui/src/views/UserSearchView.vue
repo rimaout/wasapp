@@ -2,8 +2,8 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from '../services/axios.js';
-import SearchBar from '../components/SearchBar.vue';
-import UserAvatar from '../components/UserAvatar.vue';
+import SearchBar from '../components/ui/SearchBar.vue';
+import UserAvatar from '../components/ui/UserAvatar.vue';
 import { useUsers } from '../composables/useUsers.js';
 import { refreshChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';

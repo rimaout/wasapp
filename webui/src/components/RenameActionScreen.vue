@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue';
-import ConfirmBar from './ConfirmBar.vue';
+import ConfirmBar from './ui/ConfirmBar.vue';
 import { updateName } from '../services/api.js';
 import { getErrorMessage } from '../services/utils.js';
 

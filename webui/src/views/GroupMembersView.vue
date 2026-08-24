@@ -1,6 +1,6 @@
 <script setup>
 import UserPicker from '../components/UserPicker.vue';
-import ConfirmBar from '../components/ConfirmBar.vue';
+import ConfirmBar from '../components/ui/ConfirmBar.vue';
 
 const props = defineProps({
 	members: { type: Array, default: () => [] },

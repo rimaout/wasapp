@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
 import axios from '../services/axios.js';
-import MemberChips from './MemberChips.vue';
+import MemberChips from './ui/MemberChips.vue';
 import UserPicker from './UserPicker.vue';
-import ConfirmBar from './ConfirmBar.vue';
+import ConfirmBar from './ui/ConfirmBar.vue';
 import { getErrorMessage } from '../services/utils.js';
 
 // Button in the chat header showing the member count; opens a popup with the

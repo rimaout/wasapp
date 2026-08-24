@@ -1,10 +1,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import ImagePicker from '../components/ImagePicker.vue';
-import MemberChips from '../components/MemberChips.vue';
-import IconButton from '../components/IconButton.vue';
-import ConfirmBar from '../components/ConfirmBar.vue';
+import ImagePicker from '../components/ui/ImagePicker.vue';
+import MemberChips from '../components/ui/MemberChips.vue';
+import IconButton from '../components/ui/IconButton.vue';
+import ConfirmBar from '../components/ui/ConfirmBar.vue';
 import { createGroup as createGroupRequest, updateAvatar } from '../services/api.js';
 import { refreshChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';

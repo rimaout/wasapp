@@ -1,10 +1,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import axios from '../services/axios.js';
-import SearchBar from './SearchBar.vue';
-import ChatAvatar from './ChatAvatar.vue';
-import UserAvatar from './UserAvatar.vue';
-import ConfirmBar from './ConfirmBar.vue';
+import SearchBar from './ui/SearchBar.vue';
+import ChatAvatar from './ui/ChatAvatar.vue';
+import UserAvatar from './ui/UserAvatar.vue';
+import ConfirmBar from './ui/ConfirmBar.vue';
 import { useChats } from '../composables/useChats.js';
 import { useUsers } from '../composables/useUsers.js';
 import { getErrorMessage } from '../services/utils.js';

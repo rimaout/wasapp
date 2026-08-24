@@ -1,5 +1,5 @@
 <script>
-import { getAvatarColor, getAvatarLetter } from '../services/utils.js';
+import { getAvatarColor, getAvatarLetter } from '../../services/utils.js';
 
 // Shared avatar rendering: loads an image from `imageUrl`, falling back
 // to a colored letter (or group icon) when no image is available.

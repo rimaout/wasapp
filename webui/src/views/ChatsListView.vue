@@ -1,5 +1,5 @@
 <script>
-import ChatAvatar from '../components/ChatAvatar.vue';
+import ChatAvatar from '../components/ui/ChatAvatar.vue';
 import { isMyMessage, formatPreviewTime, getStatusIcon, getStatusColor, getChatSnippet } from '../services/utils.js';
 import { usePolling } from '../composables/usePolling.js';
 import { useChats } from '../composables/useChats.js';
