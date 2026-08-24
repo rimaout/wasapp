@@ -1327,6 +1327,7 @@ components:
           - If the 'isDeleted' flag is true, the message content will not be returned by the server , and the client should render it as a deleted message.
           - If 'forwardedFrom' is not present, the message was composed in this chat. If present, it contains the identifiers (`chatId` and `messageId`) of the original message from another chat which this message forwards. This allows clients to display context about forwarded messages by referencing their original location.
           - If 'replyTo' is not present, this message is not a reply. If it is present, it contains the ID of the message in the same chat that this message is replying to.
+          - If 'repliedTo' is present, it contains the sender and content of the message this one replies to, allowing the client to render a quoted preview.
       required: [id, chatId, sendTime, sender, status, isDeleted, isInitMessage, isJoinMessage, isLeaveMessage, reactionsList]
       properties:
         id:             { $ref: '#/components/schemas/MessageId'            }
@@ -1341,6 +1342,7 @@ components:
         reactionsList:  { $ref: '#/components/schemas/EmojiReactionsList'   }
         forwardedFrom:  { $ref: '#/components/schemas/ForwardedFromInfo'    }  #optional
         replyTo:        { $ref: '#/components/schemas/ReplyToMessageId'     }  #optional
+        repliedTo:      { $ref: '#/components/schemas/RepliedToInfo'        }  #optional
         content:        { $ref: '#/components/schemas/MessageContent'       }  #optional
 
     MessageId:
@@ -1436,6 +1438,19 @@ components:
       properties:
         chatId:     { $ref: '#/components/schemas/ChatId'      }
         messageId:  { $ref: '#/components/schemas/MessageId'   }
+        text:       { $ref: '#/components/schemas/MessageText' }  #optional
+        msgImageId: { $ref: '#/components/schemas/ImageId'     }  #optional
+
+    RepliedToInfo:
+      type: object
+      description: >-
+        Information about the message this one replies to, used to render a
+        quoted preview. Only present when the message is a reply.
+      required: [messageId]
+      properties:
+        messageId:  { $ref: '#/components/schemas/MessageId'  }
+        senderId:   { $ref: '#/components/schemas/UserId'     }
+        senderName: { type: string, description: Display name of the replied-to message's sender. }
         text:       { $ref: '#/components/schemas/MessageText' }  #optional
         msgImageId: { $ref: '#/components/schemas/ImageId'     }  #optional
 

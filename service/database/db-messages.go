@@ -11,6 +11,7 @@ import (
 )
 
 type MessageStatus string
+
 const (
 	StatusDelivered MessageStatus = "delivered"
 	StatusReceived  MessageStatus = "received"
@@ -29,25 +30,34 @@ type ForwardedFromInfo struct {
 	MsgImageId *string `json:"msgImageId,omitempty"`
 }
 
+type RepliedToInfo struct {
+	MessageID  string  `json:"messageId"`
+	SenderID   string  `json:"senderId"`
+	SenderName string  `json:"senderName"`
+	Text       *string `json:"text,omitempty"`
+	MsgImageId *string `json:"msgImageId,omitempty"`
+}
+
 type MessageContent struct {
-	Text        *string `json:"text,omitempty"`
-	MsgImageId  *string `json:"msgImageId,omitempty"`
+	Text       *string `json:"text,omitempty"`
+	MsgImageId *string `json:"msgImageId,omitempty"`
 }
 
 type Message struct {
-	ID            string             `json:"id"`
-	ChatID        string             `json:"chatId"`
-	SendTime      time.Time          `json:"sendTime"`
-	Sender        User               `json:"sender"`
-	Status        MessageStatus      `json:"status"`
-	IsDeleted     bool               `json:"isDeleted"`
-	IsInitMessage bool               `json:"isInitMessage"`
-	IsJoinMessage bool               `json:"isJoinMessage"`
-	IsLeaveMessage bool              `json:"isLeaveMessage"`
-	ReactionsList []EmojiReaction    `json:"reactionsList"`
-	ForwardedFrom *ForwardedFromInfo `json:"forwardedFrom,omitempty"`
-	ReplyTo       *string            `json:"replyTo,omitempty"`
-	Content       *MessageContent    `json:"content,omitempty"`
+	ID             string             `json:"id"`
+	ChatID         string             `json:"chatId"`
+	SendTime       time.Time          `json:"sendTime"`
+	Sender         User               `json:"sender"`
+	Status         MessageStatus      `json:"status"`
+	IsDeleted      bool               `json:"isDeleted"`
+	IsInitMessage  bool               `json:"isInitMessage"`
+	IsJoinMessage  bool               `json:"isJoinMessage"`
+	IsLeaveMessage bool               `json:"isLeaveMessage"`
+	ReactionsList  []EmojiReaction    `json:"reactionsList"`
+	ForwardedFrom  *ForwardedFromInfo `json:"forwardedFrom,omitempty"`
+	ReplyTo        *string            `json:"replyTo,omitempty"`
+	RepliedTo      *RepliedToInfo     `json:"repliedTo,omitempty"`
+	Content        *MessageContent    `json:"content,omitempty"`
 }
 
 // CreateMessage inserts a new message and returns the message ID.
@@ -158,6 +168,31 @@ func (db *appdbimpl) DeleteMessageImagePath(imageId string) error {
 
 var ErrMessageNotFound = errors.New("message not found")
 
+// resolveRepliedTo returns info about the message being replied to, for a quoted
+// preview. If the parent is missing or deleted, it returns info with only the
+// messageId set (sender/content left empty).
+func (db *appdbimpl) resolveRepliedTo(replyToId string) (*RepliedToInfo, error) {
+	info := &RepliedToInfo{MessageID: replyToId}
+	var senderId, senderName string
+	var text, imageId *string
+	err := db.c.QueryRow(
+		`SELECT m.sender_id, u.name, m.text, m.image_id
+		 FROM messages m JOIN users u ON u.id = m.sender_id
+		 WHERE m.id = ? AND m.is_deleted = 0`,
+		replyToId,
+	).Scan(&senderId, &senderName, &text, &imageId)
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return nil, fmt.Errorf("resolving replied-to content: %w", err)
+	}
+	if err == nil {
+		info.SenderID = senderId
+		info.SenderName = senderName
+		info.Text = text
+		info.MsgImageId = imageId
+	}
+	return info, nil
+}
+
 // GetMessageById retrieves a message with its sender and reactions.
 // Returns ErrMessageNotFound if the message does not exist in the specified chat.
 func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
@@ -175,9 +210,9 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 	// Save the results into variables
 	var (
 		id, targetChatId, sendTimeStr, senderId, senderName string
-		isDeleted, isInit, isForward, isJoin, isLeave        bool
-		dbText, dbImageId, dbReplyTo                         *string
-		dbFwdChatId, dbFwdMsgId                              *string
+		isDeleted, isInit, isForward, isJoin, isLeave       bool
+		dbText, dbImageId, dbReplyTo                        *string
+		dbFwdChatId, dbFwdMsgId                             *string
 	)
 	err := db.c.QueryRow(query, messageId, chatId).Scan(
 		&id, &targetChatId, &sendTimeStr, &isDeleted, &isInit,
@@ -254,6 +289,12 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 	// Include reply-to message ID if present
 	if dbReplyTo != nil {
 		msg.ReplyTo = dbReplyTo
+
+		// Resolve the replied-to message's sender and content for display
+		msg.RepliedTo, err = db.resolveRepliedTo(*dbReplyTo)
+		if err != nil {
+			return Message{}, err
+		}
 	}
 
 	// Get and include reactions for the message
@@ -385,9 +426,9 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 	for rows.Next() {
 		var (
 			id, targetChatId, sendTimeStr, senderId, senderName string
-			isDeleted, isInit, isForward, isJoin, isLeave        bool
-			dbText, dbImageId, dbReplyTo                         *string
-			dbFwdChatId, dbFwdMsgId                              *string
+			isDeleted, isInit, isForward, isJoin, isLeave       bool
+			dbText, dbImageId, dbReplyTo                        *string
+			dbFwdChatId, dbFwdMsgId                             *string
 		)
 		err := rows.Scan(
 			&id, &targetChatId, &sendTimeStr, &isDeleted, &isInit,
@@ -453,6 +494,9 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 		// Include reply to message ID if present
 		if dbReplyTo != nil {
 			msg.ReplyTo = dbReplyTo
+
+			// Resolve the replied-to message's sender and content for display
+			msg.RepliedTo, _ = db.resolveRepliedTo(*dbReplyTo)
 		}
 
 		msg.ReactionsList = make([]EmojiReaction, 0)
