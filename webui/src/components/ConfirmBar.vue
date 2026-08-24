@@ -1,5 +1,17 @@
 <script setup>
-// Two-button footer: red square X (cancel) + green confirm filling the rest.
+/**
+ * ConfirmBar — a two-button footer: a square X (cancel) plus a confirm button
+ * that fills the remaining width. Default styling is a green confirm; setting
+ * `danger` swaps it to a red confirm (used inside confirm screens).
+ *
+ * @property {string} [confirmText=''] - label on the confirm button.
+ * @property {string} [confirmIcon=''] - optional feather icon name on the confirm button.
+ * @property {boolean} [iconRight=false] - put the confirm icon after the label.
+ * @property {boolean} [confirmDisabled=false] - disable the confirm button.
+ * @property {boolean} [cancelDisabled=false] - disable the X (cancel) button.
+ * @property {string} [cancelLabel='Cancel'] - accessible label/tooltip for the X button.
+ * @property {boolean} [danger=false] - red confirm styling (vs. default green).
+ */
 const props = defineProps({
 	confirmText: { type: String, default: '' },
 	confirmIcon: { type: String, default: '' },
@@ -9,6 +21,11 @@ const props = defineProps({
 	cancelLabel: { type: String, default: 'Cancel' },
 	danger: { type: Boolean, default: false },
 });
+/**
+ * Events:
+ *   cancel  - fired when the X button is clicked.
+ *   confirm - fired when the confirm button is clicked.
+ */
 const emit = defineEmits(['cancel', 'confirm']);
 </script>
 

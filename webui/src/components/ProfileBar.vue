@@ -1,18 +1,20 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import UserAvatar from './UserAvatar.vue';
 import ActionMenu from './ActionMenu.vue';
+import RenameActionScreen from './RenameActionScreen.vue';
+import ImageActionScreen from './ImageActionScreen.vue';
 import { getUserId, getUserName, setUserName, clearAuth } from '../services/auth.js';
 
 const userId = getUserId();
 const name = ref(getUserName() || 'User');
 const avatarVersion = ref(0);
 
-const profileItems = [
-	{ id: 'name', label: 'Change Profile Name', icon: 'edit-2', action: 'rename' },
-	{ id: 'image', label: 'Change Profile Image', icon: 'image', action: 'image' },
+const profileItems = computed(() => [
+	{ id: 'name', label: 'Change Profile Name', icon: 'edit-2', component: RenameActionScreen, props: { title: 'Change Profile Name', target: { kind: 'me', userId }, initialName: name.value } },
+	{ id: 'image', label: 'Change Profile Image', icon: 'image', component: ImageActionScreen, props: { title: 'Change Profile Image', target: { kind: 'me', userId } } },
 	{ id: 'logout', label: 'Logout', icon: 'log-out', danger: true, dangerText: 'Are you sure you want to log out?' },
-];
+]);
 
 function onSelect(item) {
 	if (item.id === 'logout') {
@@ -35,7 +37,7 @@ function onDone(payload) {
 	<div class="profile-bar">
 		<UserAvatar :userId="userId" :displayName="name" :size="40" :version="avatarVersion" />
 		<span class="profile-greeting">Hi 👋 {{ name }}</span>
-		<ActionMenu class="ms-auto" icon="settings" label="Profile options" placement="top-right" :items="profileItems" :target="{ kind: 'me', userId }" :initial-name="name" @select="onSelect" @done="onDone" />
+		<ActionMenu class="ms-auto" trigger-button-icon="settings" placement="top-right" :items="profileItems" @select="onSelect" @done="onDone" />
 	</div>
 </template>
 

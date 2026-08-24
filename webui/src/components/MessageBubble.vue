@@ -3,9 +3,10 @@ import { formatMessageTime, getStatusIcon, getStatusColor, isMyMessageById } fro
 import UserAvatar from './UserAvatar.vue';
 import MessageImage from './MessageImage.vue';
 import ActionMenu from './ActionMenu.vue';
+import ForwardActionScreen from './ForwardActionScreen.vue';
 
 export default {
-	components: { UserAvatar, MessageImage, ActionMenu },
+	components: { UserAvatar, MessageImage, ActionMenu, ForwardActionScreen },
 	emits: ['action'],
 	props: {
 		message: { type: Object, required: true },
@@ -61,7 +62,7 @@ export default {
 		actionItems() {
 			const items = [
 				{ id: 'reply', label: 'Reply', icon: 'corner-up-left' },
-				{ id: 'forward', label: 'Forward', icon: 'share', action: 'forward', message: this.message },
+				{ id: 'forward', label: 'Forward', icon: 'share', component: ForwardActionScreen, props: { message: this.message } },
 			];
 			if (this.isMine) {
 				items.push({ id: 'delete', label: 'Delete', icon: 'trash-2', danger: true, dangerText: 'Are you sure you want to delete this message?' });
@@ -113,7 +114,7 @@ export default {
 		</div>
 
 		<div v-else class="message-row" @mouseenter="hovered = true" @mouseleave="hovered = false">
-			<ActionMenu v-if="isMine" :items="actionItems" trigger="hover" :visible="hovered" icon="more-vertical" label="Message actions" size="small" filled placement="down-right" @select="onMenuSelect" />
+			<ActionMenu v-if="isMine" :items="actionItems" trigger-button-mode="hover" :trigger-button-visible="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-right" @select="onMenuSelect" />
 
 			<div class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': hasAvatar, 'has-image': hasImage }]">
 				<div v-if="showSenderHeader" class="message-sender">
@@ -147,7 +148,7 @@ export default {
 				</div>
 			</div>
 
-			<ActionMenu v-if="!isMine" :items="actionItems" trigger="hover" :visible="hovered" icon="more-vertical" label="Message actions" size="small" filled placement="down-left" @select="onMenuSelect" />
+			<ActionMenu v-if="!isMine" :items="actionItems" trigger-button-mode="hover" :trigger-button-visible="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-left" @select="onMenuSelect" />
 
 		</div>
 	</div>

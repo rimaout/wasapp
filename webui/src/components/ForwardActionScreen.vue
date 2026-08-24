@@ -9,10 +9,24 @@ import { useChats } from '../composables/useChats.js';
 import { useUsers } from '../composables/useUsers.js';
 import { getErrorMessage } from '../services/utils.js';
 
+/**
+ * ForwardActionScreen — a chat/user picker used to forward a message. It is meant
+ * to be supplied as the `component` of an ActionMenu item. Selecting a chat
+ * forwards there directly; selecting a user creates (or reuses) a direct chat
+ * with them first, then forwards.
+ *
+ * @property {Object} message - the message being forwarded (needs `id`, `chatId`).
+ * @property {string} [title='Forward message'] - heading shown at the top.
+ */
 const props = defineProps({
 	message: { type: Object, required: true },
 	title: { type: String, default: 'Forward message' },
 });
+/**
+ * Events:
+ *   done({ action:'forward' }) - fired after the message is forwarded to all targets.
+ *   cancel - fired when the user closes the picker.
+ */
 const emit = defineEmits(['done', 'cancel']);
 
 const query = ref('');

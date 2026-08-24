@@ -30,7 +30,7 @@ function onNewChatSelect(item) {
 	<div class="sidebar-header">
 		<template v-if="isChats">
 			<a href="#/chats" class="sidebar-logo fw-bold" @click="emit('home')">WASApp</a>
-			<ActionMenu class="ms-auto" icon="plus-square" label="New chat" placement="down-right" :items="newChatItems" @select="onNewChatSelect" />
+			<ActionMenu class="ms-auto" trigger-button-icon="plus-square" placement="down-right" :items="newChatItems" @select="onNewChatSelect" />
 		</template>
 		<template v-else>
 			<button type="button" class="back-btn" @click="emit('back')">

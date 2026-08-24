@@ -2,41 +2,40 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import ImagePicker from './ImagePicker.vue';
 import ConfirmBar from './ConfirmBar.vue';
-import { fetchAvatar, updateName, updateAvatar, deleteAvatar } from '../services/api.js';
+import { fetchAvatar, updateAvatar, deleteAvatar } from '../services/api.js';
 import { getErrorMessage } from '../services/utils.js';
 
-// Inline action panel (rename or image change) shown in place of the popup menu.
+/**
+ * ImageActionScreen — an inline panel shown in place of the popup menu, used to
+ * change or remove the image of a profile or group chat. Supply it as the
+ * `component` of an ActionMenu item.
+ *
+ * @property {string} [title=''] - heading shown at the top of the panel.
+ * @property {Object} target - what is being edited; either { kind:'me', userId }
+ *   or { kind:'group', chatId }. Used to fetch and update the avatar.
+ */
 const props = defineProps({
-	mode: { type: String, required: true },
 	title: { type: String, default: '' },
-	initialName: { type: String, default: '' },
 	target: { type: Object, required: true },
 });
+/**
+ * Events:
+ *   done({ action:'image' }) - fired after the image is changed or removed.
+ *   cancel - fired when the user cancels.
+ */
 const emit = defineEmits(['done', 'cancel']);
 
-const name = ref(props.initialName || '');
 const imageFile = ref(null);
 const currentImageUrl = ref(null);
 const removeRequested = ref(false);
 const errormsg = ref(null);
 const busy = ref(false);
 
-const isValid = computed(() => {
-	if (props.mode === 'rename') {
-		const trimmed = name.value.trim();
-		const current = (props.initialName || '').trim();
-		return trimmed.length > 0 && trimmed !== current;
-	}
-	return imageFile.value != null || removeRequested.value;
-});
+const isValid = computed(() => imageFile.value != null || removeRequested.value);
 
-const previewUrl = computed(() => {
-	return removeRequested.value ? null : currentImageUrl.value;
-});
+const previewUrl = computed(() => removeRequested.value ? null : currentImageUrl.value);
 
-const canRemove = computed(() => {
-	return currentImageUrl.value != null && imageFile.value == null && !removeRequested.value;
-});
+const canRemove = computed(() => currentImageUrl.value != null && imageFile.value == null && !removeRequested.value);
 
 async function loadCurrentImage() {
 	try {
@@ -61,20 +60,15 @@ function requestRemove() {
 
 async function confirm() {
 	if (busy.value || !isValid.value) return;
-
 	busy.value = true;
 	errormsg.value = null;
 	try {
-		if (props.mode === 'rename') {
-			const newName = await updateName(props.target, name.value.trim());
-			emit('done', { action: 'rename', name: newName });
-		} else if (imageFile.value) {
+		if (imageFile.value) {
 			await updateAvatar(props.target, imageFile.value);
-			emit('done', { action: 'image' });
 		} else if (removeRequested.value) {
 			await deleteAvatar(props.target);
-			emit('done', { action: 'image' });
 		}
+		emit('done', { action: 'image' });
 	} catch (e) {
 		errormsg.value = getErrorMessage(e);
 	} finally {
@@ -82,9 +76,7 @@ async function confirm() {
 	}
 }
 
-onMounted(() => {
-	if (props.mode === 'image') loadCurrentImage();
-});
+onMounted(loadCurrentImage);
 
 onBeforeUnmount(() => {
 	if (currentImageUrl.value) URL.revokeObjectURL(currentImageUrl.value);
@@ -92,17 +84,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-	<div class="action-screen" :class="mode">
+	<div class="action-screen image">
 		<div v-if="title" class="action-title">{{ title }}</div>
 
-		<template v-if="mode === 'rename'">
-			<input type="text" class="form-control name-input" v-model="name" maxlength="24" placeholder="Enter name" @keyup.enter="confirm" />
-		</template>
-
-		<template v-else>
-			<ImagePicker :model-value="imageFile" :preview-url="previewUrl" @update:model-value="onFileSelected" @error="onPickerError" />
-			<button v-if="canRemove" type="button" class="remove-image-btn" @click="requestRemove">Remove image</button>
-		</template>
+		<ImagePicker :model-value="imageFile" :preview-url="previewUrl" @update:model-value="onFileSelected" @error="onPickerError" />
+		<button v-if="canRemove" type="button" class="remove-image-btn" @click="requestRemove">Remove image</button>
 
 		<ErrorMsg v-if="errormsg" :msg="errormsg" />
 
@@ -118,18 +104,11 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-.action-screen {
+.action-screen.image {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 	padding: 8px;
-}
-
-.action-screen.rename {
-	width: 260px;
-}
-
-.action-screen.image {
 	width: 200px;
 }
 
@@ -137,18 +116,6 @@ onBeforeUnmount(() => {
 	color: var(--tn-fg);
 	font-weight: 600;
 	font-size: 1rem;
-}
-
-.field-label {
-	color: var(--tn-fg);
-	font-weight: 600;
-	font-size: 0.85rem;
-}
-
-.name-input {
-	background: var(--tn-bg-highlight);
-	border-color: var(--tn-border);
-	color: var(--tn-fg);
 }
 
 .remove-image-btn {

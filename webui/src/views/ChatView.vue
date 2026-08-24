@@ -3,6 +3,8 @@ import MessageBubble from '../components/MessageBubble.vue';
 import MessageInput from '../components/MessageInput.vue';
 import ChatAvatar from '../components/ChatAvatar.vue';
 import ActionMenu from '../components/ActionMenu.vue';
+import RenameActionScreen from '../components/RenameActionScreen.vue';
+import ImageActionScreen from '../components/ImageActionScreen.vue';
 import ChatMembersPopup from '../components/ChatMembersPopup.vue';
 import { usePolling } from '../composables/usePolling.js';
 import { refreshChats } from '../composables/useChats.js';
@@ -22,11 +24,6 @@ export default {
 			markedRead: false,
 			nameOverride: null,
 			avatarVersion: 0,
-			chatOptions: [
-				{ id: 'rename', label: 'Change Group Name', icon: 'type', action: 'rename' },
-				{ id: 'image', label: 'Change Group Image', icon: 'image', action: 'image' },
-				{ id: 'leave', label: 'Leave Group', icon: 'log-out', danger: true, dangerText: 'Are you sure you want to leave this group?' },
-			],
 		};
 	},
 	computed: {
@@ -38,6 +35,13 @@ export default {
 		},
 		chatName() {
 			return this.nameOverride || this.$route.query.name || 'Chat';
+		},
+		chatOptions() {
+			return [
+				{ id: 'rename', label: 'Change Group Name', icon: 'type', component: RenameActionScreen, props: { title: 'Change Group Name', target: { kind: 'group', chatId: this.chatId }, initialName: this.chatName } },
+				{ id: 'image', label: 'Change Group Image', icon: 'image', component: ImageActionScreen, props: { title: 'Change Group Image', target: { kind: 'group', chatId: this.chatId } } },
+				{ id: 'leave', label: 'Leave Group', icon: 'log-out', danger: true, dangerText: 'Are you sure you want to leave this group?' },
+			];
 		},
 	},
 	methods: {
@@ -163,7 +167,7 @@ export default {
 			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" :version="avatarVersion" />
 			<span class="chat-header-name">{{ chatName }}</span>
 			<ChatMembersPopup v-if="isGroup" :chatId="chatId" />
-			<ActionMenu v-if="isGroup" class="ms-auto" icon="more-vertical" label="Chat options" placement="down-right" :items="chatOptions" :target="{ kind: 'group', chatId: chatId }" :initial-name="chatName" filled @done="onChatAction" @select="onChatSelect" />
+			<ActionMenu v-if="isGroup" class="ms-auto" trigger-button-icon="more-vertical" placement="down-right" :items="chatOptions" trigger-button-filled @done="onChatAction" @select="onChatSelect" />
 		</div>
 
 		<div ref="messagesArea" class="chat-messages flex-grow-1">

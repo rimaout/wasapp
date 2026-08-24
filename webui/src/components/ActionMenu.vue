@@ -1,25 +1,74 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import IconButton from './IconButton.vue';
-import PopupActionScreen from './PopupActionScreen.vue';
-import ForwardActionScreen from './ForwardActionScreen.vue';
 import ConfirmBar from './ConfirmBar.vue';
 
-// Generalized floating action menu: a trigger button + a list of items.
-// Items can be simple (emit `select`), morph into an action screen (`action`),
-// or morph into a confirmation screen (`danger` + `dangerText`).
+/**
+ * ActionMenu — a generic floating menu with a trigger button and a list of items.
+ *
+ * It is a *shell*: it never needs to change to support a new action. Each item
+ * supplied via the `items` prop is one of three kinds:
+ *
+ *   1. Simple         { id, label, icon }
+ *        Picking it emits `select(item)`.
+ *
+ *   2. Confirm        { id, label, icon, danger: true, dangerText }
+ *        Picking it morphs into a built-in confirmation screen; confirming emits
+ *        `select(item)`.
+ *
+ *   3. Action screen  { id, label, icon, component, props }
+ *        Picking it morphs into `component`, rendering it with `props` bound via
+ *        v-bind. The screen reports completion via `@done` / `@cancel`, which are
+ *        forwarded as the `done` event.
+ *
+ * To add a new morphing action you only write a screen component (or reuse an
+ * existing one) and add one item object in the caller — ActionMenu is untouched.
+ *
+ * Example items:
+ *   { id:'reply',  label:'Reply',   icon:'corner-up-left' }
+ *   { id:'delete', label:'Delete',  icon:'trash-2', danger:true,
+ *     dangerText:'Are you sure you want to delete this message?' }
+ *   { id:'forward', label:'Forward', icon:'share',
+ *     component: ForwardActionScreen, props:{ message: msg } }
+ *
+ * @typedef {{
+ *   id: string, label: string, icon: string,
+ *   danger?: boolean, dangerText?: string,
+ *   component?: object, props?: object
+ * }} MenuItem
+ */
+/**
+ * @property {MenuItem[]} items - the menu entries (simple / confirm / action screen).
+ * @property {'down-right'|'down-left'|'top-right'|'top-left'} [placement='down-right']
+ *   which side of the trigger the menu opens toward (auto-flips to fit the viewport).
+ *
+ * Trigger button props — all prefixed `triggerButton`:
+ * @property {'visible'|'hover'} [triggerButtonMode='visible'] - when the trigger button
+ *   is shown. 'visible' always shows it; 'hover' reveals it only while
+ *   `triggerButtonVisible` is true (used for hover-revealed message menus).
+ * @property {boolean} [triggerButtonVisible=false] - used with
+ *   `triggerButtonMode='hover'` to reveal the trigger button.
+ * @property {string} triggerButtonIcon - feather icon name for the trigger button
+ *   (e.g. 'more-vertical').
+ * @property {boolean} [triggerButtonFilled=false] - filled trigger background
+ *   (always-visible menus).
+ * @property {'default'|'small'} [triggerButtonSize='default'] - trigger button size.
+ */
 const props = defineProps({
-	items: { type: Array, required: true },
+	items: { type: Array, required: true }, // MenuItem[]
 	placement: { type: String, default: 'down-right' }, // 'down-right' | 'down-left' | 'top-right' | 'top-left'
-	trigger: { type: String, default: 'visible' }, // 'visible' | 'hover'
-	visible: { type: Boolean, default: false },
-	icon: { type: String, required: true },
-	label: { type: String, default: '' },
-	filled: { type: Boolean, default: false },
-	size: { type: String, default: 'default' },
-	target: { type: Object, default: null },
-	initialName: { type: String, default: '' },
+	triggerButtonMode: { type: String, default: 'visible' }, // 'visible' | 'hover'
+	triggerButtonVisible: { type: Boolean, default: false },
+	triggerButtonIcon: { type: String, required: true },
+	triggerButtonFilled: { type: Boolean, default: false },
+	triggerButtonSize: { type: String, default: 'default' },
 });
+/**
+ * Events:
+ *   select(item)  - fired for simple items and for confirmed danger items.
+ *   done(payload) - fired when an action screen finishes (payload forwarded from it,
+ *                   e.g. { action:'rename', name } or { action:'forward' }).
+ */
 const emit = defineEmits(['select', 'done']);
 
 const open = ref(false);
@@ -29,7 +78,7 @@ const trigger = ref(null);
 const menu = ref(null);
 const menuStyle = ref({ visibility: 'hidden' });
 
-const showTrigger = computed(() => props.trigger !== 'hover' || props.visible || open.value);
+const showTrigger = computed(() => props.triggerButtonMode !== 'hover' || props.triggerButtonVisible || open.value);
 
 function closeAll() {
 	open.value = false;
@@ -42,9 +91,9 @@ function toggle() {
 }
 
 function choose(item) {
-	// Items with an `action` morph into the action screen in place.
-	if (item.action) {
-		activeAction.value = { mode: item.action, title: item.label, item };
+	// Items with a `component` morph into that action screen in place.
+	if (item.component) {
+		activeAction.value = { item };
 		positionMenu();
 		return;
 	}
@@ -107,26 +156,16 @@ watch([open, activeAction, confirmItem], () => {
 <template>
 	<div class="action-menu">
 		<div ref="trigger" class="action-menu-trigger" :class="{ hidden: !showTrigger }">
-			<IconButton :icon="icon" :label="label" :filled="filled" :size="size" @click="toggle" />
+			<IconButton :icon="triggerButtonIcon" :filled="triggerButtonFilled" :size="triggerButtonSize" @click="toggle" />
 		</div>
 
 		<Teleport to="body">
 			<div v-if="open" class="menu-backdrop" @click="closeAll"></div>
 			<div v-if="open" ref="menu" class="menu" :style="menuStyle">
-				<ForwardActionScreen
-					v-if="activeAction?.mode === 'forward'"
-					:message="activeAction.item.message"
-					:title="activeAction.title"
-					@done="onActionDone"
-					@cancel="closeAll"
-				/>
-
-				<PopupActionScreen
-					v-else-if="activeAction"
-					:mode="activeAction.mode"
-					:title="activeAction.title"
-					:target="target"
-					:initial-name="initialName"
+				<component
+					v-if="activeAction"
+					:is="activeAction.item.component"
+					v-bind="activeAction.item.props"
 					@done="onActionDone"
 					@cancel="closeAll"
 				/>
