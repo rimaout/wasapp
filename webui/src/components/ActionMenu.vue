@@ -2,6 +2,7 @@
 import { ref, computed, watch } from 'vue';
 import IconButton from './IconButton.vue';
 import PopupActionScreen from './PopupActionScreen.vue';
+import ForwardActionScreen from './ForwardActionScreen.vue';
 import ConfirmBar from './ConfirmBar.vue';
 
 // Generalized floating action menu: a trigger button + a list of items.
@@ -43,7 +44,7 @@ function toggle() {
 function choose(item) {
 	// Items with an `action` morph into the action screen in place.
 	if (item.action) {
-		activeAction.value = { mode: item.action, title: item.label };
+		activeAction.value = { mode: item.action, title: item.label, item };
 		positionMenu();
 		return;
 	}
@@ -112,8 +113,16 @@ watch([open, activeAction, confirmItem], () => {
 		<Teleport to="body">
 			<div v-if="open" class="menu-backdrop" @click="closeAll"></div>
 			<div v-if="open" ref="menu" class="menu" :style="menuStyle">
+				<ForwardActionScreen
+					v-if="activeAction?.mode === 'forward'"
+					:message="activeAction.item.message"
+					:title="activeAction.title"
+					@done="onActionDone"
+					@cancel="closeAll"
+				/>
+
 				<PopupActionScreen
-					v-if="activeAction"
+					v-else-if="activeAction"
 					:mode="activeAction.mode"
 					:title="activeAction.title"
 					:target="target"

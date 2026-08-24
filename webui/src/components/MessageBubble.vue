@@ -29,11 +29,18 @@ export default {
 		hasAvatar() {
 			return this.showSenderHeader && this.showAvatar;
 		},
+		isForwarded() {
+			return !!this.message.forwardedFrom;
+		},
 		hasImage() {
-			return !!this.message.content?.msgImageId;
+			return this.isForwarded
+				? !!this.message.forwardedFrom.msgImageId
+				: !!this.message.content?.msgImageId;
 		},
 		hasCaption() {
-			return !!this.message.content?.text;
+			return this.isForwarded
+				? !!this.message.forwardedFrom.text
+				: !!this.message.content?.text;
 		},
 		overlayMeta() {
 			return this.hasImage && !this.hasCaption;
@@ -54,7 +61,7 @@ export default {
 		actionItems() {
 			const items = [
 				{ id: 'reply', label: 'Reply', icon: 'corner-up-left' },
-				{ id: 'forward', label: 'Forward', icon: 'share' },
+				{ id: 'forward', label: 'Forward', icon: 'share', action: 'forward', message: this.message },
 			];
 			if (this.isMine) {
 				items.push({ id: 'delete', label: 'Delete', icon: 'trash-2', danger: true, dangerText: 'Are you sure you want to delete this message?' });
@@ -114,8 +121,13 @@ export default {
 					<span class="message-sender-name">{{ message.sender.name }}</span>
 				</div>
 
+				<div v-if="isForwarded" class="message-forwarded">
+					<svg class="feather forwarded-icon"><use href="/feather-sprite-v4.29.0.svg#corner-up-right"/></svg>
+					<span>Forwarded</span>
+				</div>
+
 				<div v-if="hasImage" class="message-image-wrap">
-					<MessageImage :chat-id="message.chatId" :image-id="message.content.msgImageId" />
+					<MessageImage :chat-id="message.chatId" :image-id="isForwarded ? message.forwardedFrom.msgImageId : message.content.msgImageId" />
 					<div v-if="overlayMeta" class="message-meta message-meta-overlay">
 						<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
 						<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
@@ -125,7 +137,7 @@ export default {
 				</div>
 
 				<div v-if="hasCaption" class="message-text" :class="{ 'message-caption': hasImage }">
-					{{ message.content.text }}
+					{{ isForwarded ? message.forwardedFrom.text : message.content.text }}
 					<span v-if="!overlayMeta" class="message-meta message-meta-inline">
 						<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
 						<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
@@ -136,6 +148,7 @@ export default {
 			</div>
 
 			<ActionMenu v-if="!isMine" :items="actionItems" trigger="hover" :visible="hovered" icon="more-vertical" label="Message actions" size="small" filled placement="down-left" @select="onMenuSelect" />
+
 		</div>
 	</div>
 </template>
@@ -160,6 +173,7 @@ export default {
 	align-items: center;
 	gap: 6px;
 	width: 100%;
+	position: relative;
 }
 
 .message-wrapper.other .message-row {
@@ -193,6 +207,10 @@ export default {
 	background-color: var(--tn-blue);
 	color: var(--tn-bg-darker);
 	border-bottom-right-radius: 4px;
+}
+
+.message-bubble.me .message-forwarded {
+	color: var(--tn-bg-darker);
 }
 
 .message-bubble.other {
@@ -242,6 +260,21 @@ export default {
 .message-meta-overlay .message-time {
 	color: #fff;
 	opacity: 0.9;
+}
+
+.message-forwarded {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--tn-fg-dark);
+	margin-bottom: 3px;
+}
+
+.message-forwarded .forwarded-icon {
+	width: 14px;
+	height: 14px;
 }
 
 .message-sender {
