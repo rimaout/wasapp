@@ -21,6 +21,10 @@ func (rt *_router) getChatMessages(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
+	// Mark all messages in this chat as received by the requesting user,
+	// before computing their statuses so the response reflects it.
+	_ = rt.db.MarkMessagesReceivedByUser(chatId, ctx.UserID)
+
 	// Get chat messages
 	messages, err := rt.db.GetChatMessages(chatId)
 	if err != nil {
@@ -28,9 +32,6 @@ func (rt *_router) getChatMessages(w http.ResponseWriter, r *http.Request, ps ht
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
 		return
 	}
-
-	// Mark all messages in this chat as received by the requesting user
-	_ = rt.db.MarkMessagesReceivedByUser(chatId, ctx.UserID)
 
 	// Return the messages as JSON
 	resp := chatMessagesResponse{Messages: messages}
