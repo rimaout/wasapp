@@ -513,7 +513,12 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 			msg.RepliedTo, _ = db.resolveRepliedTo(*dbReplyTo)
 		}
 
-		msg.ReactionsList = make([]EmojiReaction, 0)
+		// Get and include reactions for the message
+		reactions, err := db.getReactionsForMessage(id)
+		if err != nil {
+			return nil, fmt.Errorf("querying reactions for %s: %w", id, err)
+		}
+		msg.ReactionsList = reactions
 
 		// Get message statuts (delivered, received, read) based on receiver_statuses
 		status, err := db.ComputeMessageStatus(id)
