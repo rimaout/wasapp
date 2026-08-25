@@ -1,12 +1,13 @@
 <script>
 import ChatAvatar from '../components/ui/ChatAvatar.vue';
-import { isMyMessage, formatPreviewTime, getStatusIcon, getStatusColor, getChatSnippet } from '../services/utils.js';
+import MessageStatusIcon from '../components/MessageStatusIcon.vue';
+import { isMyMessage, formatPreviewTime, getChatSnippet } from '../services/utils.js';
 import { usePolling } from '../composables/usePolling.js';
 import { useChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';
 
 export default {
-	components: { ChatAvatar },
+	components: { ChatAvatar, MessageStatusIcon },
 	props: {
 		searchQuery: { type: String, default: '' },
 	},
@@ -29,8 +30,6 @@ export default {
 	methods: {
 		isMyMessage,
 		formatPreviewTime,
-		getStatusIcon,
-		getStatusColor,
 		getChatSnippet,
 
 		openChat(chat) {
@@ -86,9 +85,8 @@ export default {
 						<div class="d-flex align-items-center flex-shrink-0 ms-2">
 							<span
 								v-if="isMyMessage(chat.lastMessage.senderName)"
-								:class="getStatusColor(chat.lastMessage.status)"
 								class="me-1 chat-check"
-							>{{ getStatusIcon(chat.lastMessage.status) }}</span>
+							><MessageStatusIcon :status="chat.lastMessage.status" /></span>
 							<small class="chat-time">{{ formatPreviewTime(chat.lastMessage.sendTime) }}</small>
 						</div>
 					</div>
@@ -145,8 +143,12 @@ export default {
 }
 
 .chat-check {
-	font-size: 0.8rem;
-	font-weight: bold;
+	display: inline-flex;
+	color: var(--tn-fg-dark);
+}
+
+.chat-check .is-received {
+	opacity: 0.7;
 }
 
 .unread-badge {

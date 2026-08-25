@@ -56,10 +56,6 @@ export function formatPreviewTime(isoString) {
 	return date.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export function getStatusIcon(status) {
-	return status === 'delivered' ? '✓' : '✓✓';
-}
-
 export function formatMessageTime(isoString) {
 	let date = new Date(isoString);
 	let now = new Date();
@@ -69,10 +65,6 @@ export function formatMessageTime(isoString) {
 	if (diffMins < 60) return diffMins + 'm';
 
 	return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
-export function getStatusColor(status) {
-	return status === 'read' ? 'text-primary' : 'text-muted';
 }
 
 // Returns a formatted string for the day of the message, e.g. "Today", "Yesterday", "March 5", "March 5, 2023"

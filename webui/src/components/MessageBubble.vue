@@ -1,14 +1,15 @@
 <script>
-import { formatMessageTime, getStatusIcon, getStatusColor, isMyMessageById } from '../services/utils.js';
+import { formatMessageTime, isMyMessageById } from '../services/utils.js';
 import { emojiGlyph } from '../services/emojis.js';
 import UserAvatar from './ui/UserAvatar.vue';
 import MessageImage from './MessageImage.vue';
 import ActionMenu from './ui/ActionMenu.vue';
 import ForwardActionScreen from './ForwardActionScreen.vue';
 import ReactionActionScreen from './ReactionActionScreen.vue';
+import MessageStatusIcon from './MessageStatusIcon.vue';
 
 export default {
-	components: { UserAvatar, MessageImage, ActionMenu, ForwardActionScreen, ReactionActionScreen },
+	components: { UserAvatar, MessageImage, ActionMenu, ForwardActionScreen, ReactionActionScreen, MessageStatusIcon },
 	emits: ['action'],
 	props: {
 		message: { type: Object, required: true },
@@ -122,8 +123,6 @@ export default {
 	},
 	methods: {
 		formatMessageTime,
-		getStatusIcon,
-		getStatusColor,
 		emojiGlyph,
 
 		isNormalMessage(m) {
@@ -204,9 +203,7 @@ export default {
 					<MessageImage :chat-id="message.chatId" :image-id="isForwarded ? message.forwardedFrom.msgImageId : message.content.msgImageId" />
 					<div v-if="overlayMeta" class="message-meta message-meta-overlay">
 						<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
-						<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
-							{{ getStatusIcon(message.status) }}
-						</span>
+						<MessageStatusIcon v-if="isMine" :status="message.status" class="message-check" />
 					</div>
 				</div>
 
@@ -214,9 +211,7 @@ export default {
 					{{ isForwarded ? message.forwardedFrom.text : message.content.text }}
 					<span v-if="!overlayMeta" class="message-meta message-meta-inline">
 						<span class="message-time">{{ formatMessageTime(message.sendTime) }}</span>
-						<span v-if="isMine" class="message-check" :class="getStatusColor(message.status)">
-							{{ getStatusIcon(message.status) }}
-						</span>
+						<MessageStatusIcon v-if="isMine" :status="message.status" class="message-check" />
 					</span>
 				</div>
 			</div>
@@ -445,8 +440,19 @@ export default {
 }
 
 .message-check {
-	font-size: 0.75rem;
-	font-weight: bold;
+	color: inherit;
+}
+
+.message-check.is-received {
+	opacity: 0.7;
+}
+
+.message-meta-overlay .message-check {
+	color: #fff;
+}
+
+.message-meta-overlay .message-check.is-received {
+	opacity: 0.7;
 }
 
 .message-reactions {
