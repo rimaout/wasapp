@@ -21,7 +21,6 @@ export default {
 			sending: false,
 			loading: true,
 			errormsg: null,
-			markedRead: false,
 			nameOverride: null,
 			avatarVersion: 0,
 			replyTo: null,
@@ -54,12 +53,9 @@ export default {
 				let response = await this.$axios.get('/chats/' + this.chatId + '/messages');
 				this.messages = response.data.messages.slice().reverse();
 
-				if (!this.markedRead) {
-					this.markedRead = true;
-					this.$axios.post('/chats/' + this.chatId + '/read')
-					.then(() => refreshChats())
-					.catch(() => {});
-				}
+				this.$axios.post('/chats/' + this.chatId + '/read')
+				.then(() => refreshChats())
+				.catch(() => {});
 			} catch (e) {
 				this.errormsg = getErrorMessage(e);
 			}
@@ -167,7 +163,6 @@ export default {
 		chatId() {
 			this.messages = [];
 			this.loading = true;
-			this.markedRead = false;
 			this.errormsg = null;
 			this.nameOverride = null;
 			this.replyTo = null;
