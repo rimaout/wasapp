@@ -53,7 +53,7 @@ func (rt *_router) getMyChats(w http.ResponseWriter, r *http.Request, ps httprou
 			IsGroupChat: cp.IsGroupChat,
 			UnreadCount: cp.UnreadCount,
 			LastMessage: chatLastMessagePreview{
-				Status:         "delivered", //TODO: use real receiver status when implemented
+				Status:         cp.Status,
 				SendTime:       cp.SendTime.UTC().Format(time.RFC3339),
 				SenderName:     cp.SenderName,
 				IsDeleted:      cp.IsDeleted,

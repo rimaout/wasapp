@@ -179,6 +179,7 @@ type ChatPreview struct {
 	Text        *string
 	ImageID     *string
 	ReplyTo     *string
+	Status      string
 	UnreadCount int
 }
 
@@ -206,7 +207,16 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			 FROM receiver_statuses rs
 			 JOIN messages msg ON rs.message_id = msg.id
 			 WHERE msg.chat_id = c.id AND rs.user_id = ? AND rs.recv_time IS NULL
-			) AS unread_count
+			) AS unread_count,
+
+			-- Compute the status of the last message
+			(SELECT CASE
+				WHEN COUNT(*) = 0 THEN 'delivered'
+				WHEN SUM(CASE WHEN rs.recv_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'delivered'
+				WHEN SUM(CASE WHEN rs.read_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'received'
+				ELSE 'read'
+			END
+			FROM receiver_statuses rs WHERE rs.message_id = m.id) AS message_status
 
 		FROM members mem
 		JOIN chats c ON mem.chat_id = c.id
@@ -239,7 +249,7 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			&cp.IsDeleted, &cp.IsInitMsg, &cp.IsJoinMsg, &cp.IsLeaveMsg,
 			&cp.IsForward,
 			&cp.Text, &cp.ImageID, &cp.ReplyTo,
-			&cp.UnreadCount,
+			&cp.UnreadCount, &cp.Status,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("scanning chat row: %w", err)
