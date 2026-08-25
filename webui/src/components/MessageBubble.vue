@@ -4,9 +4,10 @@ import UserAvatar from './ui/UserAvatar.vue';
 import MessageImage from './MessageImage.vue';
 import ActionMenu from './ui/ActionMenu.vue';
 import ForwardActionScreen from './ForwardActionScreen.vue';
+import ReactionActionScreen from './ReactionActionScreen.vue';
 
 export default {
-	components: { UserAvatar, MessageImage, ActionMenu, ForwardActionScreen },
+	components: { UserAvatar, MessageImage, ActionMenu, ForwardActionScreen, ReactionActionScreen },
 	emits: ['action'],
 	props: {
 		message: { type: Object, required: true },
@@ -95,6 +96,7 @@ export default {
 		},
 		actionItems() {
 			const items = [
+				{ id: 'react', label: 'React', icon: 'smile', component: ReactionActionScreen, props: { message: this.message } },
 				{ id: 'reply', label: 'Reply', icon: 'corner-up-left' },
 				{ id: 'forward', label: 'Forward', icon: 'share', component: ForwardActionScreen, props: { message: this.message } },
 			];
@@ -131,6 +133,12 @@ export default {
 		onMenuSelect(item) {
 			this.$emit('action', { type: item.id, message: this.message });
 		},
+
+		onActionDone(payload) {
+			if (payload && payload.action === 'react' && payload.message) {
+				this.$emit('action', { type: 'react', message: this.message, updatedMessage: payload.message });
+			}
+		},
 	},
 };
 </script>
@@ -148,7 +156,7 @@ export default {
 		</div>
 
 		<div v-else class="message-row" @mouseenter="hovered = true" @mouseleave="hovered = false">
-			<ActionMenu v-if="isMine" :items="actionItems" trigger-button-mode="hover" :trigger-button-visible="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-right" @select="onMenuSelect" />
+			<ActionMenu v-if="isMine" :items="actionItems" trigger-button-mode="hover" :trigger-button-visible="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-right" @select="onMenuSelect" @done="onActionDone" />
 
 			<div class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': hasAvatar, 'has-image': hasImage }]">
 				<div v-if="showSenderHeader" class="message-sender">
@@ -198,7 +206,7 @@ export default {
 				</div>
 			</div>
 
-			<ActionMenu v-if="!isMine" :items="actionItems" trigger-button-mode="hover" :trigger-button-visible="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-left" @select="onMenuSelect" />
+			<ActionMenu v-if="!isMine" :items="actionItems" trigger-button-mode="hover" :trigger-button-visible="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-left" @select="onMenuSelect" @done="onActionDone" />
 
 		</div>
 	</div>

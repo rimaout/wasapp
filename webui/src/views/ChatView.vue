@@ -136,6 +136,9 @@ export default {
 				this.replyTo = action.message;
 			} else if (action.type === 'delete') {
 				this.deleteMessage(action.message);
+			} else if (action.type === 'react' && action.updatedMessage) {
+				const idx = this.messages.findIndex(m => m.id === action.message.id);
+				if (idx !== -1) this.messages.splice(idx, 1, action.updatedMessage);
 			}
 		},
 
