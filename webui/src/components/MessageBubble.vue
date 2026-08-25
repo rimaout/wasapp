@@ -1,5 +1,6 @@
 <script>
 import { formatMessageTime, getStatusIcon, getStatusColor, isMyMessageById } from '../services/utils.js';
+import { emojiGlyph } from '../services/emojis.js';
 import UserAvatar from './ui/UserAvatar.vue';
 import MessageImage from './MessageImage.vue';
 import ActionMenu from './ui/ActionMenu.vue';
@@ -81,6 +82,19 @@ export default {
 			if (isMyMessageById(r.senderId)) return 'Replied to you';
 			return 'Replied to ' + r.senderName;
 		},
+		reactionGroups() {
+			const groups = new Map();
+			for (const r of this.message.reactionsList || []) {
+				let g = groups.get(r.emojiId);
+				if (!g) {
+					g = { emojiId: r.emojiId, count: 0, includesMe: false };
+					groups.set(r.emojiId, g);
+				}
+				g.count++;
+				if (isMyMessageById(r.userId)) g.includesMe = true;
+			}
+			return [...groups.values()].sort((a, b) => a.emojiId - b.emojiId);
+		},
 		sameSeries() {
 			// true when the previous message is a normal message from the same
 			// sender within the time gap. Used both to hide the sender header and
@@ -110,6 +124,7 @@ export default {
 		formatMessageTime,
 		getStatusIcon,
 		getStatusColor,
+		emojiGlyph,
 
 		isNormalMessage(m) {
 			return !!m && !m.isInitMessage && !m.isJoinMessage && !m.isLeaveMessage && !m.isDeleted;
@@ -208,6 +223,13 @@ export default {
 
 			<ActionMenu v-if="!isMine" :items="actionItems" trigger-button-mode="hover" :trigger-button-visible="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-left" @select="onMenuSelect" @done="onActionDone" />
 
+		</div>
+
+		<div v-if="reactionGroups.length > 0" class="message-reactions">
+			<span v-for="g in reactionGroups" :key="g.emojiId" class="reaction-chip" :class="{ active: g.includesMe }">
+				<span class="reaction-glyph">{{ emojiGlyph(g.emojiId) }}</span>
+				<span class="reaction-count">{{ g.count }}</span>
+			</span>
 		</div>
 	</div>
 </template>
@@ -425,5 +447,38 @@ export default {
 .message-check {
 	font-size: 0.75rem;
 	font-weight: bold;
+}
+
+.message-reactions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-top: 4px;
+	padding: 0 6px;
+}
+
+.reaction-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: var(--tn-bg-light);
+	border: 1px solid var(--tn-border);
+}
+
+.reaction-chip.active {
+	border-color: var(--tn-blue);
+}
+
+.reaction-glyph {
+	font-size: 0.9rem;
+	line-height: 1;
+}
+
+.reaction-count {
+	color: var(--tn-fg-dark);
+	font-weight: 600;
+	font-size: 0.8rem;
 }
 </style>

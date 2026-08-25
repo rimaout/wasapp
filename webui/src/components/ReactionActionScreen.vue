@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import axios from '../services/axios.js';
+import { EMOJIS } from '../services/emojis.js';
 import { getUserId } from '../services/auth.js';
 import { getErrorMessage } from '../services/utils.js';
 
@@ -21,19 +22,6 @@ const props = defineProps({
  *   cancel - fired when the user closes the picker.
  */
 const emit = defineEmits(['done', 'cancel']);
-
-const EMOJIS = [
-	{ id: 0, glyph: '👍' },
-	{ id: 1, glyph: '❤️' },
-	{ id: 2, glyph: '😂' },
-	{ id: 3, glyph: '😮' },
-	{ id: 4, glyph: '😢' },
-	{ id: 5, glyph: '🤔' },
-	{ id: 6, glyph: '👏' },
-	{ id: 7, glyph: '🙌' },
-	{ id: 8, glyph: '😡' },
-	{ id: 9, glyph: '🤯' },
-];
 
 const sending = ref(false);
 const errormsg = ref(null);
