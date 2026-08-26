@@ -122,7 +122,7 @@ onMounted(() => {
 <div class="action-screen forward">
 <div class="action-title">{{ title }}</div>
 <SearchBar v-model="query" placeholder="Search chats or users..." compact light />
-<div v-if="selected.length > 0" class="px-3 py-2">
+<div v-if="selected.length > 0" class="px-2 py-1">
 <div class="forward-chips">
 <span v-for="s in selected" :key="s.kind + s.id" class="forward-chip">
 <ChatAvatar v-if="s.kind === 'chat'" :chatId="s.id" :displayName="s.name" :size="24" :isGroup="s.chat.isGroupChat" />
@@ -133,7 +133,6 @@ onMounted(() => {
 </div>
 </div>
 <ErrorMsg v-if="errormsg" :msg="errormsg" />
-<hr class="forward-divider" />
 <div class="forward-list fade-bottom">
 <template v-if="filteredChats.length > 0">
 <div class="section-header">Recent chats</div>
@@ -155,25 +154,25 @@ onMounted(() => {
 <p class="mb-2 fs-5">No results</p>
 </div>
 </div>
-<div class="forward-footer px-3 pt-0 pb-3">
+<div class="forward-footer px-1 pt-0 pb-1">
 <ConfirmBar confirm-text="Forward" confirm-icon="corner-up-right" :cancel-disabled="sending" :confirm-disabled="sending || selected.length === 0" cancel-label="Cancel" @cancel="emit('cancel')" @confirm="forward" />
 </div>
 </div>
 </template>
 
 <style scoped>
-.action-screen.forward { width: 320px; padding: 8px; display: flex; flex-direction: column; gap: 8px; max-height: 420px; }
+.action-screen.forward { width: 280px; padding: 3px 4px 2px; display: flex; flex-direction: column; gap: 4px; max-height: 420px; }
+.action-screen.forward :deep(.px-3.pb-2) { margin-top: 6px; padding-bottom: 0; }
 .action-title { color: var(--tn-fg); font-weight: 600; font-size: 1rem; }
 .forward-chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .forward-chip { display: inline-flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; padding: 3px 8px 3px 3px; color: var(--tn-fg); }
 .forward-chip-name { font-size: 0.85rem; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .forward-chip-remove { background: none; border: none; padding: 0; cursor: pointer; color: var(--tn-fg-dark); line-height: 1; font-size: 1rem; }
 .forward-chip-remove:hover { color: var(--tn-red); }
-.forward-divider { border: none; border-top: 1.5px solid var(--tn-border); margin: 6px 12px 4px; }
-.forward-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 40px; }
+.forward-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; padding-bottom: 20px; }
 .forward-list::-webkit-scrollbar { display: none; }
-.section-header { position: sticky; top: 0; z-index: 1; background: var(--tn-bg-light); color: var(--tn-fg-dark); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px 4px; }
-.forward-row { border: 0 !important; border-radius: 12px !important; margin: 2px 4px; width: auto; padding: 8px 16px; background-color: transparent !important; color: var(--tn-fg); }
+.section-header { position: sticky; top: 0; z-index: 1; background: var(--tn-bg-light); color: var(--tn-fg-dark); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 10px 1px; }
+.forward-row { border: 0 !important; border-radius: 12px !important; margin: 1px 2px; width: auto; padding: 6px 10px; background-color: transparent !important; color: var(--tn-fg); }
 .forward-row:hover { background-color: rgba(255,255,255,0.08) !important; }
 .forward-row.selected { background-color: rgba(255,255,255,0.08) !important; }
 .forward-name { color: var(--tn-fg); }

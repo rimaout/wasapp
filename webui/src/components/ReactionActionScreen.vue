@@ -82,7 +82,7 @@ async function pick(emoji) {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-	padding: 8px;
+	padding: 4px 8px 8px;
 	width: 240px;
 }
 
