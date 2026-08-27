@@ -12,7 +12,7 @@ import (
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
-const messageImageUploadDir = "uploads/messages/images/"
+const messageImageUploadDir = "messages/images"
 const maxMessagePayloadSize = maxImageSize + (1 * 1024 * 1024) //5MB max image + 1MB buffer for text/headers
 
 type NewMessageContent struct {
@@ -68,7 +68,8 @@ func (rt *_router) extractSendMessageContent(
 		}
 
 		// Ensure target directory exists
-		if err := os.MkdirAll(messageImageUploadDir, 0755); err != nil {
+		targetDir := filepath.Join(rt.uploadsDir, messageImageUploadDir)
+		if err := os.MkdirAll(targetDir, 0755); err != nil {
 			ctx.Logger.WithError(err).Error("error creating message upload directory")
 			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return NewMessageContent{}, false
@@ -94,7 +95,7 @@ func (rt *_router) extractSendMessageContent(
 			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return NewMessageContent{}, false
 		}
-		imagePath = filepath.Join(messageImageUploadDir, imageId.String()+ext)
+		imagePath = filepath.Join(targetDir, imageId.String()+ext)
 
 		// Create destination file
 		dst, err := os.Create(imagePath)

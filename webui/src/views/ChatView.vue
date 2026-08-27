@@ -224,6 +224,7 @@ export default {
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
+	height: 100dvh;
 	position: relative;
 	background-color: var(--tn-bg-dark);
 	background-image: url('/chat-bg.svg');

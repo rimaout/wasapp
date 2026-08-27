@@ -14,10 +14,13 @@ services:
       # container is recreated). /data is the volume mount point, so the
       # SQLite file lands inside the persistent volume.
       CFG_DB_FILENAME: /data/wasapp.db
+      # Uploads (avatars, message images) go under /data/uploads, so they are
+      # persisted on the host filesystem together with the DB.
+      CFG_UPLOADS_DIR: /data/uploads
     volumes:
-      # Named volume stored on the host; survives docker compose down.
-      # Only deleted with: docker compose down -v
-      - wasapp-data:/data
+      # Bind mount: the DB is saved as a real folder on the host filesystem
+      # (./data/wasapp.db) instead of inside a Docker-managed volume.
+      - ./data:/data
     restart: unless-stopped
 
   # --- FRONTEND ---
@@ -31,6 +34,3 @@ services:
     restart: unless-stopped
     depends_on:
       - backend              # Start only after backend (ordering only; doesn't wait for readiness)
-
-volumes:
-  wasapp-data:

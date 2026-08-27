@@ -2,13 +2,14 @@ package api
 
 import (
 	"net/http"
+	"path/filepath"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/rimaout/wasapp/service/database"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
-const groupChatAvatarUploadDir = "uploads/groups/avatars/"
+const groupChatAvatarUploadDir = "groups/avatars"
 
 func (rt *_router) setGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// Extract target chat id from url (http params)
@@ -60,7 +61,7 @@ func (rt *_router) setGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps
 
 	// Extract and save the new image.
 	// (saveUploadedImage writes 400, 413, 415, or 500 error responses directly on failure)
-	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", groupChatAvatarUploadDir)
+	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", filepath.Join(rt.uploadsDir, groupChatAvatarUploadDir))
 	if !ok {
 		return
 	}

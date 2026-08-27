@@ -30,6 +30,12 @@ body {
 	color: var(--tn-fg);
 }
 
+/* Lock the page height so only internal panels scroll (app-like layout) */
+html, body {
+	height: 100%;
+	overflow: hidden;
+}
+
 ::selection {
 	background-color: var(--tn-bg-highlight);
 }

@@ -2,12 +2,13 @@ package api
 
 import (
 	"net/http"
+	"path/filepath"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 )
 
-const userAvatarUploadDir = "uploads/users/avatars/"
+const userAvatarUploadDir = "users/avatars"
 
 func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
@@ -21,7 +22,7 @@ func (rt *_router) setMyUserAvatar(w http.ResponseWriter, r *http.Request, ps ht
 
 	// Extract and save the new image.
 	// (saveUploadedImage writes 400, 413, 415, or 500 error responses directly on failure)
-	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", userAvatarUploadDir)
+	newImagePath, ok := rt.saveUploadedImage(w, r, ctx, "binaryImage", filepath.Join(rt.uploadsDir, userAvatarUploadDir))
 	if !ok {
 		return
 	}

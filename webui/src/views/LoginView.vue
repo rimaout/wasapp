@@ -42,7 +42,7 @@ export default {
 </script>
 
 <template>
-	<div class="d-flex align-items-center justify-content-center min-vh-100">
+	<div class="login-view d-flex align-items-center justify-content-center">
 		<div class="login-box">
 			<div class="card card-body shadow p-4">
 				<div class="text-center mb-4">
@@ -79,6 +79,12 @@ export default {
 
 
 <style scoped>
+.login-view {
+	height: 100vh;
+	height: 100dvh;
+	overflow: hidden;
+}
+
 .login-box {
 	width: 400px;
 	max-width: 90vw;
