@@ -1,0 +1,36 @@
+# docker compose up --build   -> build and start everything
+
+services:
+  # --- BACKEND ---
+  backend:
+    container_name: wasa-backend
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "3000:3000"          # API at http://localhost:3000 (matches the frontend's hardcoded __API_URL__)
+    environment:
+      # Override the DB path (default /tmp/decaf.db is wiped whenever the
+      # container is recreated). /data is the volume mount point, so the
+      # SQLite file lands inside the persistent volume.
+      CFG_DB_FILENAME: /data/wasapp.db
+    volumes:
+      # Named volume stored on the host; survives docker compose down.
+      # Only deleted with: docker compose down -v
+      - wasapp-data:/data
+    restart: unless-stopped
+
+  # --- FRONTEND ---
+  frontend:
+    container_name: wasa-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8080:80"            # App at http://localhost:8080
+    restart: unless-stopped
+    depends_on:
+      - backend              # Start only after backend (ordering only; doesn't wait for readiness)
+
+volumes:
+  wasapp-data:

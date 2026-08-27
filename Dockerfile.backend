@@ -1,0 +1,33 @@
+# ==================== BACKEND ====================
+# Stage 1: builder - compiles the Go binary
+FROM golang:1.25.1 AS builder
+
+# Set the builder working directory
+WORKDIR /src/
+
+# Copy source code in working directory (/src)
+COPY . .
+
+# Compile the program - the executable will be at /app/webapi
+RUN go build -o /app/webapi ./cmd/webapi
+
+# Stage 2: runtime - clean image containing only the binary
+FROM debian:bookworm
+
+EXPOSE 3000
+
+# Set the runtime working directory
+WORKDIR /app/
+
+# Copy only the compiled binary from the builder stage
+COPY --from=builder /app/webapi ./
+
+# Command executed when the container starts
+CMD ["/app/webapi"]
+
+# ==================== Usage ====================
+# docker build -t wasa-backend . -f Dockerfile.backend
+# docker run -it --rm -p 3000:3000 wasa-backend
+#
+# NOTE: --rm removes the container (and the DB it holds) when it stops;
+# use the compose stack with the wasapp-data volume for persistence.
