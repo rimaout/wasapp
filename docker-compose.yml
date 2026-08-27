@@ -27,7 +27,7 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-      - "8080:80"            # App at http://localhost:8080
+      - "8080:80"            # App at http://localhost:8080 (API is proxied by nginx, same origin)
     restart: unless-stopped
     depends_on:
       - backend              # Start only after backend (ordering only; doesn't wait for readiness)
