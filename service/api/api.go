@@ -51,6 +51,9 @@ type Config struct {
 
 	// Database is the instance of database.AppDatabase where data are saved
 	Database database.AppDatabase
+
+	// UploadsDir is the base directory where uploaded images (avatars, message images) are stored
+	UploadsDir string
 }
 
 // Router is the package API interface representing an API handler builder
@@ -82,6 +85,7 @@ func New(cfg Config) (Router, error) {
 		router:     router,
 		baseLogger: cfg.Logger,
 		db:         cfg.Database,
+		uploadsDir: cfg.UploadsDir,
 	}, nil
 }
 
@@ -93,4 +97,7 @@ type _router struct {
 	baseLogger logrus.FieldLogger
 
 	db database.AppDatabase
+
+	// uploadsDir is the base directory where uploaded images are stored
+	uploadsDir string
 }

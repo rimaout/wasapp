@@ -14,6 +14,9 @@ services:
       # container is recreated). /data is the volume mount point, so the
       # SQLite file lands inside the persistent volume.
       CFG_DB_FILENAME: /data/wasapp.db
+      # Uploads (avatars, message images) go under /data/uploads, so they are
+      # persisted on the host filesystem together with the DB.
+      CFG_UPLOADS_DIR: /data/uploads
     volumes:
       # Bind mount: the DB is saved as a real folder on the host filesystem
       # (./data/wasapp.db) instead of inside a Docker-managed volume.
