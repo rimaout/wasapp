@@ -1,5 +1,3 @@
-# docker compose up --build   -> build and start everything
-
 services:
   # --- BACKEND ---
   backend:
@@ -10,16 +8,16 @@ services:
     ports:
       - "3000:3000"          # API at http://localhost:3000 (matches the frontend's hardcoded __API_URL__)
     environment:
-      # Override the DB path (default /tmp/decaf.db is wiped whenever the
-      # container is recreated). /data is the volume mount point, so the
-      # SQLite file lands inside the persistent volume.
+      # Override the default DB path (/tmp/decaf.db)
+      # Note: /data is a volume mount point, so the SQLite file is inside a persistent volume
       CFG_DB_FILENAME: /data/wasapp.db
-      # Uploads (avatars, message images) go under /data/uploads, so they are
-      # persisted on the host filesystem together with the DB.
+      # Override the default uplads path (/tmp/uploads)
+      # Notes:
+      #   - the uploads dir is where avatars images and message images are saved
+      #   - /data is a volume mount point, so the uplades dir is inside a persistent volume
       CFG_UPLOADS_DIR: /data/uploads
     volumes:
       # Bind mount: the DB is saved as a real folder on the host filesystem
-      # (./data/wasapp.db) instead of inside a Docker-managed volume.
       - ./data:/data
     restart: unless-stopped
 
@@ -33,4 +31,8 @@ services:
       - "8080:80"            # App at http://localhost:8080
     restart: unless-stopped
     depends_on:
-      - backend              # Start only after backend (ordering only; doesn't wait for readiness)
+      - backend              # Start only after backend
+
+# ==================== Usage ====================
+# docker compose up --build   -> build and start everything
+# docker compose up           -> start everything (no build so images must be built first)
