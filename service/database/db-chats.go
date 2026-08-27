@@ -25,6 +25,8 @@ type Chat struct {
 // For group chats, groupName must be non-empty and groupImagePath is optional.
 // For private chats use empty string for groupName and groupImagePath.
 func (db *appdbimpl) CreateChat(isGroup bool, groupNameIn string, groupImagePathIn string) (string, error) {
+
+	// Generate a new UUID for the chat ID
 	id, err := uuid.NewV4()
 	if err != nil {
 		return "", fmt.Errorf("error generating chat UUID: %w", err)
@@ -43,7 +45,7 @@ func (db *appdbimpl) CreateChat(isGroup bool, groupNameIn string, groupImagePath
 		groupImagePathDB = &groupImagePathIn
 	}
 
-	// Insert the new chat into the database (the constrains group constraints are defined in the database schema)
+	// Insert the new chat into the database (the constrains are defined in the database schema)
 	_, err = db.c.Exec(
 		`INSERT INTO chats (id, is_group_chat, group_name, group_image_path) VALUES (?, ?, ?, ?)`,
 		chatId, isGroup, groupNameDB, groupImagePathDB,
@@ -93,6 +95,8 @@ func (db *appdbimpl) IsGroupChat(chatId string) (bool, error) {
 	return isGroup, nil
 }
 
+// FindPrivateChatBetween returns the chat ID of a private chat between two users, if it exists.
+// If no such chat exists, it returns an empty string and no error.
 func (db *appdbimpl) FindPrivateChatBetween(userId1 string, userId2 string) (string, error) {
 	var chatId string
 	err := db.c.QueryRow(
@@ -183,7 +187,7 @@ type ChatPreview struct {
 	UnreadCount int
 }
 
-// GetMyChats returns a list of chats for the given user, including the last message in each chat.
+// GetMyChats returns a list of chats previews for the given user, including the last message in each chat.
 func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 	rows, err := db.c.Query(
 		`SELECT

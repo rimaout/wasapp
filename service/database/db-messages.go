@@ -67,12 +67,14 @@ func (db *appdbimpl) CreateMessage(
 	isInit, isForward bool,
 	inForwardFromChat, inForwardFromMsg string,
 ) (string, error) {
+	// Generate a new UUID for the message
 	id, err := uuid.NewV4()
 	if err != nil {
 		return "", fmt.Errorf("error generating message UUID: %w", err)
 	}
 	msgId := id.String()
 
+	// Prepare optional fields for database insertion
 	var dbText *string
 	if inText != "" {
 		dbText = &inText
@@ -94,6 +96,7 @@ func (db *appdbimpl) CreateMessage(
 		dbForwardFromMsg = &inForwardFromMsg
 	}
 
+	// Insert the new message into the database
 	_, err = db.c.Exec(
 		`INSERT INTO messages
 			(id, chat_id, sender_id, send_time, is_deleted, is_init_message,
@@ -108,20 +111,24 @@ func (db *appdbimpl) CreateMessage(
 		return "", fmt.Errorf("inserting message into database: %w", err)
 	}
 
+	// Return the generated message ID
 	return msgId, nil
 }
 
 // CreateSystemMessage inserts a join or leave system message (no content) and returns its ID.
 // `isJoin` selects between a join message (true) and a leave message (false).
 func (db *appdbimpl) CreateSystemMessage(chatId, senderId string, isJoin bool) (string, error) {
+	// Generate a new UUID for the message
 	id, err := uuid.NewV4()
 	if err != nil {
 		return "", fmt.Errorf("error generating message UUID: %w", err)
 	}
 	msgId := id.String()
 
+	// Get the current time
 	sendTime := time.Now().UTC().Format(time.RFC3339)
 
+	// Insert the system message into the database
 	_, err = db.c.Exec(
 		`INSERT INTO messages
 			(id, chat_id, sender_id, send_time, is_deleted, is_init_message,
@@ -135,17 +142,20 @@ func (db *appdbimpl) CreateSystemMessage(chatId, senderId string, isJoin bool) (
 		return "", fmt.Errorf("inserting system message into database: %w", err)
 	}
 
+	// Return the generated message ID
 	return msgId, nil
 }
 
 // SaveMessageImagePath inserts an image path into the images table and returns its generated UUID.
 func (db *appdbimpl) SaveMessageImagePath(path string) (string, error) {
+	// Generate a new UUID for the image
 	id, err := uuid.NewV4()
 	if err != nil {
 		return "", fmt.Errorf("error generating image UUID: %w", err)
 	}
 	imageId := id.String()
 
+	// Insert the image record into the database
 	_, err = db.c.Exec(
 		`INSERT INTO images (id, path) VALUES (?, ?)`,
 		imageId, path,
@@ -154,6 +164,7 @@ func (db *appdbimpl) SaveMessageImagePath(path string) (string, error) {
 		return "", fmt.Errorf("inserting image into database: %w", err)
 	}
 
+	// Return the generated image ID
 	return imageId, nil
 }
 
@@ -168,12 +179,15 @@ func (db *appdbimpl) DeleteMessageImagePath(imageId string) error {
 
 var ErrMessageNotFound = errors.New("message not found")
 
-// resolveRepliedTo returns info about the message being replied to, for a quoted
-// preview. If the parent is missing or deleted, it returns info with only the
-// messageId set (sender/content left empty). If the parent is a forwarded message,
+// resolveRepliedTo returns info about the message being replied to.
+// If the original message is missing or deleted, it returns info with only the
+// messageId set (sender/content left empty). If the original message is a forwarded message,
 // it quotes the original forwarded-from message's content instead.
 func (db *appdbimpl) resolveRepliedTo(replyToId string) (*RepliedToInfo, error) {
+	// Initialize the RepliedToInfo struct with the message ID,
+	// other fields will be filled if the message exists and is not deleted.
 	info := &RepliedToInfo{MessageID: replyToId}
+
 	var senderId, senderName string
 	var text, imageId *string
 	var isForward bool
@@ -184,25 +198,34 @@ func (db *appdbimpl) resolveRepliedTo(replyToId string) (*RepliedToInfo, error) 
 		 WHERE m.id = ? AND m.is_deleted = 0`,
 		replyToId,
 	).Scan(&senderId, &senderName, &text, &imageId, &isForward, &fwdMsgId)
-	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+
+	// If the message does not exist or is deleted, return info with only the messageId set.
+	if errors.Is(err, sql.ErrNoRows) {
+		return info, nil
+	}
+
+	// If there was an error other than no rows, return the error.
+	if err != nil {
 		return nil, fmt.Errorf("resolving replied-to content: %w", err)
 	}
-	if err == nil {
-		info.SenderID = senderId
-		info.SenderName = senderName
-		if isForward && fwdMsgId != nil {
-			// Parent is a forwarded message: quote the original message's content.
-			var fwdText, fwdImageId *string
-			_ = db.c.QueryRow(
-				"SELECT text, image_id FROM messages WHERE id = ? AND is_deleted = 0",
-				*fwdMsgId,
-			).Scan(&fwdText, &fwdImageId)
-			info.Text = fwdText
-			info.MsgImageId = fwdImageId
-		} else {
-			info.Text = text
-			info.MsgImageId = imageId
-		}
+
+	// Fill in the sender info
+	info.SenderID = senderId
+	info.SenderName = senderName
+
+	if isForward && fwdMsgId != nil {
+		// Parent is a forwarded message: quote the original message's content.
+		var fwdText, fwdImageId *string
+		_ = db.c.QueryRow(
+			"SELECT text, image_id FROM messages WHERE id = ? AND is_deleted = 0",
+			*fwdMsgId,
+		).Scan(&fwdText, &fwdImageId)
+		info.Text = fwdText
+		info.MsgImageId = fwdImageId
+	} else {
+		// Parent is a normal message: quote its content.
+		info.Text = text
+		info.MsgImageId = imageId
 	}
 	return info, nil
 }
@@ -235,13 +258,18 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 		&isForward, &dbFwdChatId, &dbFwdMsgId,
 		&senderId, &senderName,
 	)
+
+	// Handle the case where the message is not found by returning the specific custom ErrMessageNotFound error
 	if errors.Is(err, sql.ErrNoRows) {
 		return Message{}, ErrMessageNotFound
 	}
+
+	// Handle any other errors that occurred during the query
 	if err != nil {
 		return Message{}, fmt.Errorf("querying message by id: %w", err)
 	}
 
+	// Parse the send_time string into a time.Time object
 	sendTime, err := time.Parse(time.RFC3339, sendTimeStr)
 	if err != nil {
 		return Message{}, fmt.Errorf("parsing message send_time: %w", err)
@@ -259,7 +287,7 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 		IsLeaveMessage: isLeave,
 	}
 
-	// Only include content if the message is not deleted, not an init message, and not a system message
+	// Only include content if the message is not deleted and not a system message (init/join/leave)
 	if !isDeleted && !isInit && !isJoin && !isLeave {
 		content := MessageContent{}
 		hasContent := false
@@ -291,6 +319,7 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 			"SELECT text, image_id FROM messages WHERE id = ? AND is_deleted = 0",
 			*dbFwdMsgId,
 		).Scan(&fwdText, &fwdImageId)
+
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			return Message{}, fmt.Errorf("resolving forwarded content: %w", err)
 		}
@@ -338,6 +367,7 @@ func (db *appdbimpl) SetMessageAsDeleted(chatId, messageId string) (Message, err
 		messageId, chatId,
 	).Scan(&imageId)
 
+	// Handle errors, but ignore the case where no rows are found (message without an image are valid)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		return Message{}, fmt.Errorf("error looking up message image before deletion: %w", err)
 	}
@@ -374,6 +404,8 @@ func (db *appdbimpl) SetMessageAsDeleted(chatId, messageId string) (Message, err
 			_ = os.Remove(imagePath)
 		}
 		_, _ = db.c.Exec("DELETE FROM images WHERE id = ?", *imageId)
+
+		// Note: in future would make sense to handle the error cases here (TODO)
 	}
 
 	// Fetch the updated message to return
@@ -455,11 +487,13 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 			return nil, fmt.Errorf("scanning message row: %w", err)
 		}
 
+		// Parse the send_time string into a time.Time object
 		sendTime, err := time.Parse(time.RFC3339, sendTimeStr)
 		if err != nil {
 			return nil, fmt.Errorf("parsing message send_time: %w", err)
 		}
 
+		// Initialize the Message struct with basic info
 		msg := Message{
 			ID:             id,
 			ChatID:         targetChatId,
@@ -471,7 +505,7 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 			IsLeaveMessage: isLeave,
 		}
 
-		// Only include content if the message is not deleted, not an init message, and not a system message
+		// Only include content if the message is not deleted and not a system message (init/join/leave)
 		if !isDeleted && !isInit && !isJoin && !isLeave {
 			content := MessageContent{}
 			hasContent := false

@@ -26,7 +26,6 @@ func (db *appdbimpl) AddChatMember(chatId string, userId string) error {
 	}
 	return nil
 }
-
 // GetChatMembers returns all members of a chat (regardless of leave status).
 func (db *appdbimpl) GetChatMembers(chatId string) ([]Member, error) {
 
@@ -72,9 +71,6 @@ func (db *appdbimpl) GetOtherMemberId(chatId string, userId string) (string, err
 		`SELECT user_id FROM members WHERE chat_id = ? AND user_id != ? LIMIT 1`,
 		chatId, userId,
 	).Scan(&otherUserId)
-
-	//NOTE: if no rows are found a error is returned, because
-	//      it shoud not exists a direct chat with only one member
 
 	if err != nil {
 		return "", fmt.Errorf("querying other member: %w", err)

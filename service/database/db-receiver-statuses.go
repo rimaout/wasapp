@@ -6,10 +6,8 @@ import (
 )
 
 // InsertReceiverStatuses inserts receiver statuses for a given message and chat, for each active member of the chat except the sender.
-//It sets the recv_time and read_time to NULL, this equates to the message being delivered but not yet received or read by the recipients.
+// It sets the recv_time and read_time to NULL, this means that the message is delivered but not yet received or read by the recipients.
 func (db *appdbimpl) InsertReceiverStatuses(messageId, chatId, senderId string) error {
-	now := time.Now().UTC().Format(time.RFC3339)
-
 	_, err := db.c.Exec(
 		`INSERT INTO receiver_statuses (message_id, user_id, recv_time, read_time)
 		 SELECT ?, m.user_id, NULL, NULL
@@ -21,7 +19,6 @@ func (db *appdbimpl) InsertReceiverStatuses(messageId, chatId, senderId string) 
 		return fmt.Errorf("inserting receiver statuses: %w", err)
 	}
 
-	_ = now
 	return nil
 }
 
@@ -44,28 +41,6 @@ func (db *appdbimpl) MarkMessagesReceivedByUser(chatId, userId string) error {
 	return nil
 }
 
-// ComputeMessageStatus computes the overall status of a message based on the receiver statuses.
-// If all receivers have recv_time set, the message is considered "received".
-// If at least one receiver has recv_time set, but not all, the message is considered "delivered".
-// If no receivers have recv_time set, the message is considered "delivered".
-func (db *appdbimpl) ComputeMessageStatus(messageId string) (MessageStatus, error) {
-	var status string
-	err := db.c.QueryRow(
-		`SELECT CASE
-			WHEN COUNT(*) = 0 THEN 'delivered'
-			WHEN SUM(CASE WHEN recv_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'delivered'
-			WHEN SUM(CASE WHEN read_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'received'
-			ELSE 'read'
-		END
-		FROM receiver_statuses WHERE message_id = ?`,
-		messageId,
-	).Scan(&status)
-	if err != nil {
-		return StatusDelivered, fmt.Errorf("computing message status: %w", err)
-	}
-	return MessageStatus(status), nil
-}
-
 // MarkMessagesReadByUser marks all messages in a chat as read by the given user.
 func (db *appdbimpl) MarkMessagesReadByUser(chatId, userId string) error {
 	now := time.Now().UTC().Format(time.RFC3339)
@@ -82,4 +57,26 @@ func (db *appdbimpl) MarkMessagesReadByUser(chatId, userId string) error {
 		return fmt.Errorf("marking messages read: %w", err)
 	}
 	return nil
+}
+
+// ComputeMessageStatus computes the overall status of a message based on the receiver statuses.
+// - "delivered": Default state, at least one recipient has not received the message yet (recv_time IS NULL), or zero recipients exist.
+// - "received": All recipients have received the message, but at least one has not read it yet (read_time IS NULL).
+// - "read": All recipients have both received and read the message.
+func (db *appdbimpl) ComputeMessageStatus(messageId string) (MessageStatus, error) {
+	var status string
+	err := db.c.QueryRow(
+		`SELECT CASE
+			WHEN COUNT(*) = 0 THEN 'delivered'
+			WHEN SUM(CASE WHEN recv_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'delivered'
+			WHEN SUM(CASE WHEN read_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'received'
+			ELSE 'read'
+		END
+		FROM receiver_statuses WHERE message_id = ?`,
+		messageId,
+	).Scan(&status)
+	if err != nil {
+		return StatusDelivered, fmt.Errorf("computing message status: %w", err)
+	}
+	return MessageStatus(status), nil
 }

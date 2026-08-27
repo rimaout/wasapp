@@ -18,7 +18,7 @@ func (db *appdbimpl) getReactionsForMessage(messageId string) ([]EmojiReaction, 
 	}
 	defer rows.Close()
 
-	// Initialize a slice to hold the reactions
+	// Initialize a empty reactions slice
 	reactions := []EmojiReaction{}
 
 	// Iterate over the rows and scan each reaction into the slice
@@ -36,6 +36,7 @@ func (db *appdbimpl) getReactionsForMessage(messageId string) ([]EmojiReaction, 
 	return reactions, nil
 }
 
+// CreateReaction adds a reaction to a message. If the user has already reacted with the same emoji, it will update the reaction time.
 func (db *appdbimpl) CreateReaction(messageId, userId string, emojiId int32) error {
 	_, err := db.c.Exec(
 		`INSERT OR REPLACE INTO reactions (message_id, user_id, reac_time, emoji_id)
@@ -48,6 +49,7 @@ func (db *appdbimpl) CreateReaction(messageId, userId string, emojiId int32) err
 	return nil
 }
 
+// DeleteReaction removes a reaction from a message. If the reaction does not exist, it returns ErrReactionNotFound
 func (db *appdbimpl) DeleteReaction(messageId, userId string) error {
 	result, err := db.c.Exec(
 		"DELETE FROM reactions WHERE message_id = ? AND user_id = ?",
