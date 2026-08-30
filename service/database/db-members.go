@@ -12,13 +12,15 @@ type Member struct {
 	LeaveTime *string `json:"leaveTime,omitempty"`	// direct chat: NULL, group chat: timestamp or NULL if still active
 }
 
-// AddChatMember inserts a new row into the members table.
-// For private chats, join_time and leave_time are NULL.
-// For group chats, join_time is set to now, leave_time is NULL.
+// AddChatMember adds a user to a chat. For a fresh join it inserts a new row
+// (join_time set to now, leave_time NULL); for a member who had previously left,
+// it updates the existing row by updating join_time and clearing leave_time.
 func (db *appdbimpl) AddChatMember(chatId string, userId string) error {
 	now := time.Now().UTC().Format(time.RFC3339)
 	_, err := db.c.Exec(
-		`INSERT INTO members (chat_id, user_id, group_join_time, group_leave_time) VALUES (?, ?, ?, ?)`,
+		`INSERT INTO members (chat_id, user_id, group_join_time, group_leave_time) VALUES (?, ?, ?, ?)
+		 ON CONFLICT(chat_id, user_id)
+		 DO UPDATE SET group_join_time = excluded.group_join_time, group_leave_time = NULL`,
 		chatId, userId, now, nil,
 	)
 	if err != nil {
