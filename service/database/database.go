@@ -50,7 +50,7 @@ type AppDatabase interface {
 	SearchUsers(query string) ([]User, error)
 
 	// Chats
-	CreateChat(isGroup bool, groupName string, groupImagePath string) (string, error)
+	CreateChat(isGroup bool, groupName string) (string, error)
 	GetChatById(chatId string) (Chat, error)
 	IsGroupChat(chatId string) (bool, error)
 	FindPrivateChatBetween(userId1 string, userId2 string) (string, error)

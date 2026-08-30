@@ -62,7 +62,7 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 	}
 
 	// Create chat
-	chatId, err := rt.db.CreateChat(true, req.GroupName, "")
+	chatId, err := rt.db.CreateChat(true, req.GroupName)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating group chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500

@@ -22,9 +22,9 @@ type Chat struct {
 //		 because `*string` can be null.
 
 // CreateChat inserts a new chat row and returns the chat ID.
-// For group chats, groupName must be non-empty and groupImagePath is optional.
-// For private chats use empty string for groupName and groupImagePath.
-func (db *appdbimpl) CreateChat(isGroup bool, groupNameIn string, groupImagePathIn string) (string, error) {
+// For group chats, groupName must be non-empty.
+// For private chats use empty string for groupName.
+func (db *appdbimpl) CreateChat(isGroup bool, groupNameIn string) (string, error) {
 
 	// Generate a new UUID for the chat ID
 	id, err := uuid.NewV4()
@@ -39,16 +39,10 @@ func (db *appdbimpl) CreateChat(isGroup bool, groupNameIn string, groupImagePath
 		groupNameDB = &groupNameIn
 	}
 
-	// For group chats, groupImagePath is optional
-	var groupImagePathDB *string
-	if groupImagePathIn != "" {
-		groupImagePathDB = &groupImagePathIn
-	}
-
 	// Insert the new chat into the database (the constrains are defined in the database schema)
 	_, err = db.c.Exec(
-		`INSERT INTO chats (id, is_group_chat, group_name, group_image_path) VALUES (?, ?, ?, ?)`,
-		chatId, isGroup, groupNameDB, groupImagePathDB,
+		`INSERT INTO chats (id, is_group_chat, group_name) VALUES (?, ?, ?)`,
+		chatId, isGroup, groupNameDB,
 	)
 	if err != nil {
 		return "", fmt.Errorf("error inserting chat into database: %w", err)

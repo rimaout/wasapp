@@ -45,7 +45,7 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	}
 
 	// Create chat
-	chatId, err := rt.db.CreateChat(false, "", "")
+	chatId, err := rt.db.CreateChat(false, "")
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating chat")
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
