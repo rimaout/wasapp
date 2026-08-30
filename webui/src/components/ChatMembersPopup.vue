@@ -109,7 +109,7 @@ watch(() => props.chatId, fetchMembers);
 }
 
 .members-btn {
-	background: rgba(255, 255, 255, 0.08);
+	background: var(--tn-overlay);
 	border: none;
 	color: var(--tn-fg-dark);
 	font-size: 0.9rem;

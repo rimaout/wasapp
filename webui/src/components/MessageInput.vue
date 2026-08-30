@@ -177,7 +177,7 @@ export default {
 }
 
 .reply-remove:hover {
-	background: rgba(255, 255, 255, 0.08);
+	background: var(--tn-overlay);
 	color: var(--tn-red);
 }
 

@@ -86,7 +86,7 @@ const emit = defineEmits(['cancel', 'confirm']);
 	border: none;
 	border-radius: 8px;
 	cursor: pointer;
-	background: rgba(158, 206, 106, 0.15);
+	background: var(--tn-safe-green-bg);
 	color: var(--tn-green);
 	font-weight: 600;
 	font-size: 0.9rem;
@@ -97,13 +97,13 @@ const emit = defineEmits(['cancel', 'confirm']);
 }
 
 .confirm-btn:disabled {
-	background: rgba(255, 255, 255, 0.08);
+	background: var(--tn-overlay);
 	color: var(--tn-fg-dark);
 	cursor: default;
 }
 
 .confirm-bar.danger .footer-x {
-	background: rgba(255, 255, 255, 0.08);
+	background: var(--tn-overlay);
 	color: var(--tn-fg-dark);
 }
 
@@ -112,7 +112,7 @@ const emit = defineEmits(['cancel', 'confirm']);
 }
 
 .confirm-bar.danger .confirm-btn {
-	background: rgba(247, 118, 142, 0.15);
+	background: var(--tn-danger-red-bg);
 	color: var(--tn-red);
 }
 

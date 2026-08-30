@@ -128,11 +128,11 @@ function removeMember(member) {
 }
 
 .user-row:hover {
-	background-color: rgba(255, 255, 255, 0.08) !important;
+	background-color: var(--tn-overlay) !important;
 }
 
 .user-row.selected {
-	background-color: rgba(255, 255, 255, 0.08) !important;
+	background-color: var(--tn-overlay) !important;
 }
 
 .user-name {

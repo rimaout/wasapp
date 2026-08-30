@@ -65,7 +65,7 @@ export default {
 
 .search-input.light {
 	border: 1px solid var(--tn-border);
-	background-color: rgba(255, 255, 255, 0.08);
+	background-color: var(--tn-overlay);
 	color: var(--tn-fg);
 }
 
@@ -74,7 +74,7 @@ export default {
 }
 
 .search-input.light:focus {
-	background-color: rgba(255, 255, 255, 0.08);
+	background-color: var(--tn-overlay);
 	color: var(--tn-fg);
 }
 

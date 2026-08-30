@@ -20,6 +20,9 @@
 	--tn-red: #f7768e;
 	--tn-yellow: #e0af68;
 	--tn-border: #414868;
+	--tn-overlay: rgba(255, 255, 255, 0.08);
+	--tn-danger-red-bg: rgba(247, 118, 142, 0.15);
+	--tn-safe-green-bg: rgba(158, 206, 106, 0.15);
 	--topbar-height: 56px;
 }
 
@@ -309,13 +312,13 @@ a:hover {
 /* ===== Alerts ===== */
 
 .alert-danger {
-	background-color: rgba(247, 118, 142, 0.15);
+	background-color: var(--tn-danger-red-bg);
 	border-color: var(--tn-red);
 	color: var(--tn-red);
 }
 
 .alert-success {
-	background-color: rgba(158, 206, 106, 0.15);
+	background-color: var(--tn-safe-green-bg);
 	border-color: var(--tn-green);
 	color: var(--tn-green);
 }

@@ -38,7 +38,7 @@ const emit = defineEmits(['remove']);
 }
 
 .member-chip.light {
-	background: rgba(255, 255, 255, 0.08);
+	background: var(--tn-overlay);
 }
 
 .member-chip-name {
