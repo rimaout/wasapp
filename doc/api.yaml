@@ -553,8 +553,9 @@ paths:
       responses:
         "200":
           description: >-
-            User list returned successfully.
-            The list contains the ID and name of each user in the chat.
+            Member list returned successfully.
+            The list contains the userId and name of each member, plus the
+            optional join/leave times for group chats.
           content:
             application/json:
               schema:
@@ -1303,13 +1304,23 @@ components:
         isForward:      { $ref: '#/components/schemas/IsForwardFlag'        } #optional
         content:        { $ref: '#/components/schemas/MessageContent'       } #optional
 
+    Member:
+      type: object
+      description: A user who is (or was) a member of a chat.
+      required: [userId, name]
+      properties:
+        userId:    { $ref: '#/components/schemas/UserId'      }
+        name:      { $ref: '#/components/schemas/UserName'    }
+        joinTime:  { $ref: '#/components/schemas/BaseDateTime' } #optional; null in direct chats
+        leaveTime: { $ref: '#/components/schemas/BaseDateTime' } #optional; null if still active
+
     ChatMembersList:
       type: array
-      description: List of users in a chat, ordered alphabetically by username.
+      description: List of members in a chat, ordered alphabetically by username.
       minItems: 1
       maxItems: 1024 #max number of allowed members in a group chat
       items:
-        $ref: '#/components/schemas/User'
+        $ref: '#/components/schemas/Member'
 
     ChatMembersListIdOnly:
       type: array
@@ -1682,12 +1693,7 @@ components:
             $ref: '#/components/schemas/Message'
 
     ChatMembersListResponse:
-      type: object
-      description: Response containing the list of members in the chat.
-      required: [membersList]
-      properties:
-        membersList:
-          $ref: '#/components/schemas/ChatMembersList'
+      $ref: '#/components/schemas/ChatMembersList'
 
   responses:
     RawImageFileResponse:
