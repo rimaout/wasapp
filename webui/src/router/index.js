@@ -16,12 +16,10 @@ const router = createRouter({
 })
 
 // Before each route, check if the user is logged in. If not, redirect to login page.
-router.beforeEach((to, from, next) => {
-	if (to.path !== '/login' && !getToken()) {
-		next('/login')
-	} else {
-		next()
-	}
+router.beforeEach((to) => {
+    if (to.path !== '/login' && !getToken()) {
+        return '/login'
+    }
 })
 
 export default router
