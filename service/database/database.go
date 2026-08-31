@@ -152,6 +152,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			"group_name"        TEXT,    -- Optional (NULL for private chats)
 			"group_image_path"  TEXT     -- Optional (NULL for private chats or for group chats without an image)
 
+			-- Constraint: Group Chat Field Requirements
 			CONSTRAINT chk_group_chat_fields CHECK (
 				(is_group_chat = 1 AND group_name IS NOT NULL) OR
 				(is_group_chat = 0 AND group_name IS NULL AND group_image_path IS NULL)
@@ -183,12 +184,12 @@ func New(db *sql.DB) (AppDatabase, error) {
 		messagesStmt := `CREATE TABLE messages (
 			"id"              TEXT NOT NULL PRIMARY KEY, -- UUID
 
-			"chat_id"         TEXT NOT NULL,
-			"sender_id"       TEXT NOT NULL,
-			"send_time"       DATETIME NOT NULL,
-			"is_deleted"      BOOLEAN NOT NULL,
-			"is_init_message" BOOLEAN NOT NULL,
-			"is_join_message" BOOLEAN NOT NULL DEFAULT 0,
+			"chat_id"          TEXT NOT NULL,
+			"sender_id"        TEXT NOT NULL,
+			"send_time"        DATETIME NOT NULL,
+			"is_deleted"       BOOLEAN NOT NULL,
+			"is_init_message"  BOOLEAN NOT NULL,
+			"is_join_message"  BOOLEAN NOT NULL DEFAULT 0,
 			"is_leave_message" BOOLEAN NOT NULL DEFAULT 0,
 
 			"text"      TEXT,
@@ -208,21 +209,21 @@ func New(db *sql.DB) (AppDatabase, error) {
 			FOREIGN KEY (forwarded_from_chat_id) REFERENCES chats(id),
 			FOREIGN KEY (forwarded_from_msg_id) REFERENCES messages(id)
 
-			-- Constraint 1.1: Minimum Content Requirement
+			-- Constraint: Minimum Content Requirement
 			-- Must have text or image, unless it's an init message, deleted, a forward, or a system message
 			CONSTRAINT chk_msg_minimum_content CHECK (
 				(is_init_message = 1 OR is_deleted = 1 OR is_forward_message = 1 OR is_join_message = 1 OR is_leave_message = 1) OR
 				(text IS NOT NULL OR image_id IS NOT NULL)
 			),
 
-			-- Constraint 1.2: Initial Message Constraints
+			-- Constraint: Initial Message Constraints
 			-- If it's an init message, it cannot have text, images, be deleted, or be a forward
 			CONSTRAINT chk_init_msg_fields CHECK (
 				NOT (is_init_message = 1) OR
 				(text IS NULL AND image_id IS NULL AND is_deleted = 0 AND is_forward_message = 0)
 			),
 
-			-- Constraint 1.3: Forwarded Message Parameters
+			-- Constraint: Forwarded Message Parameters
 			-- Either all 3 forward fields are active/filled, or all 3 are inactive/NULL
 			CONSTRAINT chk_forward_pointers CHECK (
 				(is_forward_message = 1 AND forwarded_from_chat_id IS NOT NULL AND forwarded_from_msg_id IS NOT NULL) OR
@@ -236,8 +237,8 @@ func New(db *sql.DB) (AppDatabase, error) {
 				(text IS NULL AND image_id IS NULL AND is_init_message = 0)
 			),
 
-			-- Constraint 1.5: Logical Deletion State Enforcement
-			-- When deleted, all user data and forward links must be cleared. Init messages can't be deleted.
+			-- Constraint: Deletion State Enforcement
+			-- When deleted, all message content and forward links must be cleared. Init messages can't be deleted.
 			CONSTRAINT chk_logical_deletion_state CHECK (
 				NOT (is_deleted = 1) OR (
 					text IS NULL AND
@@ -249,7 +250,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 				)
 			),
 
-			-- Constraint 1.6: Join Message Constraints
+			-- Constraint: Join Message Constraints
 			-- A join message cannot have content, be deleted, forwarded, or be any other message type.
 			CONSTRAINT chk_join_msg_fields CHECK (
 				NOT (is_join_message = 1) OR (
@@ -262,7 +263,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 				)
 			),
 
-			-- Constraint 1.7: Leave Message Constraints
+			-- Constraint: Leave Message Constraints
 			-- A leave message cannot have content, be deleted, forwarded, or be any other message type.
 			CONSTRAINT chk_leave_msg_fields CHECK (
 				NOT (is_leave_message = 1) OR (
@@ -303,8 +304,8 @@ func New(db *sql.DB) (AppDatabase, error) {
 			FOREIGN KEY (message_id) REFERENCES messages(id),
 			FOREIGN KEY (user_id) REFERENCES users(id),
 
-			-- Constraint 4.2: Message Timeline Coherence
-			-- Chronological order: recv_time <= read_time (safely handling NULLs)
+			-- Constraint: Message Timeline Coherence
+			-- Chronological order: recv_time <= read_time
 			CONSTRAINT chk_delivery_timeline CHECK (
 				read_time IS NULL OR (recv_time IS NOT NULL AND recv_time <= read_time)
 			)
