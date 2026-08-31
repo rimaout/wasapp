@@ -9,7 +9,8 @@ import (
 )
 
 func (rt *_router) deleteGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	// Extract target chat id from url (http params)
+
+	// Extract target chat id from url (chats/{chatId}/avatar)
 	chatId := ps.ByName("chatId")
 
 	// Check chat exists and membership (404/403/500 errors)

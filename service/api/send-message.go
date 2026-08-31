@@ -12,6 +12,7 @@ import (
 
 
 func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// Extract target chat id from url (chats/{chatId}/messages)
 	chatId := ps.ByName("chatId")
 
 	if !rt.validateChatAccess(w, r, ctx, chatId) {
@@ -24,6 +25,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 }
 
 func (rt *_router) validateChatAccess(w http.ResponseWriter, r *http.Request, ctx reqcontext.RequestContext, chatId string) bool {
+	// Validate that the chat exists
 	_, err := rt.db.GetChatById(chatId)
 	if err == database.ErrChatNotFound {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
@@ -35,6 +37,7 @@ func (rt *_router) validateChatAccess(w http.ResponseWriter, r *http.Request, ct
 		return false
 	}
 
+	// Check if the authenticated user is a member of the chat
 	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")

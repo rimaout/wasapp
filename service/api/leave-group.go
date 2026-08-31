@@ -8,9 +8,10 @@ import (
 )
 
 func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	// Extract target chat id from url (http params)
+	// Extract target chat id from url (chats/{chatId}/leave)
 	chatId := ps.ByName("chatId")
 
+	// Validate that the authenticated user has access to the chat (404, 403, 500 errors)
 	if !rt.validateChatAccess(w, r, ctx, chatId) {
 		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return

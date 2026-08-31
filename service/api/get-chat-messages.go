@@ -14,8 +14,11 @@ type chatMessagesResponse struct {
 }
 
 func (rt *_router) getChatMessages(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+
+	// Extract target chat id form url (chats/{chatId}/messages)
 	chatId := ps.ByName("chatId")
 
+	// Validate that the authenticated user has access to the chat (404, 403, 500 errors)
 	if !rt.validateChatAccess(w, r, ctx, chatId) {
 		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return
@@ -25,7 +28,7 @@ func (rt *_router) getChatMessages(w http.ResponseWriter, r *http.Request, ps ht
 	// before computing their statuses so the response reflects it.
 	_ = rt.db.MarkMessagesReceivedByUser(chatId, ctx.UserID)
 
-	// Get chat messages
+	// Get chat messages slice from the database
 	messages, err := rt.db.GetChatMessages(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting chat messages")

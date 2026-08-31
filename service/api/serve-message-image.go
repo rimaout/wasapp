@@ -10,6 +10,7 @@ import (
 )
 
 func (rt *_router) getMessageImage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// Extract target chat id and image id from url (chats/{chatId}/messages/images/{imageId})
 	chatId := ps.ByName("chatId")
 	imageId := ps.ByName("imageId")
 
@@ -25,7 +26,7 @@ func (rt *_router) getMessageImage(w http.ResponseWriter, r *http.Request, ps ht
 		return
 	}
 
-	// Check if logged user is member of the chat (403 error)
+	// Check if authenticated user is member of the chat (403 error)
 	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is member of chat")

@@ -14,9 +14,11 @@ type emojiReactionRequest struct {
 }
 
 func (rt *_router) addReactionToMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// Extract target chat id and message id from url (chats/{chatId}/messages/{messageId}/reactions)
 	chatId := ps.ByName("chatId")
 	messageId := ps.ByName("messageId")
 
+	// Validate that the authenticated user has access to the chat (404, 403, 500 errors)
 	if !rt.validateChatAccess(w, r, ctx, chatId) {
 		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return

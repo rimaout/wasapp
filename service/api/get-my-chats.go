@@ -44,6 +44,7 @@ func (rt *_router) getMyChats(w http.ResponseWriter, r *http.Request, ps httprou
 		return
 	}
 
+	// Prepare the response list
 	list := make([]chatPreviewResponse, 0, len(chats))
 	for _, cp := range chats {
 
@@ -64,7 +65,7 @@ func (rt *_router) getMyChats(w http.ResponseWriter, r *http.Request, ps httprou
 			},
 		}
 
-		// Only include the content if the message is not deleted, not an init message, and not a system message
+		// Only include the content if the message is not deleted, and not a system message
 		if !cp.IsDeleted && !cp.IsInitMsg && !cp.IsJoinMsg && !cp.IsLeaveMsg {
 			content := &database.MessageContent{}
 			hasContent := false

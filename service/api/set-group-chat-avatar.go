@@ -12,7 +12,7 @@ import (
 const groupChatAvatarUploadDir = "groups/avatars"
 
 func (rt *_router) setGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	// Extract target chat id from url (http params)
+	// Extract target chat id from url (chats/{chatId}/avatar)
 	chatId := ps.ByName("chatId")
 
 	// Check if chat exists (404 error)
@@ -39,7 +39,7 @@ func (rt *_router) setGroupChatAvatar(w http.ResponseWriter, r *http.Request, ps
 		return
 	}
 
-	// Check if logged user is a member of the group chat (403 error)
+	// Check if authenticated user is a member of the group chat (403 error)
 	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")

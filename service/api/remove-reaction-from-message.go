@@ -10,9 +10,11 @@ import (
 )
 
 func (rt *_router) removeReactionFromMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// Extract target chat id and message id from url (chats/{chatId}/messages/{messageId}/reaction)
 	chatId := ps.ByName("chatId")
 	messageId := ps.ByName("messageId")
 
+	// Validate that the authenticated user has access to the chat (404, 403, 500 errors)
 	if !rt.validateChatAccess(w, r, ctx, chatId) {
 		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return
@@ -30,7 +32,7 @@ func (rt *_router) removeReactionFromMessage(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// Delete the reaction associated with the message for the logged user
+	// Delete the reaction associated with the message for the authenticated user
 	err = rt.db.DeleteReaction(messageId, ctx.UserID)
 	if err == database.ErrReactionNotFound {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeReactionNotFound, "reaction not found") //404

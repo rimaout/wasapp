@@ -18,7 +18,7 @@ type GroupNameResponse struct {
 
 func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
-	// Extract target chat id form url (http params)
+	// Extract target chat id form url (chats/{chatId}/name)
 	chatId := ps.ByName("chatId")
 
 	// Read request (to extract new group name)

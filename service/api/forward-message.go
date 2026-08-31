@@ -15,6 +15,8 @@ type forwardMessageRequest struct {
 }
 
 func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+
+	// Extract the origin chat ID and message ID from the URL parameters (chats/{chatId}/messages/{messageId}/forward)
 	originChatId := ps.ByName("chatId")
 	originMessageId := ps.ByName("messageId")
 
@@ -42,7 +44,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
-	// Check if the origin message exists and is not a forwarded message
+	// Check if the origin message exists
 	originMsg, err := rt.db.GetMessageById(originChatId, originMessageId)
 	if err == database.ErrMessageNotFound {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeMessageNotFound, "message not found") //404
@@ -54,6 +56,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		return
 	}
 
+	// Check if the origin message is already a forwarded message (we don't allow forwarding forwarded messages)
 	if originMsg.ForwardedFrom != nil {
 		rt.respondWithError(w, http.StatusBadRequest, ErrCodeCannotForwardForwarded, "cannot forward a forwarded message") //400
 		return
@@ -69,6 +72,8 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "destination chat id is required") //400
 		return
 	}
+
+	// Check if the destination chat is the same as the origin chat (we don't allow forwarding to the same chat)
 	if req.ForwardTo == originChatId {
 		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "cannot forward to the same chat") //400
 		return

@@ -8,8 +8,8 @@ import (
 type Member struct {
 	UserId    string  `json:"userId"`
 	Name      string  `json:"name"`
-	JoinTime  *string `json:"joinTime,omitempty"`	// direct chat: NULL, group chat: timestamp
-	LeaveTime *string `json:"leaveTime,omitempty"`	// direct chat: NULL, group chat: timestamp or NULL if still active
+	JoinTime  *string `json:"joinTime,omitempty"`  // direct chat: NULL, group chat: timestamp
+	LeaveTime *string `json:"leaveTime,omitempty"` // direct chat: NULL, group chat: timestamp or NULL if still active
 }
 
 // AddChatMember adds a user to a chat. For a fresh join it inserts a new row
@@ -28,6 +28,7 @@ func (db *appdbimpl) AddChatMember(chatId string, userId string) error {
 	}
 	return nil
 }
+
 // GetChatMembers returns all members of a chat (regardless of leave status).
 func (db *appdbimpl) GetChatMembers(chatId string) ([]Member, error) {
 
@@ -64,7 +65,6 @@ func (db *appdbimpl) GetChatMembers(chatId string) ([]Member, error) {
 
 	return members, nil
 }
-
 
 // GetOtherMemberId returns the user ID of the other member in a private chat.
 func (db *appdbimpl) GetOtherMemberId(chatId string, userId string) (string, error) {
@@ -111,4 +111,3 @@ func (db *appdbimpl) IsActiveChatMember(chatId string, userId string) (bool, err
 
 	return exists > 0, nil
 }
-

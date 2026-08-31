@@ -8,6 +8,7 @@ import (
 )
 
 func (rt *_router) markChatRead(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// Extract target chat id from url (chats/{chatId}/read)
 	chatId := ps.ByName("chatId")
 
 	if !rt.validateChatAccess(w, r, ctx, chatId) {

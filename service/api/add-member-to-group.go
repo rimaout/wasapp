@@ -13,7 +13,7 @@ type AddUserToGroupRequest struct {
 }
 
 func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
-	// Extract target chat id from url (http params)
+	// Extract target chat id from url (chats/{chatId}/members)
 	chatId := ps.ByName("chatId")
 
 	// Extract new member id from request body (JSON)
@@ -24,6 +24,7 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	}
 	newMemberId := req.UserID
 
+	// Validate that the authenticated user has access to the chat (404, 403, 500 errors)
 	if !rt.validateChatAccess(w, r, ctx, chatId) {
 		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return

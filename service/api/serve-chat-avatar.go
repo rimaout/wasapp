@@ -33,7 +33,7 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	// Check if logged user is member of the chat (403 error)
+	// Check if authenticated user is member of the chat (403 error)
 	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is member of chat")

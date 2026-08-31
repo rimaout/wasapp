@@ -16,6 +16,7 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 	chatId    := ps.ByName("chatId")
 	messageId := ps.ByName("messageId")
 
+	// Validate that the authenticated user has access to the chat (404, 403, 500 errors)
 	if !rt.validateChatAccess(w, r, ctx, chatId) {
 		// Checks errors: 404 (chat not found), 403 (user not a member), 500 (internal error)
 		return
@@ -33,7 +34,7 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 		return
 	}
 
-	// Check if message is owned by the logged user (403)
+	// Check if message is owned by the authenticated user (403)
 	if msg.Sender.Id != ctx.UserID {
 		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotSender, "user is not the owner of the message")
 		return

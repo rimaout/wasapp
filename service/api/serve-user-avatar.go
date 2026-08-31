@@ -8,6 +8,7 @@ import (
 )
 
 func (rt *_router) getUserAvatar(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
+	// Extract target user id from url (users/{userId}/avatar)
 	userId := ps.ByName("userId")
 
 	// Check if the user exists.
