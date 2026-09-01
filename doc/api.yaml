@@ -37,6 +37,7 @@ paths:
         If the user does not exist, a new user will be created and both the user identifier and an authentication token will be returned.
         If the user already exists, the user identifier and an authentication token will be returned.
       operationId: doLogin
+      security: []
       requestBody:
         description: User details.
         required: true
@@ -74,6 +75,7 @@ paths:
           - If a 'username' query parameter is provided, returns users whose usernames most closely match the query (ordered by similarity).
           - Otherwise, returns all users, ordered alphabetically by username.
       operationId: userSearch
+      security: []
       parameters:
         - name: username
           in: query
@@ -197,7 +199,30 @@ paths:
 
   # -------------------- CREATE CHATS --------------------
 
-  /chats:  # CREATE GROUP
+  /chats:  # CREATE GROUP / CHATS PREVIEWS
+    get:
+      tags: ["Chat Operations"]
+      summary: Get chat previews for the logged-in user
+      description: >-
+        Retrieve a list of chat previews belonging to the authenticated user.
+        The chats are returned in order, sorted by the time of the last sent message (most recent first).
+      operationId: getMyConversations
+      security: [ { BearerAuth: [] } ]
+      responses:
+        "200":
+          description: >-
+            Chats returned successfully.
+            The chat previews array is ordered by the last message sent time, from most recent to oldest.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatsPreviewListResponse'
+        "401":
+          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
     post:
       tags: ["Chat Creation"]
       summary: Create a group chat
@@ -302,37 +327,12 @@ paths:
         Returns the avatar of the specified user.
         Publicly accessible; no authentication required.
       operationId: serveUserAvatar
+      security: []
       responses:
         '200':
           $ref: '#/components/responses/RawImageFileResponse'
         '404':
           description: Resource not found - Returns code `USER_NOT_FOUND` if the specified user does not exist, or `NO_USER_AVATAR` if the user has no avatar set.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /chats:
-    # -------------------- CHATS PREVIEWS --------------------
-    get:
-      tags: ["Chat Operations"]
-      summary: Get chat previews for the logged-in user
-      description: >-
-        Retrieve a list of chat previews belonging to the authenticated user.
-        The chats are returned in order, sorted by the time of the last sent message (most recent first).
-      operationId: getMyConversations
-      security: [ { BearerAuth: [] } ]
-      responses:
-        "200":
-          description: >-
-            Chats returned successfully.
-            The chat previews array is ordered by the last message sent time, from most recent to oldest.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChatsPreviewListResponse'
-        "401":
-          description: Authentication required or failed - Returns code `UNAUTHORIZED` if the Bearer token is missing, malformed, or invalid.
           content:
             application/json:
               schema:
@@ -777,65 +777,65 @@ paths:
 
   # -------------------- DELETE MESSAGE --------------------
   /chats/{chatId}/messages/{messageId}:
-  parameters:
-    - $ref: '#/components/parameters/ChatId'
-    - $ref: '#/components/parameters/MessageId'
-
-  delete:
-    tags: ["Message Operations"]
-    summary: Delete a specific message from the specified chat
-    description: |-
-      Soft-deletes the message identified by messageId from the chat identified by chatId.
-      The authenticated user must be the sender of the message.
-        - Subsequent reads of this message will return it with `isDeleted: true` and `content: null`.
-        - System initialization messages (`isInitMessage: true`) and system join/leave messages (`isJoinMessage`/`isLeaveMessage`: true) cannot be deleted.
-        - Already deleted messages cannot be deleted again.
-    operationId: deleteMessage
-    security: [ { BearerAuth: [] } ]
-    responses:
-      "200":
-        description: Message marked as deleted successfully. Returns the updated message record.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Message'
-
-      "400":
-        description: >-
-          Bad Request - Returned when attempting an illegal operation on the message state:
-          - `MESSAGE_ALREADY_DELETED`: The message has already been deleted.
-          - `ITS_INIT_MESSAGE`: Initial system messages cannot be deleted.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-
-      "401":
-        description: Authentication required - Bearer token missing, malformed, or expired.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-
-      "403":
-        description: >-
-          Forbidden - Returned when authorization checks fail:
-          - `FORBIDDEN_NOT_MEMBER`: Logged-in user is not a member of this chat.
-          - `FORBIDDEN_NOT_SENDER`: Logged-in user is not the author of this message.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
-
-      "404":
-        description: >-
-          Not Found:
-          - `CHAT_NOT_FOUND`: Specified chat ID does not exist.
-          - `MESSAGE_NOT_FOUND`: Specified message ID does not exist.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Error'
+    parameters:
+      - $ref: '#/components/parameters/ChatId'
+      - $ref: '#/components/parameters/MessageId'
+  
+    delete:
+      tags: ["Message Operations"]
+      summary: Delete a specific message from the specified chat
+      description: |-
+        Soft-deletes the message identified by messageId from the chat identified by chatId.
+        The authenticated user must be the sender of the message.
+          - Subsequent reads of this message will return it with `isDeleted: true` and `content: null`.
+          - System initialization messages (`isInitMessage: true`) and system join/leave messages (`isJoinMessage`/`isLeaveMessage`: true) cannot be deleted.
+          - Already deleted messages cannot be deleted again.
+      operationId: deleteMessage
+      security: [ { BearerAuth: [] } ]
+      responses:
+        "200":
+          description: Message marked as deleted successfully. Returns the updated message record.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+  
+        "400":
+          description: >-
+            Bad Request - Returned when attempting an illegal operation on the message state:
+            - `MESSAGE_ALREADY_DELETED`: The message has already been deleted.
+            - `ITS_INIT_MESSAGE`: Initial system messages cannot be deleted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+        "401":
+          description: Authentication required - Bearer token missing, malformed, or expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+        "403":
+          description: >-
+            Forbidden - Returned when authorization checks fail:
+            - `FORBIDDEN_NOT_MEMBER`: Logged-in user is not a member of this chat.
+            - `FORBIDDEN_NOT_SENDER`: Logged-in user is not the author of this message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+        "404":
+          description: >-
+            Not Found:
+            - `CHAT_NOT_FOUND`: Specified chat ID does not exist.
+            - `MESSAGE_NOT_FOUND`: Specified message ID does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
   # -------------------- REPLY MESSAGE --------------------
   /chats/{chatId}/messages/{messageId}/replies:
@@ -1191,13 +1191,6 @@ components:
       allOf:
         - $ref: '#/components/schemas/BaseId'
         - description: Server-assigned unique identifier for the image.
-
-    ImageUrl:
-      type: string
-      format: url
-      description: >-
-        URL to access a message image. Image format is indicated by the HTTP Content-Type header upon retrieval.
-      example: "https://wasapp.online/v1/chats/550e8400-e29b-41d4-a716-446655440000/images/660e8400-e29b-41d4-a716-446655440000"
 
     BinaryImage:
       type: string
