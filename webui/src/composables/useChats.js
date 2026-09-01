@@ -2,14 +2,13 @@ import { ref } from 'vue';
 import axios from '../services/axios.js';
 import { getErrorMessage } from '../services/utils.js';
 
-// Shared reactive store for the chats list — a single source of truth.
-// Every component imports the same module-level refs, so calling
-// refreshChats() anywhere instantly updates the sidebar previews.
+// Shared chat state. Call refreshChats() to sync across components.
 
-const chats = ref([]);
+const chats    = ref([]);
 const errormsg = ref(null);
-const version = ref(0);
+const version  = ref(0);
 
+// Fetches the list of chats from the server and updates the shared state.
 export async function refreshChats() {
 	errormsg.value = null;
 	try {
@@ -21,6 +20,7 @@ export async function refreshChats() {
 	}
 }
 
+// Returns the shared state and functions for managing chats.
 export function useChats() {
 	return { chats, errormsg, version, refreshChats };
 }
