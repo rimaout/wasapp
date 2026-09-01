@@ -93,7 +93,7 @@ function removeMember(member) {
 
 .list-divider {
 	border: none;
-	border-top: 1.5px solid var(--tn-border);
+	border-top: 1.5px solid var(--theme-border);
 	margin: 6px 20px 4px;
 }
 
@@ -128,21 +128,21 @@ function removeMember(member) {
 }
 
 .user-row:hover {
-	background-color: var(--tn-overlay) !important;
+	background-color: var(--theme-overlay) !important;
 }
 
 .user-row.selected {
-	background-color: var(--tn-overlay) !important;
+	background-color: var(--theme-overlay) !important;
 }
 
 .user-name {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 }
 
 .check-icon {
 	width: 20px;
 	height: 20px;
-	color: var(--tn-blue);
+	color: var(--theme-blue);
 	flex-shrink: 0;
 }
 </style>

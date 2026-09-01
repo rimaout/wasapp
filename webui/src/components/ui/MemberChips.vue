@@ -31,14 +31,14 @@ const emit = defineEmits(['remove']);
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
-	background: var(--tn-bg-highlight);
+	background: var(--theme-bg-highlight);
 	border-radius: 999px;
 	padding: 3px 8px 3px 3px;
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 }
 
 .member-chip.light {
-	background: var(--tn-overlay);
+	background: var(--theme-overlay);
 }
 
 .member-chip-name {
@@ -54,12 +54,12 @@ const emit = defineEmits(['remove']);
 	border: none;
 	padding: 0;
 	cursor: pointer;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	line-height: 1;
 	font-size: 1rem;
 }
 
 .member-chip-remove:hover {
-	color: var(--tn-red);
+	color: var(--theme-red);
 }
 </style>

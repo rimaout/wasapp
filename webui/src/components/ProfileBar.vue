@@ -48,13 +48,13 @@ function onDone(payload) {
 	gap: 12px;
 	margin: 4px 12px 12px;
 	padding: 8px 12px;
-	background: var(--tn-bg-light);
+	background: var(--theme-bg-light);
 	border-radius: 12px;
 	flex-shrink: 0;
 }
 
 .profile-greeting {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	font-weight: 600;
 	font-size: 0.95rem;
 	overflow: hidden;

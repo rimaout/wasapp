@@ -8,7 +8,7 @@ import LoadingSpinner from './components/ui/LoadingSpinner.vue'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import './assets/dashboard.css'
 import './assets/main.css'
-import './assets/tokyo-night.css'
+import './assets/theme.css'
 
 const app = createApp(App)
 app.config.globalProperties.$axios = axios;

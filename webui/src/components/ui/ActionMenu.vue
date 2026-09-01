@@ -215,8 +215,8 @@ watch([open, activeAction, confirmItem], () => {
 	position: fixed;
 	z-index: 201;
 	min-width: 200px;
-	background: var(--tn-bg-light);
-	border: 1px solid var(--tn-border);
+	background: var(--theme-bg-light);
+	border: 1px solid var(--theme-border);
 	border-radius: 12px;
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 	padding: 6px;
@@ -231,7 +231,7 @@ watch([open, activeAction, confirmItem], () => {
 	border: none;
 	border-radius: 8px;
 	padding: 10px 12px;
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	font-size: 0.95rem;
 	cursor: pointer;
 	text-align: left;
@@ -239,28 +239,28 @@ watch([open, activeAction, confirmItem], () => {
 }
 
 .menu-item:hover {
-	background-color: var(--tn-overlay);
+	background-color: var(--theme-overlay);
 }
 
 .menu-icon {
 	width: 18px;
 	height: 18px;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	flex-shrink: 0;
 }
 
 .menu-divider {
 	height: 1px;
-	background: var(--tn-border);
+	background: var(--theme-border);
 	margin: 4px 8px;
 }
 
 .menu-item.danger {
-	color: var(--tn-red);
+	color: var(--theme-red);
 }
 
 .menu-item.danger .menu-icon {
-	color: var(--tn-red);
+	color: var(--theme-red);
 }
 
 .menu-item.danger:hover {
@@ -276,7 +276,7 @@ watch([open, activeAction, confirmItem], () => {
 }
 
 .danger-text {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	font-size: 0.95rem;
 }
 </style>

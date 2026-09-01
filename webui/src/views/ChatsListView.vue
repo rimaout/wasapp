@@ -121,30 +121,30 @@ export default {
 }
 
 .chat-row:hover {
-	background-color: var(--tn-bg-highlight) !important;
+	background-color: var(--theme-bg-highlight) !important;
 }
 
 .chat-row.active {
-	background-color: var(--tn-bg-highlight) !important;
+	background-color: var(--theme-bg-highlight) !important;
 }
 
 .chat-name {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 }
 
 .chat-snippet {
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	max-width: 100%;
 }
 
 .chat-time {
-	color: var(--tn-comment);
+	color: var(--theme-comment);
 	white-space: nowrap;
 }
 
 .chat-check {
 	display: inline-flex;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 }
 
 .chat-check .is-received {

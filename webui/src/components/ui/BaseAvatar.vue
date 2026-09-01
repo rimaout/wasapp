@@ -97,7 +97,7 @@ export default {
 	align-items: center;
 	justify-content: center;
 	font-weight: 600;
-	color: var(--tn-bg-darker);
+	color: var(--theme-bg-darker);
 }
 
 .avatar-group-icon {
@@ -106,7 +106,7 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	color: var(--tn-bg-darker);
+	color: var(--theme-bg-darker);
 	font-size: 120%;
 }
 </style>

@@ -79,14 +79,14 @@ async function confirm() {
 }
 
 .action-title {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	font-weight: 600;
 	font-size: 1rem;
 }
 
 .name-input {
-	background: var(--tn-bg-highlight);
-	border-color: var(--tn-border);
-	color: var(--tn-fg);
+	background: var(--theme-bg-highlight);
+	border-color: var(--theme-border);
+	color: var(--theme-fg);
 }
 </style>

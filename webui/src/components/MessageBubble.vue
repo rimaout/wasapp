@@ -280,18 +280,18 @@ export default {
 }
 
 .message-bubble.me {
-	background-color: var(--tn-blue);
-	color: var(--tn-bg-darker);
+	background-color: var(--theme-blue);
+	color: var(--theme-bg-darker);
 	border-bottom-right-radius: 4px;
 }
 
 .message-bubble.me .message-forwarded {
-	color: var(--tn-bg-darker);
+	color: var(--theme-bg-darker);
 }
 
 .message-bubble.other {
-	background-color: var(--tn-bg-highlight);
-	color: var(--tn-fg);
+	background-color: var(--theme-bg-highlight);
+	color: var(--theme-fg);
 	border-bottom-left-radius: 4px;
 }
 
@@ -344,7 +344,7 @@ export default {
 	gap: 4px;
 	font-size: 0.75rem;
 	font-weight: 600;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	margin-bottom: 3px;
 }
 
@@ -412,7 +412,7 @@ export default {
 .message-sender-name {
 	font-size: 0.75rem;
 	font-weight: 600;
-	color: var(--tn-cyan);
+	color: var(--theme-cyan);
 }
 
 .message-text {
@@ -469,12 +469,12 @@ export default {
 	gap: 4px;
 	padding: 2px 8px;
 	border-radius: 999px;
-	background: var(--tn-bg-light);
-	border: 1px solid var(--tn-border);
+	background: var(--theme-bg-light);
+	border: 1px solid var(--theme-border);
 }
 
 .reaction-chip.active {
-	border-color: var(--tn-blue);
+	border-color: var(--theme-blue);
 }
 
 .reaction-glyph {
@@ -483,7 +483,7 @@ export default {
 }
 
 .reaction-count {
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	font-weight: 600;
 	font-size: 0.8rem;
 }

@@ -134,8 +134,8 @@ export default {
 	display: flex;
 	align-items: center;
 	gap: 10px;
-	background: var(--tn-bg-highlight);
-	border: 1px solid var(--tn-border);
+	background: var(--theme-bg-highlight);
+	border: 1px solid var(--theme-border);
 	border-radius: 12px;
 	padding: 6px 8px;
 	margin-bottom: 8px;
@@ -151,12 +151,12 @@ export default {
 .reply-name {
 	font-size: 0.75rem;
 	font-weight: 600;
-	color: var(--tn-blue);
+	color: var(--theme-blue);
 }
 
 .reply-text {
 	font-size: 0.85rem;
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -172,13 +172,13 @@ export default {
 	border: none;
 	border-radius: 50%;
 	background: none;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	cursor: pointer;
 }
 
 .reply-remove:hover {
-	background: var(--tn-overlay);
-	color: var(--tn-red);
+	background: var(--theme-overlay);
+	color: var(--theme-red);
 }
 
 .reply-remove .feather {
@@ -206,7 +206,7 @@ export default {
 	height: 64px;
 	border-radius: 10px;
 	overflow: hidden;
-	background: var(--tn-bg-highlight);
+	background: var(--theme-bg-highlight);
 	box-shadow: 0 3px 16px rgba(0, 0, 0, 0.3);
 }
 
@@ -228,7 +228,7 @@ export default {
 	border: none;
 	border-radius: 50%;
 	background: rgba(31, 35, 53, 0.85);
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	cursor: pointer;
 }
 
@@ -240,7 +240,7 @@ export default {
 .message-input-group {
 	display: flex;
 	align-items: center;
-	background: var(--tn-bg-highlight);
+	background: var(--theme-bg-highlight);
 	border-radius: 999px;
 	height: 52px;
 	padding: 6px 6px 6px 8px;
@@ -252,13 +252,13 @@ export default {
 	background: none;
 	border: none;
 	outline: none;
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	font-size: 1rem;
 	min-width: 0;
 }
 
 .message-field::placeholder {
-	color: var(--tn-comment);
+	color: var(--theme-comment);
 }
 
 .send-btn {
@@ -267,10 +267,10 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: var(--tn-blue);
+	background-color: var(--theme-blue);
 	border: none;
 	border-radius: 50%;
-	color: var(--tn-bg-darker);
+	color: var(--theme-bg-darker);
 	cursor: pointer;
 	flex-shrink: 0;
 }
@@ -280,8 +280,8 @@ export default {
 }
 
 .send-btn:disabled {
-	background-color: var(--tn-comment);
-	color: var(--tn-bg-darker);
+	background-color: var(--theme-comment);
+	color: var(--theme-bg-darker);
 	cursor: default;
 }
 </style>

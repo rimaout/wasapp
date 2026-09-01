@@ -62,7 +62,7 @@ onBeforeUnmount(() => {
 }
 
 .message-image-failed {
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	font-size: 0.85rem;
 }
 

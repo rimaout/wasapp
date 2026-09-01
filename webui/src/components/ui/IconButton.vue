@@ -33,12 +33,12 @@ const emit = defineEmits(['click']);
 	border-radius: 50%;
 	padding: 0;
 	cursor: pointer;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	flex-shrink: 0;
 }
 
 .icon-btn:hover {
-	background-color: var(--tn-overlay);
+	background-color: var(--theme-overlay);
 }
 
 .icon-btn:active {
@@ -46,7 +46,7 @@ const emit = defineEmits(['click']);
 }
 
 .icon-btn.filled {
-	background-color: var(--tn-overlay);
+	background-color: var(--theme-overlay);
 }
 
 .icon-btn.filled:hover {

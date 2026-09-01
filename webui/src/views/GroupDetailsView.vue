@@ -121,15 +121,15 @@ async function createGroup() {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
-	background: var(--tn-bg-light);
-	border: 1px solid var(--tn-border);
+	background: var(--theme-bg-light);
+	border: 1px solid var(--theme-border);
 	border-radius: 12px;
 	padding: 16px;
 	margin-bottom: 16px;
 }
 
 .section-title {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	font-weight: 600;
 	font-size: 0.9rem;
 }
@@ -141,16 +141,16 @@ async function createGroup() {
 }
 
 .name-input {
-	background: var(--tn-bg-highlight);
-	border-color: var(--tn-border);
-	color: var(--tn-fg);
+	background: var(--theme-bg-highlight);
+	border-color: var(--theme-border);
+	color: var(--theme-fg);
 }
 
 .remove-image-btn {
 	align-self: center;
 	background: none;
 	border: none;
-	color: var(--tn-red);
+	color: var(--theme-red);
 	font-size: 0.85rem;
 	cursor: pointer;
 	padding: 0;

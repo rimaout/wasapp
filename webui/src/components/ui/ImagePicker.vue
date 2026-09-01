@@ -72,7 +72,7 @@ onBeforeUnmount(() => {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: var(--tn-bg-highlight);
-	color: var(--tn-fg-dark);
+	background: var(--theme-bg-highlight);
+	color: var(--theme-fg-dark);
 }
 </style>

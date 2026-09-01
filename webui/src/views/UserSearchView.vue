@@ -107,10 +107,10 @@ function goToChat(chatId, displayName, isGroupChat) {
 }
 
 .user-row:hover {
-	background-color: var(--tn-bg-highlight) !important;
+	background-color: var(--theme-bg-highlight) !important;
 }
 
 .user-name {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 }
 </style>

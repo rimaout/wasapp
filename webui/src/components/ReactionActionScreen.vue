@@ -104,7 +104,7 @@ async function pick(emoji) {
 }
 
 .emoji-btn:hover {
-	background-color: var(--tn-overlay);
+	background-color: var(--theme-overlay);
 }
 
 .emoji-btn.active {

@@ -49,18 +49,18 @@ function onNewChatSelect(item) {
 	align-items: center;
 	gap: 12px;
 	padding: 0 16px;
-	background: var(--tn-bg-darker);
-	color: var(--tn-fg);
+	background: var(--theme-bg-darker);
+	color: var(--theme-fg);
 }
 
 .sidebar-logo {
 	font-size: 1.25rem;
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	text-decoration: none;
 }
 
 .sidebar-logo:hover {
-	color: var(--tn-blue);
+	color: var(--theme-blue);
 }
 
 .header-title {
@@ -72,14 +72,14 @@ function onNewChatSelect(item) {
 	border: none;
 	padding: 0;
 	cursor: pointer;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	line-height: 1;
 	display: flex;
 	align-items: center;
 }
 
 .back-btn:hover {
-	color: var(--tn-blue);
+	color: var(--theme-blue);
 }
 
 .back-btn .back-icon {

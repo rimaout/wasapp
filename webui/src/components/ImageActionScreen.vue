@@ -113,7 +113,7 @@ onBeforeUnmount(() => {
 }
 
 .action-title {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	font-weight: 600;
 	font-size: 1rem;
 }
@@ -122,7 +122,7 @@ onBeforeUnmount(() => {
 	align-self: center;
 	background: none;
 	border: none;
-	color: var(--tn-red);
+	color: var(--theme-red);
 	font-size: 0.85rem;
 	cursor: pointer;
 	padding: 0;

@@ -109,9 +109,9 @@ watch(() => props.chatId, fetchMembers);
 }
 
 .members-btn {
-	background: var(--tn-overlay);
+	background: var(--theme-overlay);
 	border: none;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	font-size: 0.9rem;
 	font-weight: 560;
 	cursor: pointer;
@@ -122,7 +122,7 @@ watch(() => props.chatId, fetchMembers);
 
 .members-btn:hover {
 	background: rgba(255, 255, 255, 0.14);
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 }
 
 .popup-backdrop {
@@ -137,8 +137,8 @@ watch(() => props.chatId, fetchMembers);
 	right: 0;
 	width: 300px;
 	max-height: 550px;
-	background: var(--tn-bg-light);
-	border: 1px solid var(--tn-border);
+	background: var(--theme-bg-light);
+	border: 1px solid var(--theme-border);
 	border-radius: 12px;
 	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
 	padding: 8px 12px 12px;
@@ -157,7 +157,7 @@ watch(() => props.chatId, fetchMembers);
 }
 
 .panel-title {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	font-weight: 600;
 	font-size: 1rem;
 }

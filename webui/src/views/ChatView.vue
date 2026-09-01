@@ -226,7 +226,7 @@ export default {
 	height: 100vh;
 	height: 100dvh;
 	position: relative;
-	background-color: var(--tn-bg-dark);
+	background-color: var(--theme-bg-dark);
 	background-image: url('/chat-bg.svg');
 	background-repeat: repeat;
 	background-size: 500px;
@@ -241,14 +241,14 @@ export default {
 	border-radius: 50%;
 	width: 40px;
 	height: 40px;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	cursor: pointer;
 	flex-shrink: 0;
 	margin-left: -8px;
 }
 
 .chat-back-btn:hover {
-	background: var(--tn-overlay);
+	background: var(--theme-overlay);
 }
 
 .chat-header {
@@ -257,12 +257,12 @@ export default {
 	gap: 12px;
 	height: var(--topbar-height);
 	padding: 0 16px;
-	background: var(--tn-bg-darker);
+	background: var(--theme-bg-darker);
 	flex-shrink: 0;
 }
 
 .chat-header-name {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 	font-size: 1.15rem;
 	font-weight: 600;
 	flex: 1;
@@ -291,8 +291,8 @@ export default {
 .date-divider {
 	align-self: center;
 	font-size: 0.75rem;
-	color: var(--tn-fg-dark);
-	background: var(--tn-bg-highlight);
+	color: var(--theme-fg-dark);
+	background: var(--theme-bg-highlight);
 	padding: 4px 12px;
 	border-radius: 999px;
 	margin: 8px 0;

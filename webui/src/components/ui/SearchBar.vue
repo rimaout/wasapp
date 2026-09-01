@@ -45,13 +45,13 @@ export default {
 .search-icon {
 	position: absolute;
 	left: 10px;
-	color: var(--tn-comment);
+	color: var(--theme-comment);
 	pointer-events: none;
 	z-index: 1;
 }
 
 .search-icon.light {
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 }
 
 .search-input {
@@ -64,18 +64,18 @@ export default {
 }
 
 .search-input.light {
-	border: 1px solid var(--tn-border);
-	background-color: var(--tn-overlay);
-	color: var(--tn-fg);
+	border: 1px solid var(--theme-border);
+	background-color: var(--theme-overlay);
+	color: var(--theme-fg);
 }
 
 .search-input.light::placeholder {
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 }
 
 .search-input.light:focus {
-	background-color: var(--tn-overlay);
-	color: var(--tn-fg);
+	background-color: var(--theme-overlay);
+	color: var(--theme-fg);
 }
 
 .search-clear {
@@ -84,7 +84,7 @@ export default {
 	background: none;
 	border: none;
 	padding: 2px;
-	color: var(--tn-fg-dark);
+	color: var(--theme-fg-dark);
 	cursor: pointer;
 	line-height: 1;
 	display: flex;
@@ -92,6 +92,6 @@ export default {
 }
 
 .search-clear:hover {
-	color: var(--tn-fg);
+	color: var(--theme-fg);
 }
 </style>
