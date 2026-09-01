@@ -61,12 +61,9 @@ type AppDatabase interface {
 	// Members
 	AddChatMember(chatId string, userId string) error
 	GetChatMembers(chatId string) ([]Member, error)
-//	GetActiveChatMembers(chatId string) ([]Member, error)
-//	GetActiveMemberCount(chatId string) (int, error)
 	GetOtherMemberId(chatId string, userId string) (string, error)
 	SetLeaveTime(chatId string, userId string) error
 	IsActiveChatMember(chatId string, userId string) (bool, error)
-//	IsActiveMemberAtTime(chatId string, userId string, t time.Time) (bool, error)
 
 	// Messages
 	CreateMessage(chatId, senderId, sendTime, text, imageId, replyTo string, isInit, isForward bool, forwardFromChat, forwardFromMsg string) (string, error)
@@ -343,11 +340,6 @@ func New(db *sql.DB) (AppDatabase, error) {
 		_, err = db.Exec(imageVisibilityStmt)
 		if err != nil {
 			return nil, fmt.Errorf("error creating image_chat_visibility table: %w", err)
-		}
-
-		// --- DATABASE TRIGGERS (cross-table constraints)
-		if err = createTriggers(db); err != nil {
-			return nil, err
 		}
 	}
 

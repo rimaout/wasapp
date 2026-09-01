@@ -36,7 +36,8 @@ func (db *appdbimpl) getReactionsForMessage(messageId string) ([]EmojiReaction, 
 	return reactions, nil
 }
 
-// CreateReaction adds a reaction to a message. If the user has already reacted with the same emoji, it will update the reaction time.
+// CreateReaction adds a reaction to a message.
+// If the user has already reacted to the message, it updates the recattion with the new emoji and reaction time.
 func (db *appdbimpl) CreateReaction(messageId, userId string, emojiId int32) error {
 	_, err := db.c.Exec(
 		`INSERT OR REPLACE INTO reactions (message_id, user_id, reac_time, emoji_id)

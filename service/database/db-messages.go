@@ -24,16 +24,16 @@ type EmojiReaction struct {
 }
 
 type ForwardedFromInfo struct {
-	ChatID     string  `json:"chatId"`
-	MessageID  string  `json:"messageId"`
+	ChatID      string `json:"chatId"`
+	MessageID   string `json:"messageId"`
 	Text       *string `json:"text,omitempty"`
 	MsgImageId *string `json:"msgImageId,omitempty"`
 }
 
 type RepliedToInfo struct {
-	MessageID  string  `json:"messageId"`
-	SenderID   string  `json:"senderId"`
-	SenderName string  `json:"senderName"`
+	MessageID   string `json:"messageId"`
+	SenderID    string `json:"senderId"`
+	SenderName  string `json:"senderName"`
 	Text       *string `json:"text,omitempty"`
 	MsgImageId *string `json:"msgImageId,omitempty"`
 }
@@ -62,6 +62,7 @@ type Message struct {
 
 // CreateMessage inserts a new message and returns the message ID.
 // Pass empty strings for optional fields that should be NULL.
+// Optional fields: inText, inImageId, inReplyTo, inForwardFromChat, inForwardFromMsg.
 func (db *appdbimpl) CreateMessage(
 	chatId, senderId, sendTime, inText, inImageId, inReplyTo string,
 	isInit, isForward bool,
@@ -180,7 +181,7 @@ func (db *appdbimpl) DeleteMessageImagePath(imageId string) error {
 var ErrMessageNotFound = errors.New("message not found")
 
 // resolveRepliedTo returns info about the message being replied to.
-// If the original message is missing or deleted, it returns info with only the
+// If the original message is deleted, it returns info with only the
 // messageId set (sender/content left empty). If the original message is a forwarded message,
 // it quotes the original forwarded-from message's content instead.
 func (db *appdbimpl) resolveRepliedTo(replyToId string) (*RepliedToInfo, error) {
@@ -457,8 +458,11 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 		FROM messages m
 		JOIN users u ON m.sender_id = u.id
 		WHERE m.chat_id = ?
+
 		-- send_time has only second precision, so we use rowid as tiebreaker
 		ORDER BY m.send_time DESC, m.rowid DESC
+
+		-- Limit to the last 50 messages (in future, we may want to implement pagination or infinite scrolling)
 		LIMIT 50`,
 		chatId,
 	)

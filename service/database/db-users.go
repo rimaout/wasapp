@@ -14,6 +14,7 @@ type User struct {
 	Name string `json:"name"`
 }
 
+// CreateUser creates a new user with the given name and returns the generated user ID.
 func (db *appdbimpl) CreateUser(userName string) (string, error) {
     // Generate a new randomly-generated UUID
     id, err := uuid.NewV4()
@@ -33,6 +34,8 @@ func (db *appdbimpl) CreateUser(userName string) (string, error) {
     return userId, nil
 }
 
+// GetUserIdByName retrieves the user ID associated with the given user name.
+// Returns an empty string (and no error) if no user is found with the given name.
 func (db *appdbimpl) GetUserIdByName(userName string) (string, error) {
 	var userId string
 	err := db.c.QueryRow("SELECT id FROM users WHERE name = ?", userName).Scan(&userId)
@@ -51,6 +54,8 @@ func (db *appdbimpl) GetUserIdByName(userName string) (string, error) {
 	return userId, nil
 }
 
+// GetUserNameById retrieves the user name associated with the given user ID.
+// Returns an empty string (and no error) if no user is found with the given ID.
 func (db *appdbimpl) GetUserNameById(userId string) (string, error) {
 	var userName string
 	err := db.c.QueryRow("SELECT name FROM users WHERE id = ?", userId).Scan(&userName)
@@ -69,6 +74,7 @@ func (db *appdbimpl) GetUserNameById(userId string) (string, error) {
 	return userName, nil
 }
 
+// SetUserName updates the name of the user with the given user ID.
 func (db *appdbimpl) SetUserName(userId string, newName string) error {
 	_, err := db.c.Exec("UPDATE users SET name = ? WHERE id = ?", newName, userId)
 	if err != nil {
@@ -76,7 +82,6 @@ func (db *appdbimpl) SetUserName(userId string, newName string) error {
 	}
 	return nil
 }
-
 
 // GenerateUserSessionToken creates a new session token for the given user,
 // saves it to the database, and returns the plain token string.
@@ -124,6 +129,7 @@ func (db *appdbimpl) GetUserIDByToken(token string) (string, error) {
 	return userId, nil
 }
 
+// SetUserAvatarPath updates the avatar image path for the user with the given user ID.
 func (db *appdbimpl) SetUserAvatarPath(userId string, imagePath string) error {
 	_, err := db.c.Exec("UPDATE users SET avatar_image_path = ? WHERE id = ?", imagePath, userId)
 	if err != nil {
@@ -132,6 +138,8 @@ func (db *appdbimpl) SetUserAvatarPath(userId string, imagePath string) error {
 	return nil
 }
 
+// GetUserAvatarPath retrieves the avatar image path for the given user ID.
+// Returns an empty string (and no error) if no user is found with the given ID or if the avatar path is NULL.
 func (db *appdbimpl) GetUserAvatarPath(userId string) (string, error) {
 	var path sql.NullString
 	err := db.c.QueryRow("SELECT avatar_image_path FROM users WHERE id = ?", userId).Scan(&path)
@@ -147,6 +155,9 @@ func (db *appdbimpl) GetUserAvatarPath(userId string) (string, error) {
 	return path.String, nil
 }
 
+// SearchUsers searches for users whose names match the given query string.
+// If the query is empty, it returns all users ordered alphabetically.
+// The search is case-insensitive and supports partial matches.
 func (db *appdbimpl) SearchUsers(query string) ([]User, error) {
 	var rows *sql.Rows
 	var err error

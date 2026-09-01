@@ -6,8 +6,8 @@ import (
 )
 
 type Member struct {
-	UserId    string  `json:"userId"`
-	Name      string  `json:"name"`
+	UserId     string `json:"userId"`
+	Name       string `json:"name"`
 	JoinTime  *string `json:"joinTime,omitempty"`  // direct chat: NULL, group chat: timestamp
 	LeaveTime *string `json:"leaveTime,omitempty"` // direct chat: NULL, group chat: timestamp or NULL if still active
 }
@@ -81,8 +81,7 @@ func (db *appdbimpl) GetOtherMemberId(chatId string, userId string) (string, err
 	return otherUserId, nil
 }
 
-// SetLeaveTime marks the user as having left the group chat.
-// The row is NOT deleted, but the leave_time field is set to now.
+// SetLeaveTime marks the user as having left the group chat (leave_time field is set to now).
 func (db *appdbimpl) SetLeaveTime(chatId string, userId string) error {
 	now := time.Now().UTC().Format(time.RFC3339)
 

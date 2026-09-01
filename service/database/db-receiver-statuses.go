@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// InsertReceiverStatuses inserts receiver statuses for a given message and chat, for each active member of the chat except the sender.
+// InsertReceiverStatuses inserts receiver statuses for a message and chat, for each active member of the chat except the sender.
 // It sets the recv_time and read_time to NULL, this means that the message is delivered but not yet received or read by the recipients.
 func (db *appdbimpl) InsertReceiverStatuses(messageId, chatId, senderId string) error {
 	_, err := db.c.Exec(

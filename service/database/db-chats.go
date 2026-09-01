@@ -17,7 +17,6 @@ type Chat struct {
 	GroupName      *string `json:"groupName,omitempty"`
 	GroupImagePath *string `json:"groupImagePath,omitempty"`
 }
-
 // Note: for GroupName & GroupImagePath we use `*string` (pointer to string) instad of `string`
 //		 because `*string` can be null.
 
@@ -188,6 +187,8 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			c.id, c.is_group_chat, c.group_name,
 
 			-- Determine the display name based on if it's a group chat or a private chat
+			--  - For group chats, the group name is used.
+			--  - For private chats, the name of the other user is used.
 
 			CASE WHEN c.is_group_chat = 1 THEN c.group_name
 				 ELSE (SELECT u2.name
@@ -216,6 +217,7 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			END
 			FROM receiver_statuses rs WHERE rs.message_id = m.id) AS message_status
 
+		-- Get the last message for each chat
 		FROM members mem
 		JOIN chats c ON mem.chat_id = c.id
 		JOIN messages m ON m.id = (
@@ -223,10 +225,17 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			-- to reliably pick the most recently sent message.
 			SELECT id FROM messages WHERE chat_id = c.id ORDER BY send_time DESC, rowid DESC LIMIT 1
 		)
+
+		-- Get the sender's name for the last message
 		JOIN users u ON m.sender_id = u.id
+
+		-- Only include chats the user is currently a member of
 		WHERE mem.user_id = ? AND mem.group_leave_time IS NULL
-		-- Same tiebreaker workflow as above
+
+		-- Order chats by the last message's send time
 		ORDER BY m.send_time DESC, m.rowid DESC
+
+		-- Limit the number of chats returned (in future, I would like implement pagination)
 		LIMIT 50`,
 		userId, userId, userId,
 	)
