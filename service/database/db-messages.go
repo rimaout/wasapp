@@ -341,12 +341,16 @@ func (db *appdbimpl) GetMessageById(chatId, messageId string) (Message, error) {
 		}
 	}
 
-	// Get and include reactions for the message
-	reactions, err := db.getReactionsForMessage(messageId)
-	if err != nil {
-		return Message{}, fmt.Errorf("querying reactions: %w", err)
+	// Get and include reactions for the message (deleted messages report an empty list)
+	if msg.IsDeleted {
+		msg.ReactionsList = []EmojiReaction{}
+	} else {
+		reactions, err := db.getReactionsForMessage(messageId)
+		if err != nil {
+			return Message{}, fmt.Errorf("querying reactions: %w", err)
+		}
+		msg.ReactionsList = reactions
 	}
-	msg.ReactionsList = reactions
 
 	// Get message statuts (delivered, received, read) based on receiver_statuses
 	status, err := db.ComputeMessageStatus(messageId)
@@ -551,12 +555,16 @@ func (db *appdbimpl) GetChatMessages(chatId string) ([]Message, error) {
 			msg.RepliedTo, _ = db.resolveRepliedTo(*dbReplyTo)
 		}
 
-		// Get and include reactions for the message
-		reactions, err := db.getReactionsForMessage(id)
-		if err != nil {
-			return nil, fmt.Errorf("querying reactions for %s: %w", id, err)
+		// Get and include reactions for the message (deleted messages report an empty list)
+		if isDeleted {
+			msg.ReactionsList = []EmojiReaction{}
+		} else {
+			reactions, err := db.getReactionsForMessage(id)
+			if err != nil {
+				return nil, fmt.Errorf("querying reactions for %s: %w", id, err)
+			}
+			msg.ReactionsList = reactions
 		}
-		msg.ReactionsList = reactions
 
 		// Get message statuts (delivered, received, read) based on receiver_statuses
 		status, err := db.ComputeMessageStatus(id)
