@@ -36,6 +36,11 @@ type chatLastMessagePreview struct {
 
 func (rt *_router) getMyChats(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
+	// Mark all messages in the user's chats as received by them: delivering the chat
+	// list means the messages have reached the user's device, even if not yet read.
+	// An empty chatId marks all the user's chats.
+	_ = rt.db.MarkMessagesReceivedByUser("", ctx.UserID)
+
 	// Get the list of chats for the authenticated user
 	chats, err := rt.db.GetMyChats(ctx.UserID)
 	if err != nil {

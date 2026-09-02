@@ -17,6 +17,7 @@ type Chat struct {
 	GroupName      *string `json:"groupName,omitempty"`
 	GroupImagePath *string `json:"groupImagePath,omitempty"`
 }
+
 // Note: for GroupName & GroupImagePath we use `*string` (pointer to string) instad of `string`
 //		 because `*string` can be null.
 
@@ -205,16 +206,13 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 			(SELECT COUNT(*)
 			 FROM receiver_statuses rs
 			 JOIN messages msg ON rs.message_id = msg.id
-			 WHERE msg.chat_id = c.id AND rs.user_id = ? AND rs.recv_time IS NULL
+			 WHERE msg.chat_id = c.id AND rs.user_id = ? AND rs.read_time IS NULL
 			) AS unread_count,
 
-			-- Compute the status of the last message
-			(SELECT CASE
-				WHEN COUNT(*) = 0 THEN 'DELIVERED'
-				WHEN SUM(CASE WHEN rs.recv_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'DELIVERED'
-				WHEN SUM(CASE WHEN rs.read_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'RECEIVED'
-				ELSE 'READ'
-			END
+			-- Compute the status of the last message (messageStatusCase is defined in db-chats.go)
+			(SELECT `+
+			messageStatusCase+
+			`
 			FROM receiver_statuses rs WHERE rs.message_id = m.id) AS message_status
 
 		-- Get the last message for each chat
