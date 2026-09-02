@@ -6,6 +6,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
+	"github.com/rimaout/wasapp/service/database"
 )
 
 func (rt *_router) getChatMembers(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
@@ -29,5 +30,7 @@ func (rt *_router) getChatMembers(w http.ResponseWriter, r *http.Request, ps htt
 	// Respond with members list (200 OK)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(members)
+	json.NewEncoder(w).Encode(struct {
+		MembersList []database.Member `json:"membersList"`
+	}{MembersList: members})
 }

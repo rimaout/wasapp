@@ -1428,7 +1428,7 @@ components:
 
     MessageStatus:
       type: string
-      enum: [delivered, received, read]
+      enum: [DELIVERED, RECEIVED, READ]
       description: |-
         Message read status:
           - 'delivered' means the message has been delivered to the server (default)
@@ -1592,36 +1592,36 @@ components:
           type: string
           description: Machine-readable error code for frontend logic.
           enum:
-            - CHAT_NOT_FOUND
-            - USER_NOT_FOUND
-            - ALREADY_IN_GROUP
-            - NOT_A_GROUP_CHAT
-            - NO_CHAT_AVATAR
-            - NO_USER_AVATAR
-            - FORBIDDEN_NOT_MEMBER
-            - INVALID_INPUT
-            - INTERNAL_SERVER_ERROR
+            - CHAT-NOT-FOUND
+            - USER-NOT-FOUND
+            - ALREADY-IN-GROUP
+            - NOT-A-GROUP-CHAT
+            - NO-CHAT-AVATAR
+            - NO-USER-AVATAR
+            - FORBIDDEN-NOT-MEMBER
+            - INVALID-INPUT
+            - INTERNAL-SERVER-ERROR
             - UNAUTHORIZED
-            - USERNAME_TAKEN
-            - CHAT_ALREADY_EXISTS
-            - PAYLOAD_TOO_LARGE
-            - UNSUPPORTED_MEDIA_TYPE
-            - INVALID_USER_NAME
-            - INVALID_GROUP_NAME
-            - EMPTY_MEMBER_LIST
-            - MISSING_IMAGE_FILE
-            - FORBIDDEN_NOT_SENDER
-            - ITS_INIT_MESSAGE
-            - MESSAGE_NOT_FOUND
-            - INVALID_EMOJI_ID
-            - REACTION_NOT_FOUND
-            - DESTINATION_CHAT_NOT_FOUND
-            - ORIGIN_CHAT_NOT_FOUND
-            - MESSAGE_ALREADY_DELETED
-            - INVALID_MESSAGE_TEXT
-            - MESSAGE_WITH_NO_CONTENT
-            - CANNOT_FORWARD_FORWARDED_MESSAGE
-          example: USER_NOT_FOUND
+            - USERNAME-TAKEN
+            - CHAT-ALREADY-EXISTS
+            - PAYLOAD-TOO-LARGE
+            - UNSUPPORTED-MEDIA-TYPE
+            - INVALID-USER-NAME
+            - INVALID-GROUP-NAME
+            - EMPTY-MEMBER-LIST
+            - MISSING-IMAGE-FILE
+            - FORBIDDEN-NOT-SENDER
+            - ITS-INIT-MESSAGE
+            - MESSAGE-NOT-FOUND
+            - INVALID-EMOJI-ID
+            - REACTION-NOT-FOUND
+            - DESTINATION-CHAT-NOT-FOUND
+            - ORIGIN-CHAT-NOT-FOUND
+            - MESSAGE-ALREADY-DELETED
+            - INVALID-MESSAGE-TEXT
+            - MESSAGE-WITH-NO-CONTENT
+            - CANNOT-FORWARD-FORWARDED-MESSAGE
+          example: USER-NOT-FOUND
         message:
           type: string
           description: Human-readable error message.
@@ -1686,7 +1686,12 @@ components:
             $ref: '#/components/schemas/Message'
 
     ChatMembersListResponse:
-      $ref: '#/components/schemas/ChatMembersList'
+      type: object
+      description: Response containing the list of members of a chat, ordered alphabetically by username.
+      required: [membersList]
+      properties:
+        membersList:
+          $ref: '#/components/schemas/ChatMembersList'
 
   responses:
     RawImageFileResponse:

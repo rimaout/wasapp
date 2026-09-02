@@ -13,9 +13,9 @@ import (
 type MessageStatus string
 
 const (
-	StatusDelivered MessageStatus = "delivered"
-	StatusReceived  MessageStatus = "received"
-	StatusRead      MessageStatus = "read"
+	StatusDelivered MessageStatus = "DELIVERED"
+	StatusReceived  MessageStatus = "RECEIVED"
+	StatusRead      MessageStatus = "READ"
 )
 
 type EmojiReaction struct {

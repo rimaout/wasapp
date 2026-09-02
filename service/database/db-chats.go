@@ -210,10 +210,10 @@ func (db *appdbimpl) GetMyChats(userId string) ([]ChatPreview, error) {
 
 			-- Compute the status of the last message
 			(SELECT CASE
-				WHEN COUNT(*) = 0 THEN 'delivered'
-				WHEN SUM(CASE WHEN rs.recv_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'delivered'
-				WHEN SUM(CASE WHEN rs.read_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'received'
-				ELSE 'read'
+				WHEN COUNT(*) = 0 THEN 'DELIVERED'
+				WHEN SUM(CASE WHEN rs.recv_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'DELIVERED'
+				WHEN SUM(CASE WHEN rs.read_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'RECEIVED'
+				ELSE 'READ'
 			END
 			FROM receiver_statuses rs WHERE rs.message_id = m.id) AS message_status
 

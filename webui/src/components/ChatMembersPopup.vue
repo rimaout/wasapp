@@ -32,7 +32,7 @@ async function fetchMembers() {
 	errormsg.value = null;
 	try {
 		const res = await axios.get('/chats/' + props.chatId + '/members');
-		members.value = res.data
+		members.value = res.data.membersList
 			.filter(m => !m.leaveTime)
 			.map(m => ({ id: m.userId, name: m.name }));
 	} catch (e) {

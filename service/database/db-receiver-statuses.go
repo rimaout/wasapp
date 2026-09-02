@@ -60,17 +60,17 @@ func (db *appdbimpl) MarkMessagesReadByUser(chatId, userId string) error {
 }
 
 // ComputeMessageStatus computes the overall status of a message based on the receiver statuses.
-// - "delivered": Default state, at least one recipient has not received the message yet (recv_time IS NULL), or zero recipients exist.
-// - "received": All recipients have received the message, but at least one has not read it yet (read_time IS NULL).
-// - "read": All recipients have both received and read the message.
+// - "DELIVERED": Default state, at least one recipient has not received the message yet (recv_time IS NULL), or zero recipients exist.
+// - "RECEIVED": All recipients have received the message, but at least one has not read it yet (read_time IS NULL).
+// - "READ": All recipients have both received and read the message.
 func (db *appdbimpl) ComputeMessageStatus(messageId string) (MessageStatus, error) {
 	var status string
 	err := db.c.QueryRow(
 		`SELECT CASE
-			WHEN COUNT(*) = 0 THEN 'delivered'
-			WHEN SUM(CASE WHEN recv_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'delivered'
-			WHEN SUM(CASE WHEN read_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'received'
-			ELSE 'read'
+			WHEN COUNT(*) = 0 THEN 'DELIVERED'
+			WHEN SUM(CASE WHEN recv_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'DELIVERED'
+			WHEN SUM(CASE WHEN read_time IS NULL THEN 1 ELSE 0 END) > 0 THEN 'RECEIVED'
+			ELSE 'READ'
 		END
 		FROM receiver_statuses WHERE message_id = ?`,
 		messageId,
