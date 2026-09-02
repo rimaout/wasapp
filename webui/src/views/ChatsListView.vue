@@ -151,6 +151,10 @@ export default {
 	opacity: 0.7;
 }
 
+.chat-check .is-read {
+	color: var(--theme-cyan);
+}
+
 .unread-badge {
 	font-size: 0.7rem;
 	padding: 0.25em 0.55em;

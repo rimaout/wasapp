@@ -443,16 +443,20 @@ export default {
 	color: inherit;
 }
 
-.message-check.is-received {
-	opacity: 0.7;
+.message-check:not(.is-read) {
+	opacity: 0.45;
 }
 
 .message-meta-overlay .message-check {
 	color: #fff;
 }
 
-.message-meta-overlay .message-check.is-received {
+.message-meta-overlay .message-check:not(.is-read) {
 	opacity: 0.7;
+}
+
+.message-meta-overlay .message-check.is-read {
+	color: var(--theme-cyan);
 }
 
 .message-reactions {
