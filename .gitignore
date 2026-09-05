@@ -190,7 +190,7 @@ fabric.properties
 data/
 .golangci.yml
 .spectral.js
-webapi
+/webapi
 node_modules/
 /.idea
 uploads/
@@ -199,3 +199,5 @@ TODO.md
 project-requests/wasaText.md
 project-requests/project.md
 wasapp.code-workspace
+AGENTS.md
+doc/db_integriry_constraints_new_restruction.md
