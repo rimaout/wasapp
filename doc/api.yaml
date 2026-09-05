@@ -5,6 +5,9 @@ info:
   description: |-
     API for interacting with Wasapp, a messaging service.
   version: 1.0.0
+  license:
+    name: MIT
+    identifier: MIT
 
 servers:
   - url: https://wasapp.online/v1
@@ -74,7 +77,7 @@ paths:
         Returns a list of users.
           - If a 'username' query parameter is provided, returns users whose usernames most closely match the query (ordered by similarity).
           - Otherwise, returns all users, ordered alphabetically by username.
-      operationId: userSearch
+      operationId: getUsers
       security: []
       parameters:
         - name: username
@@ -141,7 +144,7 @@ paths:
         Uploads or replaces the avatar for the authenticated user.
         The image must be JPEG, PNG or WebP format, maximum 5MB.
         Returns the updated user object with the new image URL.
-      operationId: setMyUserAvatar
+      operationId: setMyPhoto
       security: [ { BearerAuth: [] } ]
       requestBody:
         description: Image file for user avatar
@@ -230,7 +233,7 @@ paths:
         Create a group chat with the users specified in the request as members. The chat is automatically created by the server with an initial message.
         The authenticated user is automaticaly added to the group chat a member.
         The welcome message has the following characteristics: the sender is the user who created the chat, the content is empty, and it has isInitMessage = true.
-      operationId: createGroupChat
+      operationId: createConversation
       security: [ { BearerAuth: [] } ]
       requestBody:
         description: Group details.
@@ -326,7 +329,7 @@ paths:
       description: >-
         Returns the avatar of the specified user.
         Publicly accessible; no authentication required.
-      operationId: serveUserAvatar
+      operationId: getUserProPic
       security: []
       responses:
         '200':
@@ -548,7 +551,7 @@ paths:
       description: >
         Returns the list of users who are members in the specified chat.
         Each item includes the user ID and username.
-      operationId: getChatMembers
+      operationId: getConversationMembers
       security: [ { BearerAuth: [] } ]
       responses:
         "200":
@@ -849,7 +852,7 @@ paths:
       description: >
         Creates a new message in the specified chat that replies to
         the message identified by messageId.
-      operationId: replyMessage
+      operationId: replyToMessage
       security: [ { BearerAuth: [] } ]
       requestBody:
         description: The new message sent as a reply to the specified message.
@@ -1053,7 +1056,7 @@ paths:
       summary: Mark all messages in the chat as read
       description: >-
         Marks all messages in the specified chat as read by the authenticated user.
-      operationId: markChatRead
+      operationId: readMessages
       security: [ { BearerAuth: [] } ]
       responses:
         "204":
@@ -1089,7 +1092,7 @@ paths:
       description: >-
         Returns the raw image file attached to a message in the specified chat.
         Authentication required, only chat members can access.
-      operationId: serveMessageImage
+      operationId: getImage
       security: [ { BearerAuth: [] } ]
       responses:
         '200':
