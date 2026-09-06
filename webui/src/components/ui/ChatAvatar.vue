@@ -5,11 +5,11 @@ import BaseAvatar from './BaseAvatar.vue';
 export default {
 	components: { BaseAvatar },
 	props: {
-		chatId: { type: String, required: true },
-		displayName: { type: String, required: true },
-		size: { type: Number, default: 48 },
-		isGroup: { type: Boolean, default: false },
-		version: { type: Number, default: 0 },
+		chatId:      { type: String,  required: true  },
+		displayName: { type: String,  required: true  },
+		size:        { type: Number,  default:  48    },
+		isGroup:     { type: Boolean, default:  false },
+		version:     { type: Number,  default:  0     },
 	},
 	computed: {
 		imageUrl() {

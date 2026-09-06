@@ -5,19 +5,22 @@ import { getAvatarColor, getAvatarLetter } from '../../services/utils.js';
 // to a colored letter (or group icon) when no image is available.
 export default {
 	props: {
-		imageUrl: { type: String, required: true },
-		displayName: { type: String, required: true },
-		size: { type: Number, default: 48 },
-		isGroup: { type: Boolean, default: false },
-		version: { type: Number, default: 0 },	// Used to trigger avatar reload when the avatar is updated
+		imageUrl:    { type: String,  required: true },
+		displayName: { type: String,  required: true },
+		size:        { type: Number,  default: 48    },
+		isGroup:     { type: Boolean, default: false },
+		version:     { type: Number,  default: 0     },	// Used to trigger avatar reload when the avatar is updated
 	},
 	data() {
+		// Internal Data for the component
 		return {
 			imgSrc: null,
 			showImage: false,
 		};
 	},
 	computed: {
+		// Intaernal Data that is computed based on props and data (re-computed when props/data change)
+
 		style() {
 			let px = this.size + 'px';
 			return {
@@ -36,12 +39,15 @@ export default {
 		},
 	},
 	methods: {
+		// Load the image from the server and create a blob URL for it.
+		// NOTE: a blob URL is a local URL that points to a blob (binary data) in memory, it must be revoked when no longer needed.
 		async loadImage() {
 			try {
+				// Request the image as a blob (binary data) from the server, and create a blob URL for it.
 				let response = await this.$axios.get(this.imageUrl, { responseType: 'blob' });
 				let url = URL.createObjectURL(response.data);
+
 				// Release the previous blob URL before swapping to the new one
-				// (the image source can change without a component remount).
 				if (this.imgSrc) URL.revokeObjectURL(this.imgSrc);
 				this.imgSrc = url;
 				this.showImage = true;
@@ -51,18 +57,16 @@ export default {
 		},
 	},
 	watch: {
-		// Reload when the image URL changes (e.g. switching to another chat).
+		// Reload when the image URL changes (switching to another chat) or when the version prop is bumped (avatar was re-uploaded).
 		imageUrl: 'loadImage',
-		// Reload when the version prop is bumped (e.g. avatar was re-uploaded).
-		version: {
-			handler: 'loadImage',
-			immediate: true,
-		},
+		version:  'loadImage',
 	},
 	mounted() {
+		// Load the image when the component is mounted.
 		this.loadImage();
 	},
 	beforeUnmount() {
+		// Release the blob URL when the component is unmounted.
 		if (this.imgSrc) URL.revokeObjectURL(this.imgSrc);
 	},
 };
@@ -70,10 +74,15 @@ export default {
 
 <template>
 	<div class="avatar-circle" :style="style">
+		<!-- Show the image if it was successfully loaded -->
 		<img v-if="showImage" :src="imgSrc" class="avatar-img" />
+
+		<!-- Else, show the group icon if it's a group chat -->
 		<span v-else-if="isGroup" class="avatar-group-icon" :style="{ backgroundColor: bgColor }">
 			<i class="bi bi-people-fill"></i>
 		</span>
+
+		<!-- Else, show the letter avatar -->
 		<span v-else class="avatar-letter" :style="{ backgroundColor: bgColor }">{{ letter }}</span>
 	</div>
 </template>
