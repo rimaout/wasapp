@@ -9,7 +9,7 @@ import ReactionActionScreen from './ReactionActionScreen.vue';
 import MessageStatusIcon from './MessageStatusIcon.vue';
 
 export default {
-	components: { UserAvatar, MessageImage, ActionMenu, ForwardActionScreen, ReactionActionScreen, MessageStatusIcon },
+	components: { UserAvatar, MessageImage, ActionMenu, MessageStatusIcon },
 	emits: ['action'],
 	props: {
 		message: { type: Object, required: true },
