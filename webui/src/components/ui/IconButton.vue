@@ -1,22 +1,32 @@
 <script setup>
+
+// Define the inputs (props) passed from a parent component into this button
 defineProps({
-	icon: { type: String, required: true },
-	size: { type: String, default: 'default' },
-	label: { type: String, default: '' },
-	disabled: { type: Boolean, default: false },
-	filled: { type: Boolean, default: false },
+	icon:     { type: String,  required: true     }, // Feather icon name
+	size:     { type: String,  default: 'default' }, // Size variant: 'default' or 'small'
+	disabled: { type: Boolean, default: false     }, // Disables button clicks when true
+	filled:   { type: Boolean, default: false     }, // Gives button a background fill when true
 });
+
+// Define the custom 'click' event sent back up to the parent component
 const emit = defineEmits(['click']);
+
 </script>
 
 <template>
 	<button
 		type="button"
 		class="icon-btn"
+
+		<!-- Dynamic CSS Classes:
+             1. size: Adds the size prop string directly as a CSS class ('default' or 'small')
+             2. { filled: filled }: Adds the 'filled' class ONLY if the 'filled' prop boolean is true -->
 		:class="[size, { filled: filled }]"
+
+		<!-- Sets the native HTML disabled attribute based on the 'disabled' prop (true/false) -->
 		:disabled="disabled"
-		:aria-label="label || undefined"
-		:title="label || undefined"
+
+		<!-- Listens for native browser click and sends a custom 'click' event up to the parent component -->
 		@click="emit('click')"
 	>
 		<svg class="feather icon-btn-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + icon"/></svg>

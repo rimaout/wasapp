@@ -84,7 +84,7 @@ async function createGroup() {
 			<div class="section-box">
 				<div class="section-title-row">
 					<span class="section-title">Members</span>
-					<IconButton icon="plus" size="small" label="Add members" filled @click="emit('add-members')" />
+					<IconButton icon="plus" size="small" filled @click="emit('add-members')" />
 				</div>
 				<MemberChips :members="members" light @remove="removeMember" />
 			</div>

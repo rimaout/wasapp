@@ -103,7 +103,7 @@ export default {
 		</div>
 
 		<div class="message-input-group">
-			<IconButton class="me-3" icon="image" label="Attach image" @click="triggerFileInput" />
+			<IconButton class="me-3" icon="image" @click="triggerFileInput" />
 			<input
 				type="text"
 				class="message-field"
