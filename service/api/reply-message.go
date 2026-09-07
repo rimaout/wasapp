@@ -10,7 +10,7 @@ import (
 
 func (rt *_router) replyMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
-	// Extract target chat id and parent message id from url (chats/{chatId}/messages/{messageId}/reply)
+	// Extract target chat id and parent message id from url (chats/{chatId}/messages/{messageId}/replies)
 	chatId := ps.ByName("chatId")
 	messageId := ps.ByName("messageId")
 

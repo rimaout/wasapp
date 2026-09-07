@@ -70,7 +70,7 @@ export default {
 			this.sending = true;
 			try {
 				let base = '/chats/' + this.chatId + '/messages';
-				let url = this.replyTo ? base + '/' + this.replyTo.id + '/reply' : base;
+				let url = this.replyTo ? base + '/' + this.replyTo.id + '/replies' : base;
 
 				if (this.newImages.length === 0) {
 					let formData = new FormData();
