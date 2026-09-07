@@ -289,7 +289,7 @@ func New(db *sql.DB) (AppDatabase, error) {
 			return nil, fmt.Errorf("error creating images table: %w", err)
 		}
 
-	    // --- RECEIVER_STATUSES TABLE (for message delivery and read statuses)
+		// --- RECEIVER_STATUSES TABLE (for message delivery and read statuses)
 		receiverStatusesStmt := `CREATE TABLE receiver_statuses (
 			"message_id"  TEXT NOT NULL,
 			"user_id"     TEXT NOT NULL,

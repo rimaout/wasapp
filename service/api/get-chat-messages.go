@@ -32,7 +32,7 @@ func (rt *_router) getChatMessages(w http.ResponseWriter, r *http.Request, ps ht
 	messages, err := rt.db.GetChatMessages(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting chat messages")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 

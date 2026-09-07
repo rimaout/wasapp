@@ -19,7 +19,7 @@ type Chat struct {
 }
 
 // Note: for GroupName & GroupImagePath we use `*string` (pointer to string) instad of `string`
-//		 because `*string` can be null.
+// 		 because `*string` can be null.
 
 // CreateChat inserts a new chat row and returns the chat ID.
 // For group chats, groupName must be non-empty.

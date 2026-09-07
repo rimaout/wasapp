@@ -21,11 +21,11 @@ func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprou
 	isGroup, err := rt.db.IsGroupChat(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if chat is a group chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if !isGroup {
-		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat, only members of group chats can leave the group") //409
+		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat, only members of group chats can leave the group") // 409
 		return
 	}
 
@@ -33,7 +33,7 @@ func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprou
 	err = rt.db.SetLeaveTime(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error setting leave time for user in chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -41,7 +41,7 @@ func (rt *_router) leaveGroup(w http.ResponseWriter, r *http.Request, ps httprou
 	leaveMsgId, err := rt.db.CreateSystemMessage(chatId, ctx.UserID, false)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating leave message")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 

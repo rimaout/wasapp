@@ -25,19 +25,19 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 	// Decode the request body
 	var req groupChatRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") // 400
 		return
 	}
 
 	// Check group name
 	if !isValidBaseName(req.GroupName) {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidGroupName, "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidGroupName, "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") // 400
 		return
 	}
 
 	// Check members list: at least 1 member
 	if len(req.MembersList) == 0 {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeEmptyMemberList, "membersList must contain at least one user") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeEmptyMemberList, "membersList must contain at least one user") // 400
 		return
 	}
 
@@ -45,7 +45,7 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 	seen := make(map[string]bool)
 	for _, id := range req.MembersList {
 		if seen[id] {
-			rt.respondWithError(w, http.StatusConflict, ErrCodeAlreadyInGroup, "duplicate user in membersList") //409
+			rt.respondWithError(w, http.StatusConflict, ErrCodeAlreadyInGroup, "duplicate user in membersList") // 409
 			return
 		}
 		seen[id] = true
@@ -57,13 +57,13 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 		name, err := rt.db.GetUserNameById(id)
 		if err != nil {
 			ctx.Logger.WithError(err).Error("error looking up user in members list")
-			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return
 		}
 
 		// If name is empty, user does not exist in the database
 		if name == "" {
-			rt.respondWithError(w, http.StatusNotFound, ErrCodeUserNotFound, "user not found: "+id) //404
+			rt.respondWithError(w, http.StatusNotFound, ErrCodeUserNotFound, "user not found: "+id) // 404
 			return
 		}
 	}
@@ -72,14 +72,14 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 	chatId, err := rt.db.CreateChat(true, req.GroupName)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating group chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
 	// Add creator (authenticated user) as member
 	if err := rt.db.AddChatMember(chatId, ctx.UserID); err != nil {
 		ctx.Logger.WithError(err).Error("error adding creator to group")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -90,14 +90,14 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 		}
 		if err := rt.db.AddChatMember(chatId, id); err != nil {
 			ctx.Logger.WithError(err).Error("error adding member to group")
-			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return
 		}
 	}
 
 	// Create init message for group chat
-	//	 The init message is a message with out content, just to have a message in the chat.
-	//	 The frontend can use it to display "Group created by ..." or similar in the chat history.
+	// 	 The init message is a message with out content, just to have a message in the chat.
+	// 	 The frontend can use it to display "Group created by ..." or similar in the chat history.
 	messageId, err := rt.db.CreateMessage(
 		chatId,
 		ctx.UserID,
@@ -112,7 +112,7 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 	)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating init message")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -138,17 +138,17 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	targetName, err := rt.db.GetUserNameById(targetUserId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error looking up target user")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if targetName == "" {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeUserNotFound, "user not found") //404
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeUserNotFound, "user not found") // 404
 		return
 	}
 
 	// Cannot create a chat with yourself
 	if targetUserId == ctx.UserID {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "cannot create a chat with yourself") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "cannot create a chat with yourself") // 400
 		return
 	}
 
@@ -156,7 +156,7 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	existingChatId, err := rt.db.FindPrivateChatBetween(ctx.UserID, targetUserId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking existing private chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if existingChatId != "" {
@@ -168,19 +168,19 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	chatId, err := rt.db.CreateChat(false, "")
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
 	// Add both members
 	if err := rt.db.AddChatMember(chatId, ctx.UserID); err != nil {
 		ctx.Logger.WithError(err).Error("error adding creator to chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if err := rt.db.AddChatMember(chatId, targetUserId); err != nil {
 		ctx.Logger.WithError(err).Error("error adding target user to chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -199,7 +199,7 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 	)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating init message")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 

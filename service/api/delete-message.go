@@ -1,19 +1,18 @@
 package api
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/rimaout/wasapp/service/database"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
+	"github.com/rimaout/wasapp/service/database"
 )
-
 
 func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 
 	// Extract target chat id from url
-	chatId    := ps.ByName("chatId")
+	chatId := ps.ByName("chatId")
 	messageId := ps.ByName("messageId")
 
 	// Validate that the authenticated user has access to the chat (404, 403, 500 errors)

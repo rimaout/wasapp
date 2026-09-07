@@ -16,12 +16,12 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 	// Check if chat exist (404 error)
 	_, err := rt.db.GetChatById(chatId)
 	if err == database.ErrChatNotFound {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") // 404
 		return
 	}
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting chat by id")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -29,7 +29,7 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 	isGroup, err := rt.db.IsGroupChat(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if chat is a group chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -37,11 +37,11 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is member of chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if !isMember {
-		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "user is not a member of the chat") //403
+		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "user is not a member of the chat") // 403
 		return
 	}
 
@@ -55,12 +55,12 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 		imagePath, err = rt.db.GetGroupAvatarPath(chatId)
 		if err != nil {
 			ctx.Logger.WithError(err).Error("error getting avatar image path")
-			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return
 		}
 
 		if imagePath == "" {
-			rt.respondWithError(w, http.StatusNotFound, ErrCodeNoChatAvatar, "no avatar set for this chat") //404
+			rt.respondWithError(w, http.StatusNotFound, ErrCodeNoChatAvatar, "no avatar set for this chat") // 404
 			return
 		}
 	} else {
@@ -70,7 +70,7 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 		otherUserId, err := rt.db.GetOtherMemberId(chatId, ctx.UserID)
 		if err != nil {
 			ctx.Logger.WithError(err).Error("error getting other member id")
-			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return
 		}
 
@@ -78,12 +78,12 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 		imagePath, err = rt.db.GetUserAvatarPath(otherUserId)
 		if err != nil {
 			ctx.Logger.WithError(err).Error("error getting avatar image path")
-			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return
 		}
 
 		if imagePath == "" {
-			rt.respondWithError(w, http.StatusNotFound, ErrCodeNoChatAvatar, "no avatar set for this chat") //404
+			rt.respondWithError(w, http.StatusNotFound, ErrCodeNoChatAvatar, "no avatar set for this chat") // 404
 			return
 		}
 	}

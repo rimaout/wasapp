@@ -17,12 +17,12 @@ func (rt *_router) getMessageImage(w http.ResponseWriter, r *http.Request, ps ht
 	// Check if chat exists (404 error)
 	_, err := rt.db.GetChatById(chatId)
 	if err == database.ErrChatNotFound {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") // 404
 		return
 	}
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting chat by id")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -30,11 +30,11 @@ func (rt *_router) getMessageImage(w http.ResponseWriter, r *http.Request, ps ht
 	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is member of chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if !isMember {
-		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "user is not a member of the chat") //403
+		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "user is not a member of the chat") // 403
 		return
 	}
 
@@ -42,11 +42,11 @@ func (rt *_router) getMessageImage(w http.ResponseWriter, r *http.Request, ps ht
 	exists, err := rt.db.IsImageVisibleInChat(chatId, imageId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if image is in chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if !exists {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeMissingImageFile, "image not found") //404
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeMissingImageFile, "image not found") // 404
 		return
 	}
 
@@ -54,11 +54,11 @@ func (rt *_router) getMessageImage(w http.ResponseWriter, r *http.Request, ps ht
 	imagePath, err := rt.db.GetImagePathByImageId(imageId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting image path")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if imagePath == "" {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeMissingImageFile, "image not found") //404
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeMissingImageFile, "image not found") // 404
 		return
 	}
 

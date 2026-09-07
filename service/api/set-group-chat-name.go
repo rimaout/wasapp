@@ -24,14 +24,14 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 	// Read request (to extract new group name)
 	var req patchGroupNameRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") // 400
 		return
 	}
 	newGroupName := req.GroupName
 
 	// Check if new group name is valid (400 error)
 	if !isValidBaseName(newGroupName) {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidGroupName, "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidGroupName, "groupName must be 3-24 characters, alphanumeric + spaces/underscores/hyphens, at least one non-space") // 400
 		return
 	}
 
@@ -44,18 +44,18 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 	isGroup, err := rt.db.IsGroupChat(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if chat is a group chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if !isGroup {
-		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat, only the names of group chats can be set/changed") //409
+		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat, only the names of group chats can be set/changed") // 409
 		return
 	}
 
 	// Set new group name
 	if err := rt.db.SetGroupName(chatId, newGroupName); err != nil {
 		ctx.Logger.WithError(err).Error("error updating group name")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -66,4 +66,3 @@ func (rt *_router) setGroupChatName(w http.ResponseWriter, r *http.Request, ps h
 		GroupName: req.GroupName,
 	})
 }
-

@@ -45,7 +45,7 @@ func (rt *_router) getMyChats(w http.ResponseWriter, r *http.Request, ps httprou
 	chats, err := rt.db.GetMyChats(ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting chats")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 

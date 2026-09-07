@@ -6,8 +6,8 @@ import (
 )
 
 type Member struct {
-	UserId     string `json:"userId"`
-	Name       string `json:"name"`
+	UserId    string  `json:"userId"`
+	Name      string  `json:"name"`
 	JoinTime  *string `json:"joinTime,omitempty"`  // direct chat: NULL, group chat: timestamp
 	LeaveTime *string `json:"leaveTime,omitempty"` // direct chat: NULL, group chat: timestamp or NULL if still active
 }

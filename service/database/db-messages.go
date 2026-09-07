@@ -24,16 +24,16 @@ type EmojiReaction struct {
 }
 
 type ForwardedFromInfo struct {
-	ChatID      string `json:"chatId"`
-	MessageID   string `json:"messageId"`
+	ChatID     string  `json:"chatId"`
+	MessageID  string  `json:"messageId"`
 	Text       *string `json:"text,omitempty"`
 	MsgImageId *string `json:"msgImageId,omitempty"`
 }
 
 type RepliedToInfo struct {
-	MessageID   string `json:"messageId"`
-	SenderID    string `json:"senderId"`
-	SenderName  string `json:"senderName"`
+	MessageID  string  `json:"messageId"`
+	SenderID   string  `json:"senderId"`
+	SenderName string  `json:"senderName"`
 	Text       *string `json:"text,omitempty"`
 	MsgImageId *string `json:"msgImageId,omitempty"`
 }

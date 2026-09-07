@@ -38,8 +38,8 @@ package api
 
 import (
 	"errors"
-	"github.com/rimaout/wasapp/service/database"
 	"github.com/julienschmidt/httprouter"
+	"github.com/rimaout/wasapp/service/database"
 	"github.com/sirupsen/logrus"
 	"net/http"
 )

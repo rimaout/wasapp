@@ -3,8 +3,8 @@ package database
 import (
 	"database/sql"
 	"errors"
-	"time"
 	"fmt"
+	"time"
 
 	"github.com/gofrs/uuid"
 )
@@ -16,22 +16,22 @@ type User struct {
 
 // CreateUser creates a new user with the given name and returns the generated user ID.
 func (db *appdbimpl) CreateUser(userName string) (string, error) {
-    // Generate a new randomly-generated UUID
-    id, err := uuid.NewV4()
-    if err != nil {
-        return "", fmt.Errorf("generating user UUID: %w", err)
-    }
+	// Generate a new randomly-generated UUID
+	id, err := uuid.NewV4()
+	if err != nil {
+		return "", fmt.Errorf("generating user UUID: %w", err)
+	}
 
-    userId := id.String()
+	userId := id.String()
 
-    // Insert the new user. If a UUID collision happens (virtually impossible)
-    // or if the DB connection fails, return a error.
-    _, err = db.c.Exec("INSERT INTO users (id, name) VALUES (?, ?)", userId, userName)
-    if err != nil {
-        return "", fmt.Errorf("inserting user into database: %w", err)
-    }
+	// Insert the new user. If a UUID collision happens (virtually impossible)
+	// or if the DB connection fails, return a error.
+	_, err = db.c.Exec("INSERT INTO users (id, name) VALUES (?, ?)", userId, userName)
+	if err != nil {
+		return "", fmt.Errorf("inserting user into database: %w", err)
+	}
 
-    return userId, nil
+	return userId, nil
 }
 
 // GetUserIdByName retrieves the user ID associated with the given user name.
@@ -92,23 +92,23 @@ func (db *appdbimpl) SetUserName(userId string, newName string) error {
 func (db *appdbimpl) GenerateUserSessionToken(userId string) (string, error) {
 
 	// Generate a new random UUID for the token
-    tokenUUID, err := uuid.NewV4()
-    if err != nil {
-        return "", fmt.Errorf("generating session token: %w", err)
-    }
-    token := tokenUUID.String()
+	tokenUUID, err := uuid.NewV4()
+	if err != nil {
+		return "", fmt.Errorf("generating session token: %w", err)
+	}
+	token := tokenUUID.String()
 
-    // Set an expiration time (24 hours from now)
-    expiresAt := time.Now().Add(24 * time.Hour)
+	// Set an expiration time (24 hours from now)
+	expiresAt := time.Now().Add(24 * time.Hour)
 
-    // Insert the token into the database
-    _, err = db.c.Exec(`INSERT INTO tokens (token, user_id, expires_at) VALUES (?, ?, ?)`,
-        token, userId, expiresAt)
-    if err != nil {
-        return "", fmt.Errorf("inserting session token into database: %w", err)
-    }
+	// Insert the token into the database
+	_, err = db.c.Exec(`INSERT INTO tokens (token, user_id, expires_at) VALUES (?, ?, ?)`,
+		token, userId, expiresAt)
+	if err != nil {
+		return "", fmt.Errorf("inserting session token into database: %w", err)
+	}
 
-    return token, nil
+	return token, nil
 }
 
 // GetUserIDByToken checks if the given token represents a live session.
@@ -168,7 +168,7 @@ func (db *appdbimpl) SearchUsers(query string) ([]User, error) {
 	} else {
 		// Query provided: search using query string
 		pattern := "%" + query + "%" // Use `%` wildcars for pattern matching
-									 // For example, searching "bob" will match "bob", "spongebob", and "superbob123".
+		// For example, searching "bob" will match "bob", "spongebob", and "superbob123".
 		rows, err = db.c.Query(
 			`SELECT id, name
 			FROM users

@@ -1,9 +1,9 @@
 package api
 
 import (
-	"github.com/rimaout/wasapp/service/api/reqcontext"
 	"github.com/gofrs/uuid"
 	"github.com/julienschmidt/httprouter"
+	"github.com/rimaout/wasapp/service/api/reqcontext"
 	"github.com/sirupsen/logrus"
 	"net/http"
 	"strings"
@@ -69,14 +69,14 @@ func (rt *_router) wrapAuthenticated(fn httpRouterHandler) func(http.ResponseWri
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
 			ctx.Logger.Warning("missing or invalid Authorization header")
-			rt.respondWithError(w, http.StatusUnauthorized, ErrCodeUnauthorized, "authentication required") //401
+			rt.respondWithError(w, http.StatusUnauthorized, ErrCodeUnauthorized, "authentication required") // 401
 			return
 		}
 
 		token := strings.TrimPrefix(authHeader, "Bearer ") // Extract the token value after "Bearer "
 		if token == "" {
 			ctx.Logger.Warning("empty token in Authorization header")
-			rt.respondWithError(w, http.StatusUnauthorized, ErrCodeUnauthorized, "authentication required") //401
+			rt.respondWithError(w, http.StatusUnauthorized, ErrCodeUnauthorized, "authentication required") // 401
 			return
 		}
 
@@ -84,13 +84,13 @@ func (rt *_router) wrapAuthenticated(fn httpRouterHandler) func(http.ResponseWri
 		userId, err := rt.db.GetUserIDByToken(token)
 		if err != nil {
 			ctx.Logger.WithError(err).Error("error validating token")
-			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return
 		}
 
 		if userId == "" {
 			ctx.Logger.Warning("invalid or expired token")
-			rt.respondWithError(w, http.StatusUnauthorized, ErrCodeUnauthorized, "authentication failed") //401
+			rt.respondWithError(w, http.StatusUnauthorized, ErrCodeUnauthorized, "authentication failed") // 401
 			return
 		}
 

@@ -1,10 +1,10 @@
 package api
 
 import (
-	"io"
-	"os"
 	"errors"
+	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gofrs/uuid"
@@ -41,12 +41,12 @@ func (rt *_router) saveUploadedImage(
 		// Check if request body exceeds the maximum size limit
 		var maxBytesErr *http.MaxBytesError
 		if errors.As(err, &maxBytesErr) {
-			rt.respondWithError(w, http.StatusRequestEntityTooLarge, ErrCodePayloadTooLarge, "image exceeds maximum size of 5MB") //413
+			rt.respondWithError(w, http.StatusRequestEntityTooLarge, ErrCodePayloadTooLarge, "image exceeds maximum size of 5MB") // 413
 			return "", false
 		}
 
 		// Check if the error is due to invalid multipart form format
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid multipart form") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid multipart form") // 400
 		return "", false
 	}
 
@@ -61,14 +61,14 @@ func (rt *_router) saveUploadedImage(
 	// Validate content type (only JPEG, PNG, WEBP)
 	contentType := header.Header.Get("Content-Type")
 	if contentType != "image/jpeg" && contentType != "image/png" && contentType != "image/webp" {
-		rt.respondWithError(w, http.StatusUnsupportedMediaType, ErrCodeUnsupportedMedia, "unsupported image format, only JPEG, PNG, WebP allowed") //415
+		rt.respondWithError(w, http.StatusUnsupportedMediaType, ErrCodeUnsupportedMedia, "unsupported image format, only JPEG, PNG, WebP allowed") // 415
 		return "", false
 	}
 
 	// Ensure the target directory exists
 	if err := os.MkdirAll(targetDir, 0755); err != nil {
 		ctx.Logger.WithError(err).Error("error creating upload directory")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return "", false
 	}
 
@@ -89,7 +89,7 @@ func (rt *_router) saveUploadedImage(
 	imageId, err := uuid.NewV4()
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error generating image UUID")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return "", false
 	}
 	imagePath := filepath.Join(targetDir, imageId.String()+ext)
@@ -98,7 +98,7 @@ func (rt *_router) saveUploadedImage(
 	dst, err := os.Create(imagePath)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating image file")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return "", false
 	}
 	defer dst.Close()
@@ -106,7 +106,7 @@ func (rt *_router) saveUploadedImage(
 	// Write content to disk (note: io.Copy directly writes to the disk without buffering the entire file in memory)
 	if _, err := io.Copy(dst, file); err != nil {
 		ctx.Logger.WithError(err).Error("error saving image file")
-		rt.deleteImageFile(ctx, imagePath) // clean up partial file
+		rt.deleteImageFile(ctx, imagePath)                                                                    // clean up partial file
 		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return "", false
 	}

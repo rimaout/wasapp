@@ -6,10 +6,9 @@ import (
 	"time"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/rimaout/wasapp/service/database"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
+	"github.com/rimaout/wasapp/service/database"
 )
-
 
 func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
 	// Extract target chat id from url (chats/{chatId}/messages)
@@ -28,12 +27,12 @@ func (rt *_router) validateChatAccess(w http.ResponseWriter, r *http.Request, ct
 	// Validate that the chat exists
 	_, err := rt.db.GetChatById(chatId)
 	if err == database.ErrChatNotFound {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") //404
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") // 404
 		return false
 	}
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting chat by id")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return false
 	}
 
@@ -41,11 +40,11 @@ func (rt *_router) validateChatAccess(w http.ResponseWriter, r *http.Request, ct
 	isMember, err := rt.db.IsActiveChatMember(chatId, ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return false
 	}
 	if !isMember {
-		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "user is not a member of the chat") //403
+		rt.respondWithError(w, http.StatusForbidden, ErrCodeForbiddenNotMember, "user is not a member of the chat") // 403
 		return false
 	}
 
@@ -72,7 +71,7 @@ func (rt *_router) createMessageLogic(w http.ResponseWriter, r *http.Request, ct
 			// Clean up file on disk since DB insert failed
 			rt.deleteImageFile(ctx, reqContent.ImagePath)
 
-			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return
 		}
 
@@ -99,11 +98,11 @@ func (rt *_router) createMessageLogic(w http.ResponseWriter, r *http.Request, ct
 
 		// Clean up uploaded image if database insert fails
 		if reqContent.ImagePath != "" {
-			_ = rt.db.DeleteMessageImagePath(imageId)		// Delete image record from database
-			rt.deleteImageFile(ctx, reqContent.ImagePath)	// Delete image file from disk
+			_ = rt.db.DeleteMessageImagePath(imageId)     // Delete image record from database
+			rt.deleteImageFile(ctx, reqContent.ImagePath) // Delete image file from disk
 		}
 
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -111,7 +110,7 @@ func (rt *_router) createMessageLogic(w http.ResponseWriter, r *http.Request, ct
 	msg, err := rt.db.GetMessageById(chatId, messageId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error fetching created message")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 

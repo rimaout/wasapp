@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"github.com/julienschmidt/httprouter"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
 	"github.com/rimaout/wasapp/service/database"
-	"github.com/julienschmidt/httprouter"
 )
 
 type userSearchResponse struct {
@@ -19,7 +19,7 @@ func (rt *_router) userSearch(w http.ResponseWriter, r *http.Request, ps httprou
 	users, err := rt.db.SearchUsers(query)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error searching users")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 

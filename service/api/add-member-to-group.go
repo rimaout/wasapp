@@ -20,7 +20,7 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	// Extract new member id from request body (JSON)
 	var req AddUserToGroupRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") // 400
 		return
 	}
 	newMemberId := req.UserID
@@ -35,11 +35,11 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	isGroup, err := rt.db.IsGroupChat(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if chat is a group chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if !isGroup {
-		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat") //409
+		rt.respondWithError(w, http.StatusConflict, ErrCodeNotAGroupChat, "chat is not a group chat") // 409
 		return
 	}
 
@@ -47,11 +47,11 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	newMemberName, err := rt.db.GetUserNameById(newMemberId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting user by id")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if newMemberName == "" {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeUserNotFound, "user not found") //404
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeUserNotFound, "user not found") // 404
 		return
 	}
 
@@ -59,18 +59,18 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	isAlreadyMember, err := rt.db.IsActiveChatMember(chatId, newMemberId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error checking if user is a member of the chat")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 	if isAlreadyMember {
-		rt.respondWithError(w, http.StatusConflict, ErrCodeAlreadyInGroup, "user is already a member of the group chat") //409
+		rt.respondWithError(w, http.StatusConflict, ErrCodeAlreadyInGroup, "user is already a member of the group chat") // 409
 		return
 	}
 
 	// Add new member to group
 	if err := rt.db.AddChatMember(chatId, newMemberId); err != nil {
 		ctx.Logger.WithError(err).Error("error adding new user to group")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -78,7 +78,7 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	joinMsgId, err := rt.db.CreateSystemMessage(chatId, newMemberId, true)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error creating join message")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -89,7 +89,7 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	updatedMembers, err := rt.db.GetChatMembers(chatId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting updated list of members")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -100,4 +100,3 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 		MembersList []database.Member `json:"membersList"`
 	}{MembersList: updatedMembers})
 }
-

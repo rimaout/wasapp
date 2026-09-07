@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"github.com/rimaout/wasapp/service/database"
 	"github.com/rimaout/wasapp/service/api/reqcontext"
+	"github.com/rimaout/wasapp/service/database"
 )
 
 type emojiReactionRequest struct {
@@ -27,25 +27,25 @@ func (rt *_router) addReactionToMessage(w http.ResponseWriter, r *http.Request, 
 	// Check if the message exists
 	_, err := rt.db.GetMessageById(chatId, messageId)
 	if err == database.ErrMessageNotFound {
-		rt.respondWithError(w, http.StatusNotFound, ErrCodeMessageNotFound, "message not found") //404
+		rt.respondWithError(w, http.StatusNotFound, ErrCodeMessageNotFound, "message not found") // 404
 		return
 	}
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error getting message by id")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
 	// Decode the request body
 	var req emojiReactionRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidInput, "invalid request body") // 400
 		return
 	}
 
 	// Validate the emoji id
 	if req.EmojiId < 0 || req.EmojiId > 9 {
-		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidEmojiId, "invalid emoji id") //400
+		rt.respondWithError(w, http.StatusBadRequest, ErrCodeInvalidEmojiId, "invalid emoji id") // 400
 		return
 	}
 
@@ -53,7 +53,7 @@ func (rt *_router) addReactionToMessage(w http.ResponseWriter, r *http.Request, 
 	err = rt.db.CreateReaction(messageId, ctx.UserID, req.EmojiId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error adding reaction to message")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
@@ -61,7 +61,7 @@ func (rt *_router) addReactionToMessage(w http.ResponseWriter, r *http.Request, 
 	msg, err := rt.db.GetMessageById(chatId, messageId)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error fetching updated message")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 

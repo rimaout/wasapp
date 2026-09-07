@@ -1,10 +1,10 @@
 package api
 
 import (
-	"io"
-	"os"
 	"errors"
+	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 
 	"github.com/gofrs/uuid"
@@ -13,7 +13,7 @@ import (
 )
 
 const messageImageUploadDir = "messages/images"
-const maxMessagePayloadSize = maxImageSize + (1 * 1024 * 1024) //5MB max image + 1MB buffer for text/headers
+const maxMessagePayloadSize = maxImageSize + (1 * 1024 * 1024) // 5MB max image + 1MB buffer for text/headers
 
 type NewMessageContent struct {
 	Text      string
@@ -109,7 +109,7 @@ func (rt *_router) extractSendMessageContent(
 		// Write content to disk (note: io.Copy directly writes to the disk without buffering the entire file in memory)
 		if _, err := io.Copy(dst, file); err != nil {
 			ctx.Logger.WithError(err).Error("error saving message image file")
-			rt.deleteImageFile(ctx, imagePath) // Cleanup partial file
+			rt.deleteImageFile(ctx, imagePath)                                                                    // Cleanup partial file
 			rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 			return NewMessageContent{}, false
 		}

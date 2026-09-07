@@ -14,14 +14,14 @@ func (rt *_router) deleteMyUserAvatar(w http.ResponseWriter, r *http.Request, ps
 	oldImagePath, err := rt.db.GetUserAvatarPath(ctx.UserID)
 	if err != nil {
 		ctx.Logger.WithError(err).Error("error fetching old avatar path")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
 	// Clear the avatar path in the database
 	if err := rt.db.SetUserAvatarPath(ctx.UserID, ""); err != nil {
 		ctx.Logger.WithError(err).Error("error clearing avatar image path in database")
-		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") //500
+		rt.respondWithError(w, http.StatusInternalServerError, ErrCodeInternalError, "internal server error") // 500
 		return
 	}
 
