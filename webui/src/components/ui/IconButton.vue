@@ -14,19 +14,12 @@ const emit = defineEmits(['click']);
 </script>
 
 <template>
+	<!-- Button with dynamic CSS classes (:class), native disabled state, and a custom click event -->
 	<button
 		type="button"
 		class="icon-btn"
-
-		<!-- Dynamic CSS Classes:
-             1. size: Adds the size prop string directly as a CSS class ('default' or 'small')
-             2. { filled: filled }: Adds the 'filled' class ONLY if the 'filled' prop boolean is true -->
 		:class="[size, { filled: filled }]"
-
-		<!-- Sets the native HTML disabled attribute based on the 'disabled' prop (true/false) -->
 		:disabled="disabled"
-
-		<!-- Listens for native browser click and sends a custom 'click' event up to the parent component -->
 		@click="emit('click')"
 	>
 		<svg class="feather icon-btn-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + icon"/></svg>
