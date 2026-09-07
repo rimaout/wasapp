@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -22,7 +23,7 @@ func (rt *_router) replyMessage(w http.ResponseWriter, r *http.Request, ps httpr
 
 	// Validate the parent message exists in the chat (404 error)
 	_, err := rt.db.GetMessageById(chatId, messageId)
-	if err == database.ErrMessageNotFound {
+	if errors.Is(err, database.ErrMessageNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeMessageNotFound, "message not found") // 404
 		return
 	}

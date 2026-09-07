@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -22,7 +23,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 
 	// Check if the origin chat exists
 	_, err := rt.db.GetChatById(originChatId)
-	if err == database.ErrChatNotFound {
+	if errors.Is(err, database.ErrChatNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeOriginChatNotFound, "origin chat not found") // 404
 		return
 	}
@@ -46,7 +47,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 
 	// Check if the origin message exists
 	originMsg, err := rt.db.GetMessageById(originChatId, originMessageId)
-	if err == database.ErrMessageNotFound {
+	if errors.Is(err, database.ErrMessageNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeMessageNotFound, "message not found") // 404
 		return
 	}
@@ -81,7 +82,7 @@ func (rt *_router) forwardMessage(w http.ResponseWriter, r *http.Request, ps htt
 
 	// Check if the destination chat exists
 	_, err = rt.db.GetChatById(req.ForwardTo)
-	if err == database.ErrChatNotFound {
+	if errors.Is(err, database.ErrChatNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrDestinationChatNotFound, "destination chat not found") // 404
 		return
 	}

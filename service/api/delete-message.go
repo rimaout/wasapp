@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -23,7 +24,7 @@ func (rt *_router) deleteMessage(w http.ResponseWriter, r *http.Request, ps http
 
 	// Check if message exists (404)
 	msg, err := rt.db.GetMessageById(chatId, messageId)
-	if err == database.ErrMessageNotFound {
+	if errors.Is(err, database.ErrMessageNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeMessageNotFound, "message not found")
 		return
 	}

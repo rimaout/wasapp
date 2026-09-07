@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -26,7 +27,7 @@ func (rt *_router) sendMessage(w http.ResponseWriter, r *http.Request, ps httpro
 func (rt *_router) validateChatAccess(w http.ResponseWriter, r *http.Request, ctx reqcontext.RequestContext, chatId string) bool {
 	// Validate that the chat exists
 	_, err := rt.db.GetChatById(chatId)
-	if err == database.ErrChatNotFound {
+	if errors.Is(err, database.ErrChatNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") // 404
 		return false
 	}

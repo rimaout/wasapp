@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -22,7 +23,7 @@ func (rt *_router) removeReactionFromMessage(w http.ResponseWriter, r *http.Requ
 
 	// Check if the message exists
 	_, err := rt.db.GetMessageById(chatId, messageId)
-	if err == database.ErrMessageNotFound {
+	if errors.Is(err, database.ErrMessageNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeMessageNotFound, "message not found") // 404
 		return
 	}
@@ -34,7 +35,7 @@ func (rt *_router) removeReactionFromMessage(w http.ResponseWriter, r *http.Requ
 
 	// Delete the reaction associated with the message for the authenticated user
 	err = rt.db.DeleteReaction(messageId, ctx.UserID)
-	if err == database.ErrReactionNotFound {
+	if errors.Is(err, database.ErrReactionNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeReactionNotFound, "reaction not found") // 404
 		return
 	}

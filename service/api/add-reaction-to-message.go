@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -26,7 +27,7 @@ func (rt *_router) addReactionToMessage(w http.ResponseWriter, r *http.Request, 
 
 	// Check if the message exists
 	_, err := rt.db.GetMessageById(chatId, messageId)
-	if err == database.ErrMessageNotFound {
+	if errors.Is(err, database.ErrMessageNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeMessageNotFound, "message not found") // 404
 		return
 	}

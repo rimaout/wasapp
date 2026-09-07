@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
@@ -16,7 +17,7 @@ func (rt *_router) getMessageImage(w http.ResponseWriter, r *http.Request, ps ht
 
 	// Check if chat exists (404 error)
 	_, err := rt.db.GetChatById(chatId)
-	if err == database.ErrChatNotFound {
+	if errors.Is(err, database.ErrChatNotFound) {
 		rt.respondWithError(w, http.StatusNotFound, ErrCodeChatNotFound, "chat not found") // 404
 		return
 	}
