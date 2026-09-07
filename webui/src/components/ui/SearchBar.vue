@@ -1,18 +1,31 @@
 <script>
 import { ref, watch } from 'vue';
 
+// Reusable Search Bar component with clear button, custom placeholder, and theme switching.
 export default {
 	props: {
-		modelValue: { type: String, default: '' },
-		placeholder: { type: String, default: 'Search chats...' },
-		compact: { type: Boolean, default: false },
-		light: { type: Boolean, default: false },
+		modelValue:  { type: String,  default: ''                }, // Text value bound via v-model from parent component
+		placeholder: { type: String,  default: 'Search chats...' }, // Default placeholder text shown when input is empty
+		compact:     { type: Boolean, default: false             }, // Reduces vertical padding around component when true
+		light:       { type: Boolean, default: false             }, // Applies lighter color palette when true (useful for dark backgrounds)
 	},
-	emits: ['update:modelValue'],
+
+	emits: ['update:modelValue'], // Defines the custom event emitted to parent component when input value changes
+
 	setup(props, { emit }) {
+		// Local variable synced with input field
 		const query = ref(props.modelValue);
-		watch(query, (val) => emit('update:modelValue', val));
-		watch(() => props.modelValue, (val) => { query.value = val; });
+
+		// Every time 'query' changes (as the user types), emit an event to the parent (update v-model binding)
+		watch(query, (newVal) => {
+			emit('update:modelValue', newVal);
+		});
+
+		// If the parent updates 'modelValue' from the outside, sync local 'query'
+		watch(() => props.modelValue, (newVal) => {
+			query.value = newVal;
+		});
+
 		return { query };
 	},
 };
@@ -21,16 +34,23 @@ export default {
 <template>
 	<div :class="compact ? 'px-3 pb-2' : 'px-3 pt-3 pb-2'">
 		<div class="search-wrapper">
+
+			<!-- Search magnifying glass icon overlay -->
 			<svg class="feather search-icon" :class="{ light: light }" style="width: 18px; height: 18px;">
 				<use href="/feather-sprite-v4.29.0.svg#search"/>
 			</svg>
+
+			<!-- Text input field linked to local query variable -->
 			<input type="text" class="form-control form-control-sm search-input" :class="{ light: light }"
 				:placeholder="placeholder" v-model="query" />
+
+			<!-- Clear button: only visible when text is typed (query is non-empty) -->
 			<button v-if="query" class="search-clear" @click="query = ''">
 				<svg class="feather" style="width: 14px; height: 14px; stroke-width: 2.5;">
 					<use href="/feather-sprite-v4.29.0.svg#x"/>
 				</svg>
 			</button>
+
 		</div>
 	</div>
 </template>

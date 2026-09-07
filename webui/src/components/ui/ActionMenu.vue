@@ -6,8 +6,7 @@ import ConfirmBar from './ConfirmBar.vue';
 /**
  * ActionMenu — a generic floating menu with a trigger button and a list of items.
  *
- * It is a *shell*: it never needs to change to support a new action. Each item
- * supplied via the `items` prop is one of three kinds:
+ * Each item is supplied via the `items` prop, and there are 3 types:
  *
  *   1. Simple         { id, label, icon }
  *        Picking it emits `select(item)`.
@@ -30,55 +29,30 @@ import ConfirmBar from './ConfirmBar.vue';
  *     dangerText:'Are you sure you want to delete this message?' }
  *   { id:'forward', label:'Forward', icon:'share',
  *     component: ForwardActionScreen, props:{ message: msg } }
- *
- * @typedef {{
- *   id: string, label: string, icon: string,
- *   danger?: boolean, dangerText?: string,
- *   component?: object, props?: object
- * }} MenuItem
  */
-/**
- * @property {MenuItem[]} items - the menu entries (simple / confirm / action screen).
- * @property {'down-right'|'down-left'|'top-right'|'top-left'} [placement='down-right']
- *   which side of the trigger the menu opens toward (auto-flips to fit the viewport).
- *
- * Trigger button props — all prefixed `triggerButton`:
- * @property {'visible'|'hover'} [triggerButtonMode='visible'] - when the trigger button
- *   is shown. 'visible' always shows it; 'hover' reveals it only while
- *   `triggerButtonVisible` is true (used for hover-revealed message menus).
- * @property {boolean} [triggerButtonVisible=false] - used with
- *   `triggerButtonMode='hover'` to reveal the trigger button.
- * @property {string} triggerButtonIcon - feather icon name for the trigger button
- *   (e.g. 'more-vertical').
- * @property {boolean} [triggerButtonFilled=false] - filled trigger background
- *   (always-visible menus).
- * @property {'default'|'small'} [triggerButtonSize='default'] - trigger button size.
- */
+
 const props = defineProps({
-	items: { type: Array, required: true }, // MenuItem[]
-	placement: { type: String, default: 'down-right' }, // 'down-right' | 'down-left' | 'top-right' | 'top-left'
-	triggerButtonMode: { type: String, default: 'visible' }, // 'visible' | 'hover'
-	triggerButtonVisible: { type: Boolean, default: false },
-	triggerButtonIcon: { type: String, required: true },
-	triggerButtonFilled: { type: Boolean, default: false },
-	triggerButtonSize: { type: String, default: 'default' },
+	items:                  { type: Array,   required: true        }, // array of menu items (simple / confirm / action screen)
+	placement:              { type: String,  default: 'down-right' }, // 'down-right' | 'down-left' | 'top-right' | 'top-left' used to position the menu relative to the trigger button
+	triggerButtonMode:      { type: String,  default: 'visible'    }, // 'visible' | 'hover' used to control when the trigger button is shown (hover mode is used for message menus that reveal the trigger button on hover)
+	triggerButtonVisible:   { type: Boolean, default: false        }, // ?
+	triggerButtonIcon:      { type: String,  required: true        }, // feather icon name for the trigger button (e.g. 'more-vertical')
+	triggerButtonFilled:    { type: Boolean, default: false        }, // filled trigger background
+	triggerButtonSize:      { type: String,  default: 'default'    }, // 'default' | 'small'
 });
-/**
- * Events:
- *   select(item)  - fired for simple items and for confirmed danger items.
- *   done(payload) - fired when an action screen finishes (payload forwarded from it,
- *                   e.g. { action:'rename', name } or { action:'forward' }).
- */
+
+// Events emitted to parent component
+// 'select': Fired when a normal item is clicked or a danger item is confirmed
+// 'done': Fired when a sub-component screen finishes its task
 const emit = defineEmits(['select', 'done']);
 
-const open = ref(false);
+const open         = ref(false);
 const activeAction = ref(null);
-const confirmItem = ref(null);
-const trigger = ref(null);
-const menu = ref(null);
-const menuStyle = ref({ visibility: 'hidden' });
-
-const showTrigger = computed(() => props.triggerButtonMode !== 'hover' || props.triggerButtonVisible || open.value);
+const confirmItem  = ref(null);
+const trigger      = ref(null);
+const menu         = ref(null);
+const menuStyle    = ref({ visibility: 'hidden' });
+const showTrigger  = computed(() => props.triggerButtonMode !== 'hover' || props.triggerButtonVisible || open.value);
 
 function closeAll() {
 	open.value = false;
@@ -120,12 +94,12 @@ function onActionDone(payload) {
 
 function positionMenu() {
 	if (!trigger.value || !menu.value) return;
-	const t = trigger.value.getBoundingClientRect();
+	const t  = trigger.value.getBoundingClientRect();
 	const mw = menu.value.offsetWidth;
 	const mh = menu.value.offsetHeight;
 
 	const alignRight = props.placement.includes('right');
-	const preferTop = props.placement.includes('top');
+	const preferTop  = props.placement.includes('top');
 
 	let left = alignRight ? t.right - mw : t.left;
 	left = Math.max(8, Math.min(left, window.innerWidth - mw - 8));

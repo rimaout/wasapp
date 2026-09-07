@@ -4,23 +4,24 @@
  * that fills the remaining width. Default styling is a green confirm; setting
  * `danger` swaps it to a red confirm (used inside confirm screens).
  *
- * @property {string} [confirmText=''] - label on the confirm button.
- * @property {string} [confirmIcon=''] - optional feather icon name on the confirm button.
- * @property {boolean} [iconRight=false] - put the confirm icon after the label.
+ * @property {string}  [confirmText='']        - label on the confirm button.
+ * @property {string}  [confirmIcon='']        - optional feather icon name on the confirm button.
+ * @property {boolean} [iconRight=false]       - put the confirm icon after the label.
  * @property {boolean} [confirmDisabled=false] - disable the confirm button.
- * @property {boolean} [cancelDisabled=false] - disable the X (cancel) button.
- * @property {string} [cancelLabel='Cancel'] - accessible label/tooltip for the X button.
- * @property {boolean} [danger=false] - red confirm styling (vs. default green).
+ * @property {boolean} [cancelDisabled=false]  - disable the X (cancel) button.
+ * @property {string}  [cancelLabel='Cancel']  - accessible label/tooltip for the X button.
+ * @property {boolean} [danger=false]          - red confirm styling (vs. default green).
  */
 const props = defineProps({
-	confirmText: { type: String, default: '' },
-	confirmIcon: { type: String, default: '' },
-	iconRight: { type: Boolean, default: false },
-	confirmDisabled: { type: Boolean, default: false },
-	cancelDisabled: { type: Boolean, default: false },
-	cancelLabel: { type: String, default: 'Cancel' },
-	danger: { type: Boolean, default: false },
+	confirmText:     { type: String,  default: ''       },
+	confirmIcon:     { type: String,  default: ''       },
+	iconRight:       { type: Boolean, default: false    },
+	confirmDisabled: { type: Boolean, default: false    },
+	cancelDisabled:  { type: Boolean, default: false    },
+	cancelLabel:     { type: String,  default: 'Cancel' },
+	danger:          { type: Boolean, default: false    },
 });
+
 /**
  * Events:
  *   cancel  - fired when the X button is clicked.

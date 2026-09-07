@@ -5,10 +5,10 @@ import { getAvatarColor, getAvatarLetter } from '../../services/utils.js';
 // to a colored letter (or group icon) when no image is available.
 export default {
 	props: {
-		imageUrl:    { type: String,  required: true },
-		displayName: { type: String,  required: true },
-		size:        { type: Number,  default: 48    },
-		isGroup:     { type: Boolean, default: false },
+		imageUrl:    { type: String,  required: true }, // URL to the avatar image (can be a blob URL)
+		displayName: { type: String,  required: true }, // Name to display when no image is available (used to generate the letter and color)
+		size:        { type: Number,  default: 48    }, // Size of the avatar in pixels (width and height)
+		isGroup:     { type: Boolean, default: false }, // Whether this is a group chat (show group icon instead of letter)
 		version:     { type: Number,  default: 0     },	// Used to trigger avatar reload when the avatar is updated
 	},
 	data() {
@@ -20,7 +20,6 @@ export default {
 	},
 	computed: {
 		// Intaernal Data that is computed based on props and data (re-computed when props/data change)
-
 		style() {
 			let px = this.size + 'px';
 			return {

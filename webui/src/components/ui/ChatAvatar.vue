@@ -5,11 +5,11 @@ import BaseAvatar from './BaseAvatar.vue';
 export default {
 	components: { BaseAvatar },
 	props: {
-		chatId:      { type: String,  required: true  },
-		displayName: { type: String,  required: true  },
-		size:        { type: Number,  default:  48    },
-		isGroup:     { type: Boolean, default:  false },
-		version:     { type: Number,  default:  0     },
+		chatId:      { type: String,  required: true  }, // Chat ID to load the avatar for
+		displayName: { type: String,  required: true  }, // Name to display when no image is available (used to generate the letter and color)
+		size:        { type: Number,  default:  48    }, // Size of the avatar in pixels (width and height)
+		isGroup:     { type: Boolean, default:  false }, // Whether this is a group chat (show group icon instead of letter)
+		version:     { type: Number,  default:  0     }, // Used to trigger avatar reload when the avatar is updated
 	},
 	computed: {
 		imageUrl() {

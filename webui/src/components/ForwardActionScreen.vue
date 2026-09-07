@@ -19,8 +19,8 @@ import { getErrorMessage } from '../services/utils.js';
  * @property {string} [title='Forward message'] - heading shown at the top.
  */
 const props = defineProps({
-	message: { type: Object, required: true },
-	title: { type: String, default: 'Forward message' },
+	message: { type: Object, required: true             },
+	title:   { type: String, default: 'Forward message' },
 });
 /**
  * Events:
@@ -29,12 +29,12 @@ const props = defineProps({
  */
 const emit = defineEmits(['done', 'cancel']);
 
-const query = ref('');
+const query    = ref('');
 const selected = ref([]);
-const sending = ref(false);
+const sending  = ref(false);
 const errormsg = ref(null);
 
-const { chats, refreshChats } = useChats();
+const { chats, refreshChats       } = useChats();
 const { fetchUsers, filteredUsers } = useUsers();
 
 const filteredChats = computed(() => {

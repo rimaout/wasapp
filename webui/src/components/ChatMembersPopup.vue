@@ -12,13 +12,13 @@ const props = defineProps({
 	chatId: { type: String, required: true },
 });
 
-const open = ref(false);
-const view = ref('members'); // 'members' | 'add'
-const members = ref([]);
-const loading = ref(false);
+const open     = ref(false);
+const view     = ref('members'); // 'members' | 'add'
+const members  = ref([]);
+const loading  = ref(false);
 const errormsg = ref(null);
 
-const selected = ref([]);
+const selected    = ref([]);
 const existingIds = computed(() => members.value.map(m => m.id));
 
 const countLabel = computed(() => {
