@@ -123,11 +123,14 @@ func (rt *_router) createGroupChat(w http.ResponseWriter, r *http.Request, ps ht
 	// Respond with the chat preview for the newly created group chat
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(ChatPreviewResponse{
+	if err := json.NewEncoder(w).Encode(ChatPreviewResponse{
 		Id:          chatId,
 		DisplayName: req.GroupName,
 		IsGroupChat: true,
-	})
+	}); err != nil {
+		ctx.Logger.WithError(err).Error("error encoding response")
+		return
+	}
 }
 
 func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps httprouter.Params, ctx reqcontext.RequestContext) {
@@ -209,9 +212,12 @@ func (rt *_router) createDirectChat(w http.ResponseWriter, r *http.Request, ps h
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(ChatPreviewResponse{
+	if err := json.NewEncoder(w).Encode(ChatPreviewResponse{
 		Id:          chatId,
 		DisplayName: targetName,
 		IsGroupChat: false,
-	})
+	}); err != nil {
+		ctx.Logger.WithError(err).Error("error encoding response")
+		return
+	}
 }

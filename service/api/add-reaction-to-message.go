@@ -69,5 +69,8 @@ func (rt *_router) addReactionToMessage(w http.ResponseWriter, r *http.Request, 
 	// Respond with the updated message
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(msg)
+	if err := json.NewEncoder(w).Encode(msg); err != nil {
+		ctx.Logger.WithError(err).Error("error encoding response")
+		return
+	}
 }

@@ -63,8 +63,11 @@ func (rt *_router) doLogin(w http.ResponseWriter, r *http.Request, ps httprouter
 	// Respond with the user identifier and token in JSON format
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(loginResponse{
+	if err := json.NewEncoder(w).Encode(loginResponse{
 		UserId: userId,
 		Token:  "Bearer " + token,
-	})
+	}); err != nil {
+		ctx.Logger.WithError(err).Error("error encoding response")
+		return
+	}
 }

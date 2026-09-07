@@ -30,7 +30,10 @@ func (rt *_router) getChatMembers(w http.ResponseWriter, r *http.Request, ps htt
 	// Respond with members list (200 OK)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(struct {
+	if err := json.NewEncoder(w).Encode(struct {
 		MembersList []database.Member `json:"membersList"`
-	}{MembersList: members})
+	}{MembersList: members}); err != nil {
+		ctx.Logger.WithError(err).Error("error encoding response")
+		return
+	}
 }

@@ -24,5 +24,8 @@ func (rt *_router) userSearch(w http.ResponseWriter, r *http.Request, ps httprou
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(userSearchResponse{UsersList: users})
+	if err := json.NewEncoder(w).Encode(userSearchResponse{UsersList: users}); err != nil {
+		ctx.Logger.WithError(err).Error("error encoding response")
+		return
+	}
 }

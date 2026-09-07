@@ -96,7 +96,10 @@ func (rt *_router) addMemberToGroup(w http.ResponseWriter, r *http.Request, ps h
 	// Respond with success (201) and the updated list of members
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(struct {
+	if err := json.NewEncoder(w).Encode(struct {
 		MembersList []database.Member `json:"membersList"`
-	}{MembersList: updatedMembers})
+	}{MembersList: updatedMembers}); err != nil {
+		ctx.Logger.WithError(err).Error("error encoding response")
+		return
+	}
 }

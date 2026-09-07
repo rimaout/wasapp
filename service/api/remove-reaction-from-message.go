@@ -56,5 +56,8 @@ func (rt *_router) removeReactionFromMessage(w http.ResponseWriter, r *http.Requ
 	// Respond with the updated message
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(msg)
+	if err := json.NewEncoder(w).Encode(msg); err != nil {
+		ctx.Logger.WithError(err).Error("error encoding response")
+		return
+	}
 }

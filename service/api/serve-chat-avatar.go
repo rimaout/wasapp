@@ -47,7 +47,7 @@ func (rt *_router) getChatAvatar(w http.ResponseWriter, r *http.Request, ps http
 	}
 
 	// Initialize imagePath variable to hold the path of the avatar imagePath
-	imagePath := ""
+	var imagePath string
 
 	if isGroup {
 		// If the chat is a group chat, we need to get the avatar image of the group
