@@ -8,10 +8,10 @@ import ChatView    from '../views/ChatView.vue'
 const router = createRouter({
 	history: createWebHashHistory(import.meta.env.BASE_URL),
 	routes: [
-		{ path: '/',              redirect: '/chats'   },
-		{ path: '/login',         component: LoginView },
+		{ path: '/',              redirect: '/chats'     },
+		{ path: '/login',         component: LoginView   },
 		{ path: '/chats',         component: WelcomeView },
-		{ path: '/chats/:chatId', component: ChatView },
+		{ path: '/chats/:chatId', component: ChatView    },
 	]
 })
 

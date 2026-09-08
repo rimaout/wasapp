@@ -12,10 +12,10 @@ export default {
 	components: { UserAvatar, MessageImage, ActionMenu, MessageStatusIcon },
 	emits: ['action'],
 	props: {
-		message: { type: Object, required: true },
-		isGroup: { type: Boolean, default: false },
-		showAvatar: { type: Boolean, default: false },
-		previousMessage: { type: Object, default: null },
+		message:         { type: Object, required: true  },
+		isGroup:         { type: Boolean, default: false },
+		showAvatar:      { type: Boolean, default: false },
+		previousMessage: { type: Object, default: null   },
 	},
 	data() {
 		return {

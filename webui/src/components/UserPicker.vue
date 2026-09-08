@@ -8,11 +8,11 @@ import { useUsers } from '../composables/useUsers.js';
 // Search + select users, shown as removable chips. Excludes the logged-in user
 // and any IDs passed in `excludeIds`.
 const props = defineProps({
-	modelValue: { type: Array, default: () => [] },
-	excludeIds: { type: Array, default: () => [] },
-	placeholder: { type: String, default: 'Search users...' },
-	compact: { type: Boolean, default: false },
-	light: { type: Boolean, default: false },
+	modelValue:  { type: Array,   default: () => []          },
+	excludeIds:  { type: Array,   default: () => []          },
+	placeholder: { type: String,  default: 'Search users...' },
+	compact:     { type: Boolean, default: false             },
+	light:       { type: Boolean, default: false             },
 });
 const emit = defineEmits(['update:modelValue']);
 

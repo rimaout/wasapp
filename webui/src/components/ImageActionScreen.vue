@@ -15,7 +15,7 @@ import { getErrorMessage } from '../services/utils.js';
  *   or { kind:'group', chatId }. Used to fetch and update the avatar.
  */
 const props = defineProps({
-	title: { type: String, default: '' },
+	title:  { type: String, default: ''    },
 	target: { type: Object, required: true },
 });
 /**

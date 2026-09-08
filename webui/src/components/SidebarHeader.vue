@@ -18,7 +18,7 @@ const title = computed(() => TITLES[props.mode] || '');
 
 const newChatItems = [
 	{ id: 'direct', label: 'Create Direct Chat', icon: 'message-circle' },
-	{ id: 'group', label: 'Create Group', icon: 'users' },
+	{ id: 'group', label: 'Create Group', icon: 'users'                 },
 ];
 
 function onNewChatSelect(item) {

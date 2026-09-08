@@ -5,8 +5,8 @@ import axios from '../services/axios.js';
 // Loads a message image as an authenticated blob (the message image endpoint
 // requires a Bearer token, so a plain <img src> cannot be used).
 const props = defineProps({
-	chatId: { type: String, required: true },
-	imageId: { type: String, required: true },
+	chatId:    { type: String, required: true  },
+	imageId:   { type: String, required: true  },
 	thumbnail: { type: Boolean, default: false },
 });
 

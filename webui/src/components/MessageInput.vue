@@ -5,11 +5,11 @@ import MessageImage from './MessageImage.vue';
 export default {
 	components: { IconButton, MessageImage },
 	props: {
-		modelValue: { type: String, default: '' },
-		images: { type: Array, default: () => [] },
-		sending: { type: Boolean, default: false },
-		chatId: { type: String, default: '' },
-		replyTo: { type: Object, default: null },
+		modelValue: { type: String,  default: ''       },
+		images:     { type: Array,   default: () => [] },
+		sending:    { type: Boolean, default: false    },
+		chatId:     { type: String,  default: ''       },
+		replyTo:    { type: Object,  default: null     },
 	},
 	emits: ['update:modelValue', 'update:images', 'send', 'error', 'clearReply'],
 	data() {

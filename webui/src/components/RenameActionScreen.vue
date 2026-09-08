@@ -14,9 +14,9 @@ import { getErrorMessage } from '../services/utils.js';
  *   or { kind:'group', chatId }.
  */
 const props = defineProps({
-	title: { type: String, default: '' },
-	initialName: { type: String, default: '' },
-	target: { type: Object, required: true },
+	title:       { type: String, default: ''    },
+	initialName: { type: String, default: ''    },
+	target:      { type: Object, required: true },
 });
 /**
  * Events:
