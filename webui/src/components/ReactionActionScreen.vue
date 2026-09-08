@@ -1,6 +1,4 @@
-<script setup>
-import { ref, computed } from 'vue';
-import axios from '../services/axios.js';
+<script>
 import { EMOJIS } from '../services/emojis.js';
 import { getUserId } from '../services/auth.js';
 import { getErrorMessage } from '../services/utils.js';
@@ -13,48 +11,59 @@ import { getErrorMessage } from '../services/utils.js';
  *
  * @property {Object} message - the message being reacted to (needs `id`, `chatId`, `reactionsList`).
  */
-const props = defineProps({
-	message: { type: Object, required: true },
-});
-/**
- * Events:
- *   done({ action:'react' }) - fired after the reaction is added/removed.
- *   cancel - fired when the user closes the picker.
- */
-const emit = defineEmits(['done', 'cancel']);
+export default {
+	props: {
+		message: { type: Object, required: true },
+	},
+	/**
+	 * Events:
+	 *   done({ action:'react' }) - fired after the reaction is added/removed.
+	 *   cancel - fired when the user closes the picker.
+	 */
+	emits: ['done', 'cancel'],
 
-const sending = ref(false);
-const errormsg = ref(null);
+	data() {
+		return {
+			EMOJIS, // Available emoji reactions (used in the template)
+			sending: false,
+			errormsg: null,
+		};
+	},
 
-const myReactionId = computed(() => {
-	const me = getUserId();
-	const found = (props.message.reactionsList || []).find(r => r.userId === me);
-	return found ? found.emojiId : null;
-});
+	computed: {
+		myReactionId() {
+			const me = getUserId();
+			const found = (this.message.reactionsList || []).find(r => r.userId === me);
+			return found ? found.emojiId : null;
+		},
+	},
 
-function isActive(emojiId) {
-	return myReactionId.value === emojiId;
-}
+	methods: {
+		isActive(emojiId) {
+			return this.myReactionId === emojiId;
+		},
 
-async function pick(emoji) {
-	if (sending.value) return;
-	sending.value = true;
-	errormsg.value = null;
-	try {
-		const base = '/chats/' + props.message.chatId + '/messages/' + props.message.id + '/reactions';
-		let res;
-		if (isActive(emoji.id)) {
-			res = await axios.delete(base);
-		} else {
-			res = await axios.post(base, { emojiId: emoji.id });
-		}
-		emit('done', { action: 'react', message: res.data });
-	} catch (e) {
-		errormsg.value = getErrorMessage(e);
-	} finally {
-		sending.value = false;
-	}
-}
+		async pick(emoji) {
+			if (this.sending) return;
+			this.sending = true;
+			this.errormsg = null;
+			try {
+				const base = '/chats/' + this.message.chatId + '/messages/' + this.message.id + '/reactions';
+				let res;
+				if (this.isActive(emoji.id)) {
+					res = await this.$axios.delete(base);
+				} else {
+					res = await this.$axios.post(base, { emojiId: emoji.id });
+				}
+				this.$emit('done', { action: 'react', message: res.data });
+			} catch (e) {
+				this.errormsg = getErrorMessage(e);
+			} finally {
+				this.sending = false;
+			}
+		},
+	},
+};
 </script>
 
 <template>

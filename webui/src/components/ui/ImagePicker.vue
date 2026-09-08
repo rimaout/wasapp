@@ -1,51 +1,64 @@
-<script setup>
-import { ref, watch, computed, onBeforeUnmount } from 'vue';
-
+<script>
 // Circular/rounded image picker: handles file selection, 5MB check and local image preview.
-const props = defineProps({
-    modelValue: { type: File,   default: null  }, // Selected File object via v-model from parent component
-    previewUrl: { type: String, default: null  }, // Initial/fallback image URL when no local File object is selected
-    radius:     { type: String, default: '50%' }, // CSS border-radius value controlling container shape (e.g., '50%' or '12px')
-    size:       { type: Number, default: 96    }, // Width and height of the component in pixels
-});
+export default {
+	props: {
+		modelValue: { type: File,   default: null  }, // Selected File object via v-model from parent component
+		previewUrl: { type: String, default: null  }, // Initial/fallback image URL when no local File object is selected
+		radius:     { type: String, default: '50%' }, // CSS border-radius value controlling container shape (e.g., '50%' or '12px')
+		size:       { type: Number, default: 96    }, // Width and height of the component in pixels
+	},
 
-// Emits file selection updates to parent or error messages on validation failure
-const emit = defineEmits(['update:modelValue', 'error']);
+	// Emits file selection updates to parent or error messages on validation failure
+	emits: ['update:modelValue', 'error'],
 
-// Temporary browser blob/object URL created for local image preview
-const objectUrl = ref(null);
+	data() {
+		return {
+			// Temporary browser blob/object URL created for local image preview
+			objectUrl: null,
+		};
+	},
 
-// Calculates camera icon size proportional to overall component dimensions
-const iconSize = computed(() => Math.round(props.size * 28 / 96));
+	computed: {
+		// Calculates camera icon size proportional to overall component dimensions
+		iconSize() {
+			return Math.round(this.size * 28 / 96);
+		},
+		// Resolves display source priority: newly selected local file > initial preview URL > fallback null
+		displaySrc() {
+			return this.objectUrl || this.previewUrl || null;
+		},
+	},
 
-// Automatically manages blob URLs: revokes previous object URL to prevent memory leaks and generates a new preview URL
-watch(() => props.modelValue, (file) => {
-    if (objectUrl.value) URL.revokeObjectURL(objectUrl.value);
-    objectUrl.value = file ? URL.createObjectURL(file) : null;
-});
+	watch: {
+		// Automatically manages blob URLs: revokes previous object URL to prevent memory leaks and generates a new preview URL
+		modelValue(file) {
+			if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+			this.objectUrl = file ? URL.createObjectURL(file) : null;
+		},
+	},
 
-// Resolves display source priority: newly selected local file > initial preview URL > fallback null
-const displaySrc = computed(() => objectUrl.value || props.previewUrl || null);
+	methods: {
+		// Handles file input selection: validates max file size (5MB) and updates v-model
+		onFileChange(e) {
+			const file = e.target.files && e.target.files[0];
+			if (!file) return;
 
-// Handles file input selection: validates max file size (5MB) and updates v-model
-function onFileChange(e) {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
+			// Validate image size limit (5 MB)
+			if (file.size > 5 * 1024 * 1024) {
+				this.$emit('error', 'Image must be at most 5 MB');
+				e.target.value = ''; // Reset input selection
+				return;
+			}
 
-    // Validate image size limit (5 MB)
-    if (file.size > 5 * 1024 * 1024) {
-        emit('error', 'Image must be at most 5 MB');
-        e.target.value = ''; // Reset input selection
-        return;
-    }
+			this.$emit('update:modelValue', file);
+		},
+	},
 
-    emit('update:modelValue', file);
-}
-
-// Memory cleanup: revokes generated object URL when component unmounts
-onBeforeUnmount(() => {
-    if (objectUrl.value) URL.revokeObjectURL(objectUrl.value);
-});
+	beforeUnmount() {
+		// Memory cleanup: revokes generated object URL when component unmounts
+		if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);
+	},
+};
 </script>
 
 <template>

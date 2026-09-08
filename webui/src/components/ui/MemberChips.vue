@@ -1,15 +1,16 @@
-<script setup>
+<script>
 import UserAvatar from './UserAvatar.vue';
 
 // Displays selected members as chips with an avatar, display name, and optional remove button.
-defineProps({
-    members:   { type: Array,   required: true }, // Array of member objects containing user details (id, name)
-    removable: { type: Boolean, default: true  }, // Enables/disables the '×' remove button on each chip
-    light:     { type: Boolean, default: false }, // Applies lighter color palette when true (useful for dark backgrounds)
-});
-
-// Declares custom events to emit back to parent component when actions occur
-const emit = defineEmits(['remove']);
+export default {
+	components: { UserAvatar },
+	props: {
+		members:   { type: Array,   required: true }, // Array of member objects containing user details (id, name)
+		removable: { type: Boolean, default: true  }, // Enables/disables the '×' remove button on each chip
+		light:     { type: Boolean, default: false }, // Applies lighter color palette when true (useful for dark backgrounds)
+	},
+	emits: ['remove'], // Declares custom events to emit back to parent component when actions occur
+};
 </script>
 
 <template>
@@ -25,7 +26,7 @@ const emit = defineEmits(['remove']);
             <span class="member-chip-name">{{ m.name }}</span>
 
             <!-- Remove button: passes member object to parent via 'remove' event -->
-            <button v-if="removable" type="button" class="member-chip-remove" @click="emit('remove', m)">×</button>
+            <button v-if="removable" type="button" class="member-chip-remove" @click="$emit('remove', m)">×</button>
 
         </span>
     </div>

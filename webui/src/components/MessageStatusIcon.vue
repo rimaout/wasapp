@@ -1,4 +1,4 @@
-<script setup>
+<script>
 /**
  * MessageStatusIcon — compact read-receipt icon for a message status.
  * 'DELIVERED' renders a single check; 'RECEIVED'/'READ' render a double check.
@@ -7,9 +7,11 @@
  *
  * @property {'DELIVERED'|'RECEIVED'|'READ'} status - the message status.
  */
-defineProps({
-	status: { type: String, required: true },
-});
+export default {
+	props: {
+		status: { type: String, required: true }, // Message status to render
+	},
+};
 </script>
 
 <template>

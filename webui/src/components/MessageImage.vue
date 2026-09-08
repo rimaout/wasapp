@@ -1,40 +1,54 @@
-<script setup>
-import { ref, watch, onBeforeUnmount } from 'vue';
-import axios from '../services/axios.js';
-
+<script>
 // Loads a message image as an authenticated blob (the message image endpoint
 // requires a Bearer token, so a plain <img src> cannot be used).
-const props = defineProps({
-	chatId:    { type: String, required: true  },
-	imageId:   { type: String, required: true  },
-	thumbnail: { type: Boolean, default: false },
-});
+export default {
+	props: {
+		chatId:    { type: String, required: true  },
+		imageId:   { type: String, required: true  },
+		thumbnail: { type: Boolean, default: false },
+	},
 
-const loading = ref(true);
-const src = ref(null);
-const failed = ref(false);
+	data() {
+		return {
+			loading: true,
+			src: null,
+			failed: false,
+		};
+	},
 
-async function load() {
-	loading.value = true;
-	failed.value = false;
-	if (src.value) {
-		URL.revokeObjectURL(src.value);
-		src.value = null;
-	}
-	try {
-		const res = await axios.get('/chats/' + props.chatId + '/images/' + props.imageId, { responseType: 'blob' });
-		src.value = URL.createObjectURL(res.data);
-	} catch (e) {
-		failed.value = true;
-	}
-	loading.value = false;
-}
+	watch: {
+		// Reload when the chat or image changes
+		chatId:  'load',
+		imageId: 'load',
+	},
 
-watch(() => [props.chatId, props.imageId], load, { immediate: true });
+	created() {
+		// Load the image when the component is created (equivalent of the previous immediate watcher)
+		this.load();
+	},
 
-onBeforeUnmount(() => {
-	if (src.value) URL.revokeObjectURL(src.value);
-});
+	methods: {
+		async load() {
+			this.loading = true;
+			this.failed = false;
+			if (this.src) {
+				URL.revokeObjectURL(this.src);
+				this.src = null;
+			}
+			try {
+				const res = await this.$axios.get('/chats/' + this.chatId + '/images/' + this.imageId, { responseType: 'blob' });
+				this.src = URL.createObjectURL(res.data);
+			} catch (e) {
+				this.failed = true;
+			}
+			this.loading = false;
+		},
+	},
+
+	beforeUnmount() {
+		if (this.src) URL.revokeObjectURL(this.src);
+	},
+};
 </script>
 
 <template>

@@ -1,5 +1,4 @@
-<script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+<script>
 import ImagePicker from './ui/ImagePicker.vue';
 import ConfirmBar from './ui/ConfirmBar.vue';
 import { fetchAvatar, updateAvatar, deleteAvatar } from '../services/api.js';
@@ -14,73 +13,90 @@ import { getErrorMessage } from '../services/utils.js';
  * @property {Object} target - what is being edited; either { kind:'me', userId }
  *   or { kind:'group', chatId }. Used to fetch and update the avatar.
  */
-const props = defineProps({
-	title:  { type: String, default: ''    },
-	target: { type: Object, required: true },
-});
-/**
- * Events:
- *   done({ action:'image' }) - fired after the image is changed or removed.
- *   cancel - fired when the user cancels.
- */
-const emit = defineEmits(['done', 'cancel']);
+export default {
+	components: { ImagePicker, ConfirmBar },
+	props: {
+		title:  { type: String, default: ''    },
+		target: { type: Object, required: true },
+	},
+	/**
+	 * Events:
+	 *   done({ action:'image' }) - fired after the image is changed or removed.
+	 *   cancel - fired when the user cancels.
+	 */
+	emits: ['done', 'cancel'],
 
-const imageFile = ref(null);
-const currentImageUrl = ref(null);
-const removeRequested = ref(false);
-const errormsg = ref(null);
-const busy = ref(false);
+	data() {
+		return {
+			imageFile: null,
+			currentImageUrl: null,
+			removeRequested: false,
+			errormsg: null,
+			busy: false,
+		};
+	},
 
-const isValid = computed(() => imageFile.value != null || removeRequested.value);
+	computed: {
+		isValid() {
+			return this.imageFile != null || this.removeRequested;
+		},
+		previewUrl() {
+			return this.removeRequested ? null : this.currentImageUrl;
+		},
+		canRemove() {
+			return this.currentImageUrl != null && this.imageFile == null && !this.removeRequested;
+		},
+	},
 
-const previewUrl = computed(() => removeRequested.value ? null : currentImageUrl.value);
+	methods: {
+		async loadCurrentImage() {
+			try {
+				this.currentImageUrl = URL.createObjectURL(await fetchAvatar(this.target));
+			} catch (e) {
+				this.currentImageUrl = null;
+			}
+		},
 
-const canRemove = computed(() => currentImageUrl.value != null && imageFile.value == null && !removeRequested.value);
+		onFileSelected(file) {
+			this.imageFile = file;
+			if (file) this.removeRequested = false;
+		},
 
-async function loadCurrentImage() {
-	try {
-		currentImageUrl.value = URL.createObjectURL(await fetchAvatar(props.target));
-	} catch (e) {
-		currentImageUrl.value = null;
-	}
-}
+		onPickerError(message) {
+			this.errormsg = message;
+		},
 
-function onFileSelected(file) {
-	imageFile.value = file;
-	if (file) removeRequested.value = false;
-}
+		requestRemove() {
+			this.removeRequested = true;
+		},
 
-function onPickerError(message) {
-	errormsg.value = message;
-}
+		async confirm() {
+			if (this.busy || !this.isValid) return;
+			this.busy = true;
+			this.errormsg = null;
+			try {
+				if (this.imageFile) {
+					await updateAvatar(this.target, this.imageFile);
+				} else if (this.removeRequested) {
+					await deleteAvatar(this.target);
+				}
+				this.$emit('done', { action: 'image' });
+			} catch (e) {
+				this.errormsg = getErrorMessage(e);
+			} finally {
+				this.busy = false;
+			}
+		},
+	},
 
-function requestRemove() {
-	removeRequested.value = true;
-}
+	mounted() {
+		this.loadCurrentImage();
+	},
 
-async function confirm() {
-	if (busy.value || !isValid.value) return;
-	busy.value = true;
-	errormsg.value = null;
-	try {
-		if (imageFile.value) {
-			await updateAvatar(props.target, imageFile.value);
-		} else if (removeRequested.value) {
-			await deleteAvatar(props.target);
-		}
-		emit('done', { action: 'image' });
-	} catch (e) {
-		errormsg.value = getErrorMessage(e);
-	} finally {
-		busy.value = false;
-	}
-}
-
-onMounted(loadCurrentImage);
-
-onBeforeUnmount(() => {
-	if (currentImageUrl.value) URL.revokeObjectURL(currentImageUrl.value);
-});
+	beforeUnmount() {
+		if (this.currentImageUrl) URL.revokeObjectURL(this.currentImageUrl);
+	},
+};
 </script>
 
 <template>
@@ -97,7 +113,7 @@ onBeforeUnmount(() => {
 			:confirm-disabled="busy || !isValid"
 			confirm-text="Confirm"
 			confirm-icon="check"
-			@cancel="emit('cancel')"
+			@cancel="$emit('cancel')"
 			@confirm="confirm"
 		/>
 	</div>

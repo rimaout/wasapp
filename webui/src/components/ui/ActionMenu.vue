@@ -1,5 +1,4 @@
-<script setup>
-import { ref, computed, watch } from 'vue';
+<script>
 import IconButton from './IconButton.vue';
 import ConfirmBar from './ConfirmBar.vue';
 
@@ -30,101 +29,118 @@ import ConfirmBar from './ConfirmBar.vue';
  *   { id:'forward', label:'Forward', icon:'share',
  *     component: ForwardActionScreen, props:{ message: msg } }
  */
+export default {
+	components: { IconButton, ConfirmBar },
+	props: {
+		items:                  { type: Array,   required: true        }, // array of menu items (simple / confirm / action screen)
+		placement:              { type: String,  default: 'down-right' }, // 'down-right' | 'down-left' | 'top-right' | 'top-left' used to position the menu relative to the trigger button
+		triggerButtonMode:      { type: String,  default: 'visible'    }, // 'visible' | 'hover' used to control when the trigger button is shown (hover mode is used for message menus that reveal the trigger button on hover)
+		triggerButtonVisible:   { type: Boolean, default: false        }, // ?
+		triggerButtonIcon:      { type: String,  required: true        }, // feather icon name for the trigger button (e.g. 'more-vertical')
+		triggerButtonFilled:    { type: Boolean, default: false        }, // filled trigger background
+		triggerButtonSize:      { type: String,  default: 'default'    }, // 'default' | 'small'
+	},
 
-const props = defineProps({
-	items:                  { type: Array,   required: true        }, // array of menu items (simple / confirm / action screen)
-	placement:              { type: String,  default: 'down-right' }, // 'down-right' | 'down-left' | 'top-right' | 'top-left' used to position the menu relative to the trigger button
-	triggerButtonMode:      { type: String,  default: 'visible'    }, // 'visible' | 'hover' used to control when the trigger button is shown (hover mode is used for message menus that reveal the trigger button on hover)
-	triggerButtonVisible:   { type: Boolean, default: false        }, // ?
-	triggerButtonIcon:      { type: String,  required: true        }, // feather icon name for the trigger button (e.g. 'more-vertical')
-	triggerButtonFilled:    { type: Boolean, default: false        }, // filled trigger background
-	triggerButtonSize:      { type: String,  default: 'default'    }, // 'default' | 'small'
-});
+	// Events emitted to parent component
+	// 'select': Fired when a normal item is clicked or a danger item is confirmed
+	// 'done': Fired when a sub-component screen finishes its task
+	emits: ['select', 'done'],
 
-// Events emitted to parent component
-// 'select': Fired when a normal item is clicked or a danger item is confirmed
-// 'done': Fired when a sub-component screen finishes its task
-const emit = defineEmits(['select', 'done']);
+	data() {
+		return {
+			open: false,
+			activeAction: null,
+			confirmItem: null,
+			menuStyle: { visibility: 'hidden' },
+		};
+	},
 
-const open         = ref(false);
-const activeAction = ref(null);
-const confirmItem  = ref(null);
-const trigger      = ref(null);
-const menu         = ref(null);
-const menuStyle    = ref({ visibility: 'hidden' });
-const showTrigger  = computed(() => props.triggerButtonMode !== 'hover' || props.triggerButtonVisible || open.value);
+	computed: {
+		showTrigger() {
+			return this.triggerButtonMode !== 'hover' || this.triggerButtonVisible || this.open;
+		},
+	},
 
-function closeAll() {
-	open.value = false;
-	activeAction.value = null;
-	confirmItem.value = null;
-}
+	watch: {
+		// Position (or reposition on morph) after the menu has been rendered.
+		open:          { handler: 'repositionMenu', flush: 'post' },
+		activeAction:  { handler: 'repositionMenu', flush: 'post' },
+		confirmItem:   { handler: 'repositionMenu', flush: 'post' },
+	},
 
-function toggle() {
-	open.value = !open.value;
-}
+	methods: {
+		repositionMenu() {
+			if (this.open) this.positionMenu();
+		},
 
-function choose(item) {
-	// Items with a `component` morph into that action screen in place.
-	if (item.component) {
-		activeAction.value = { item };
-		positionMenu();
-		return;
-	}
-	// Danger items with a `dangerText` morph into the confirmation screen.
-	if (item.danger && item.dangerText) {
-		confirmItem.value = item;
-		positionMenu();
-		return;
-	}
-	closeAll();
-	emit('select', item);
-}
+		closeAll() {
+			this.open = false;
+			this.activeAction = null;
+			this.confirmItem = null;
+		},
 
-function onConfirm() {
-	const item = confirmItem.value;
-	closeAll();
-	emit('select', item);
-}
+		toggle() {
+			this.open = !this.open;
+		},
 
-function onActionDone(payload) {
-	emit('done', payload);
-	closeAll();
-}
+		choose(item) {
+			// Items with a `component` morph into that action screen in place.
+			if (item.component) {
+				this.activeAction = { item };
+				this.positionMenu();
+				return;
+			}
+			// Danger items with a `dangerText` morph into the confirmation screen.
+			if (item.danger && item.dangerText) {
+				this.confirmItem = item;
+				this.positionMenu();
+				return;
+			}
+			this.closeAll();
+			this.$emit('select', item);
+		},
 
-function positionMenu() {
-	if (!trigger.value || !menu.value) return;
-	const t  = trigger.value.getBoundingClientRect();
-	const mw = menu.value.offsetWidth;
-	const mh = menu.value.offsetHeight;
+		onConfirm() {
+			const item = this.confirmItem;
+			this.closeAll();
+			this.$emit('select', item);
+		},
 
-	const alignRight = props.placement.includes('right');
-	const preferTop  = props.placement.includes('top');
+		onActionDone(payload) {
+			this.$emit('done', payload);
+			this.closeAll();
+		},
 
-	let left = alignRight ? t.right - mw : t.left;
-	left = Math.max(8, Math.min(left, window.innerWidth - mw - 8));
+		positionMenu() {
+			if (!this.$refs.trigger || !this.$refs.menu) return;
+			const t  = this.$refs.trigger.getBoundingClientRect();
+			const mw = this.$refs.menu.offsetWidth;
+			const mh = this.$refs.menu.offsetHeight;
 
-	const style = { left: left + 'px', visibility: 'visible' };
+			const alignRight = this.placement.includes('right');
+			const preferTop  = this.placement.includes('top');
 
-	// Flip vertically if the preferred direction does not fit.
-	const spaceBelow = window.innerHeight - t.bottom;
-	const spaceAbove = t.top;
-	let openUp = preferTop;
-	if (preferTop && spaceAbove < mh + 8) openUp = false;
-	if (!preferTop && spaceBelow < mh + 8) openUp = true;
+			let left = alignRight ? t.right - mw : t.left;
+			left = Math.max(8, Math.min(left, window.innerWidth - mw - 8));
 
-	if (openUp) {
-		style.bottom = (window.innerHeight - t.top + 6) + 'px';
-	} else {
-		style.top = (t.bottom + 6) + 'px';
-	}
-	menuStyle.value = style;
-}
+			const style = { left: left + 'px', visibility: 'visible' };
 
-// Position (or reposition on morph) after the menu has been rendered.
-watch([open, activeAction, confirmItem], () => {
-	if (open.value) positionMenu();
-}, { flush: 'post' });
+			// Flip vertically if the preferred direction does not fit.
+			const spaceBelow = window.innerHeight - t.bottom;
+			const spaceAbove = t.top;
+			let openUp = preferTop;
+			if (preferTop && spaceAbove < mh + 8) openUp = false;
+			if (!preferTop && spaceBelow < mh + 8) openUp = true;
+
+			if (openUp) {
+				style.bottom = (window.innerHeight - t.top + 6) + 'px';
+			} else {
+				style.top = (t.bottom + 6) + 'px';
+			}
+			this.menuStyle = style;
+		},
+	},
+};
 </script>
 
 <template>

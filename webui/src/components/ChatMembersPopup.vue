@@ -1,6 +1,4 @@
-<script setup>
-import { ref, computed, onMounted, watch } from 'vue';
-import axios from '../services/axios.js';
+<script>
 import MemberChips from './ui/MemberChips.vue';
 import UserPicker from './UserPicker.vue';
 import ConfirmBar from './ui/ConfirmBar.vue';
@@ -8,70 +6,88 @@ import { getErrorMessage } from '../services/utils.js';
 
 // Button in the chat header showing the member count; opens a popup with the
 // group member list and an "Add members" view (search + pick new members).
-const props = defineProps({
-	chatId: { type: String, required: true },
-});
+export default {
+	components: { MemberChips, UserPicker, ConfirmBar },
+	props: {
+		chatId: { type: String, required: true },
+	},
 
-const open     = ref(false);
-const view     = ref('members'); // 'members' | 'add'
-const members  = ref([]);
-const loading  = ref(false);
-const errormsg = ref(null);
+	data() {
+		return {
+			open: false,
+			view: 'members', // 'members' | 'add'
+			members: [],
+			loading: false,
+			errormsg: null,
+			selected: [],
+		};
+	},
 
-const selected    = ref([]);
-const existingIds = computed(() => members.value.map(m => m.id));
+	computed: {
+		existingIds() {
+			return this.members.map(m => m.id);
+		},
+		countLabel() {
+			if (this.loading) return 'Members';
+			const n = this.members.length;
+			return n === 1 ? '1 Member' : n + ' Members';
+		},
+	},
 
-const countLabel = computed(() => {
-	if (loading.value) return 'Members';
-	const n = members.value.length;
-	return n === 1 ? '1 Member' : n + ' Members';
-});
+	watch: {
+		// Reload when switching to another chat
+		chatId: 'fetchMembers',
+	},
 
-async function fetchMembers() {
-	loading.value = true;
-	errormsg.value = null;
-	try {
-		const res = await axios.get('/chats/' + props.chatId + '/members');
-		members.value = res.data.membersList
-			.filter(m => !m.leaveTime)
-			.map(m => ({ id: m.userId, name: m.name }));
-	} catch (e) {
-		errormsg.value = getErrorMessage(e);
-	}
-	loading.value = false;
-}
+	mounted() {
+		this.fetchMembers();
+	},
 
-function toggle() {
-	open.value = !open.value;
-}
+	methods: {
+		async fetchMembers() {
+			this.loading = true;
+			this.errormsg = null;
+			try {
+				const res = await this.$axios.get('/chats/' + this.chatId + '/members');
+				this.members = res.data.membersList
+					.filter(m => !m.leaveTime)
+					.map(m => ({ id: m.userId, name: m.name }));
+			} catch (e) {
+				this.errormsg = getErrorMessage(e);
+			}
+			this.loading = false;
+		},
 
-function close() {
-	open.value = false;
-	view.value = 'members';
-}
+		toggle() {
+			this.open = !this.open;
+		},
 
-function openAddView() {
-	selected.value = [];
-	view.value = 'add';
-}
+		close() {
+			this.open = false;
+			this.view = 'members';
+		},
 
-async function confirmAdd() {
-	errormsg.value = null;
-	for (const user of selected.value) {
-		try {
-			await axios.post('/chats/' + props.chatId + '/members', { userId: user.id });
-		} catch (e) {
-			errormsg.value = getErrorMessage(e);
-			return;
-		}
-	}
-	selected.value = [];
-	await fetchMembers();
-	close();
-}
+		openAddView() {
+			this.selected = [];
+			this.view = 'add';
+		},
 
-onMounted(fetchMembers);
-watch(() => props.chatId, fetchMembers);
+		async confirmAdd() {
+			this.errormsg = null;
+			for (const user of this.selected) {
+				try {
+					await this.$axios.post('/chats/' + this.chatId + '/members', { userId: user.id });
+				} catch (e) {
+					this.errormsg = getErrorMessage(e);
+					return;
+				}
+			}
+			this.selected = [];
+			await this.fetchMembers();
+			this.close();
+		},
+	},
+};
 </script>
 
 <template>

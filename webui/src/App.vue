@@ -1,7 +1,5 @@
-<script setup>
-
-import { RouterView, useRoute } from 'vue-router'
-import { ref, computed } from 'vue'
+<script>
+import { RouterView } from 'vue-router'
 import ChatsListView from './views/ChatsListView.vue'
 import UserSearchView from './views/UserSearchView.vue'
 import GroupMembersView from './views/GroupMembersView.vue'
@@ -19,37 +17,50 @@ import ProfileBar from './components/ProfileBar.vue'
 //  - 'users': shows the user search view for starting a direct chat
 //  - 'group-members': shows the group member selection view for creating a group chat
 
-const route        = useRoute();
-const isChatRoute  = computed(() => route.path.startsWith('/chats/'));
+export default {
+	components: { RouterView, ChatsListView, UserSearchView, GroupMembersView, GroupDetailsView, SidebarHeader, SearchBar, ProfileBar },
 
-const sidebarMode  = ref('chats') // current mode of the sidebar: 'chats', 'users', 'group-members', 'group-details'
-const groupMembers = ref([])	  // selected members for creating a group chat (used in 'group-members' and 'group-details' modes)
-const searchQuery  = ref('')      // search query for search bar (used in 'chats' mode)
+	data() {
+		return {
+			sidebarMode: 'chats',   // current mode of the sidebar: 'chats', 'users', 'group-members', 'group-details'
+			groupMembers: [],       // selected members for creating a group chat (used in 'group-members' and 'group-details' modes)
+			searchQuery: '',        // search query for search bar (used in 'chats' mode)
+		};
+	},
 
-function startGroupCreation() {
-	groupMembers.value = [];
-	sidebarMode.value = 'group-members';
-}
+	computed: {
+		isChatRoute() {
+			return this.$route.path.startsWith('/chats/');
+		},
+	},
 
-function finishGroupCreation() {
-	groupMembers.value = [];
-	sidebarMode.value = 'chats';
-}
+	methods: {
+		startGroupCreation() {
+			this.groupMembers = [];
+			this.sidebarMode = 'group-members';
+		},
 
-function cancelGroupCreation() {
-	groupMembers.value = [];
-	sidebarMode.value = 'chats';
-}
+		finishGroupCreation() {
+			this.groupMembers = [];
+			this.sidebarMode = 'chats';
+		},
 
-function handleBackButton() {
-	if (sidebarMode.value === 'users') {
-		sidebarMode.value = 'chats';
-	} else if (sidebarMode.value === 'group-members') {
-		sidebarMode.value = 'chats';
-	} else if (sidebarMode.value === 'group-details') {
-		sidebarMode.value = 'group-members';
-	}
-}
+		cancelGroupCreation() {
+			this.groupMembers = [];
+			this.sidebarMode = 'chats';
+		},
+
+		handleBackButton() {
+			if (this.sidebarMode === 'users') {
+				this.sidebarMode = 'chats';
+			} else if (this.sidebarMode === 'group-members') {
+				this.sidebarMode = 'chats';
+			} else if (this.sidebarMode === 'group-details') {
+				this.sidebarMode = 'group-members';
+			}
+		},
+	},
+};
 </script>
 
 <template>

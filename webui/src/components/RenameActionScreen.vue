@@ -1,5 +1,4 @@
-<script setup>
-import { ref, computed } from 'vue';
+<script>
 import ConfirmBar from './ui/ConfirmBar.vue';
 import { updateName } from '../services/api.js';
 import { getErrorMessage } from '../services/utils.js';
@@ -13,41 +12,52 @@ import { getErrorMessage } from '../services/utils.js';
  * @property {Object} target - what is being renamed; either { kind:'me', userId }
  *   or { kind:'group', chatId }.
  */
-const props = defineProps({
-	title:       { type: String, default: ''    },
-	initialName: { type: String, default: ''    },
-	target:      { type: Object, required: true },
-});
-/**
- * Events:
- *   done({ action:'rename', name }) - fired after the name is saved.
- *   cancel - fired when the user cancels.
- */
-const emit = defineEmits(['done', 'cancel']);
+export default {
+	components: { ConfirmBar },
+	props: {
+		title:       { type: String, default: ''    },
+		initialName: { type: String, default: ''    },
+		target:      { type: Object, required: true },
+	},
+	/**
+	 * Events:
+	 *   done({ action:'rename', name }) - fired after the name is saved.
+	 *   cancel - fired when the user cancels.
+	 */
+	emits: ['done', 'cancel'],
 
-const name = ref(props.initialName || '');
-const errormsg = ref(null);
-const busy = ref(false);
+	data() {
+		return {
+			name: this.initialName || '',
+			errormsg: null,
+			busy: false,
+		};
+	},
 
-const isValid = computed(() => {
-	const trimmed = name.value.trim();
-	const current = (props.initialName || '').trim();
-	return trimmed.length > 0 && trimmed !== current;
-});
+	computed: {
+		isValid() {
+			const trimmed = this.name.trim();
+			const current = (this.initialName || '').trim();
+			return trimmed.length > 0 && trimmed !== current;
+		},
+	},
 
-async function confirm() {
-	if (busy.value || !isValid.value) return;
-	busy.value = true;
-	errormsg.value = null;
-	try {
-		const newName = await updateName(props.target, name.value.trim());
-		emit('done', { action: 'rename', name: newName });
-	} catch (e) {
-		errormsg.value = getErrorMessage(e);
-	} finally {
-		busy.value = false;
-	}
-}
+	methods: {
+		async confirm() {
+			if (this.busy || !this.isValid) return;
+			this.busy = true;
+			this.errormsg = null;
+			try {
+				const newName = await updateName(this.target, this.name.trim());
+				this.$emit('done', { action: 'rename', name: newName });
+			} catch (e) {
+				this.errormsg = getErrorMessage(e);
+			} finally {
+				this.busy = false;
+			}
+		},
+	},
+};
 </script>
 
 <template>
@@ -63,7 +73,7 @@ async function confirm() {
 			:confirm-disabled="busy || !isValid"
 			confirm-text="Confirm"
 			confirm-icon="check"
-			@cancel="emit('cancel')"
+			@cancel="$emit('cancel')"
 			@confirm="confirm"
 		/>
 	</div>

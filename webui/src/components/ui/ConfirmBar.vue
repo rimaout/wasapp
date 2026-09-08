@@ -1,4 +1,4 @@
-<script setup>
+<script>
 /**
  * ConfirmBar — a two-button footer: a square X (cancel) plus a confirm button
  * that fills the remaining width. Default styling is a green confirm; setting
@@ -12,30 +12,32 @@
  * @property {string}  [cancelLabel='Cancel']  - accessible label/tooltip for the X button.
  * @property {boolean} [danger=false]          - red confirm styling (vs. default green).
  */
-const props = defineProps({
-	confirmText:     { type: String,  default: ''       },
-	confirmIcon:     { type: String,  default: ''       },
-	iconRight:       { type: Boolean, default: false    },
-	confirmDisabled: { type: Boolean, default: false    },
-	cancelDisabled:  { type: Boolean, default: false    },
-	cancelLabel:     { type: String,  default: 'Cancel' },
-	danger:          { type: Boolean, default: false    },
-});
+export default {
+	props: {
+		confirmText:     { type: String,  default: ''       },
+		confirmIcon:     { type: String,  default: ''       },
+		iconRight:       { type: Boolean, default: false    },
+		confirmDisabled: { type: Boolean, default: false    },
+		cancelDisabled:  { type: Boolean, default: false    },
+		cancelLabel:     { type: String,  default: 'Cancel' },
+		danger:          { type: Boolean, default: false    },
+	},
 
-/**
- * Events:
- *   cancel  - fired when the X button is clicked.
- *   confirm - fired when the confirm button is clicked.
- */
-const emit = defineEmits(['cancel', 'confirm']);
+	/**
+	 * Events:
+	 *   cancel  - fired when the X button is clicked.
+	 *   confirm - fired when the confirm button is clicked.
+	 */
+	emits: ['cancel', 'confirm'],
+};
 </script>
 
 <template>
 	<div class="confirm-bar" :class="{ danger }">
-		<button type="button" class="footer-x" :disabled="cancelDisabled" :aria-label="cancelLabel" :title="cancelLabel" @click="emit('cancel')">
+		<button type="button" class="footer-x" :disabled="cancelDisabled" :aria-label="cancelLabel" :title="cancelLabel" @click="$emit('cancel')">
 			<svg class="feather footer-x-icon"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
 		</button>
-		<button type="button" class="confirm-btn" :disabled="confirmDisabled" :aria-label="confirmText || undefined" :title="confirmText || undefined" @click="emit('confirm')">
+		<button type="button" class="confirm-btn" :disabled="confirmDisabled" :aria-label="confirmText || undefined" :title="confirmText || undefined" @click="$emit('confirm')">
 			<svg v-if="confirmIcon && !iconRight" class="feather confirm-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + confirmIcon"/></svg>
 			<span v-if="confirmText">{{ confirmText }}</span>
 			<svg v-if="confirmIcon && iconRight" class="feather confirm-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + confirmIcon"/></svg>

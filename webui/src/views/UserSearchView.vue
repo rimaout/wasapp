@@ -1,7 +1,4 @@
-<script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import axios from '../services/axios.js';
+<script>
 import SearchBar from '../components/ui/SearchBar.vue';
 import UserAvatar from '../components/ui/UserAvatar.vue';
 import { useUsers } from '../composables/useUsers.js';
@@ -9,41 +6,61 @@ import { refreshChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';
 import { getErrorMessage } from '../services/utils.js';
 
-const emit = defineEmits(['close']);
-const router = useRouter();
+export default {
+	components: { SearchBar, UserAvatar },
+	emits: ['close'],
 
-const query = ref('');
-const creating = ref(null);
+	// Shared users state comes from the useUsers composable (module-level refs);
+	// expose it here so the rest of the Options API can use it via `this`.
+	setup(props, { emit }) {
+		const { users, loading, errormsg, fetchUsers, filteredUsers } = useUsers();
+		return { users, loading, errormsg, fetchUsers, filteredUsers };
+	},
 
-const { users, loading, errormsg, fetchUsers, filteredUsers } = useUsers();
-fetchUsers();
+	data() {
+		return {
+			query: '',
+			creating: null,
+		};
+	},
 
-const visibleUsers = computed(() => filteredUsers(query.value));
+	computed: {
+		visibleUsers() {
+			return this.filteredUsers(this.query);
+		},
+	},
 
-async function selectUser(user) {
-	if (creating.value) return;
-	creating.value = user.id;
-	errormsg.value = null;
-	try {
-		const response = await axios.post('/users/' + user.id + '/chats');
-		refreshChats().catch(() => {});
-		goToChat(response.data.id, response.data.displayName, false);
-	} catch (e) {
-		if (e.response && e.response.status === 409 && e.response.data && e.response.data.chatId) {
-			refreshChats().catch(() => {});
-			goToChat(e.response.data.chatId, user.name, false);
-		} else {
-			errormsg.value = getErrorMessage(e);
-		}
-	} finally {
-		creating.value = null;
-	}
-}
+	created() {
+		this.fetchUsers();
+	},
 
-function goToChat(chatId, displayName, isGroupChat) {
-	navigateToChat(router, { id: chatId, displayName, isGroupChat });
-	emit('close');
-}
+	methods: {
+		async selectUser(user) {
+			if (this.creating) return;
+			this.creating = user.id;
+			this.errormsg = null;
+			try {
+				const response = await this.$axios.post('/users/' + user.id + '/chats');
+				refreshChats().catch(() => {});
+				this.goToChat(response.data.id, response.data.displayName, false);
+			} catch (e) {
+				if (e.response && e.response.status === 409 && e.response.data && e.response.data.chatId) {
+					refreshChats().catch(() => {});
+					this.goToChat(e.response.data.chatId, user.name, false);
+				} else {
+					this.errormsg = getErrorMessage(e);
+				}
+			} finally {
+				this.creating = null;
+			}
+		},
+
+		goToChat(chatId, displayName, isGroupChat) {
+			navigateToChat(this.$router, { id: chatId, displayName, isGroupChat });
+			this.$emit('close');
+		},
+	},
+};
 </script>
 
 <template>

@@ -1,16 +1,15 @@
-<script setup>
-
+<script>
 // Define the inputs (props) passed from a parent component into this button
-defineProps({
-	icon:     { type: String,  required: true     }, // Feather icon name
-	size:     { type: String,  default: 'default' }, // Size variant: 'default' or 'small'
-	disabled: { type: Boolean, default: false     }, // Disables button clicks when true
-	filled:   { type: Boolean, default: false     }, // Gives button a background fill when true
-});
+export default {
+	props: {
+		icon:     { type: String,  required: true     }, // Feather icon name
+		size:     { type: String,  default: 'default' }, // Size variant: 'default' or 'small'
+		disabled: { type: Boolean, default: false     }, // Disables button clicks when true
+		filled:   { type: Boolean, default: false     }, // Gives button a background fill when true
+	},
 
-// Define the custom 'click' event sent back up to the parent component
-const emit = defineEmits(['click']);
-
+	emits: ['click'], // Defines the custom 'click' event sent back up to the parent component
+};
 </script>
 
 <template>
@@ -20,7 +19,7 @@ const emit = defineEmits(['click']);
 		class="icon-btn"
 		:class="[size, { filled: filled }]"
 		:disabled="disabled"
-		@click="emit('click')"
+		@click="$emit('click')"
 	>
 		<svg class="feather icon-btn-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + icon"/></svg>
 	</button>

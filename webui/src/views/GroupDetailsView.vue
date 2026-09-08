@@ -1,6 +1,4 @@
-<script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+<script>
 import ImagePicker from '../components/ui/ImagePicker.vue';
 import MemberChips from '../components/ui/MemberChips.vue';
 import IconButton from '../components/ui/IconButton.vue';
@@ -10,65 +8,73 @@ import { refreshChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';
 import { getErrorMessage } from '../services/utils.js';
 
-const props = defineProps({
-	members: { type: Array, default: () => [] },
-});
-const emit = defineEmits(['done', 'update:members', 'add-members', 'cancel']);
+export default {
+	components: { ImagePicker, MemberChips, IconButton, ConfirmBar },
+	props: {
+		members: { type: Array, default: () => [] },
+	},
+	emits: ['done', 'update:members', 'add-members', 'cancel'],
 
-function removeMember(member) {
-	emit('update:members', props.members.filter(m => m.id !== member.id));
-}
-const router = useRouter();
+	data() {
+		return {
+			name: '',
+			imageFile: null,
+			errormsg: null,
+			creating: false,
+		};
+	},
 
-const name = ref('');
-const imageFile = ref(null);
-const errormsg = ref(null);
-const creating = ref(false);
+	methods: {
+		removeMember(member) {
+			this.$emit('update:members', this.members.filter(m => m.id !== member.id));
+		},
 
-function onPickerError(message) {
-	errormsg.value = message;
-}
+		onPickerError(message) {
+			this.errormsg = message;
+		},
 
-function validate() {
-	const n = name.value.trim();
-	if (n.length < 3 || n.length > 24) {
-		return 'Group name must be 3-24 characters';
-	}
-	if (!/^[A-Za-z0-9 _-]+$/.test(n)) {
-		return 'Group name can only contain letters, numbers, spaces, underscores and hyphens';
-	}
-	if (!/\S/.test(n)) {
-		return 'Group name must contain at least one non-space character';
-	}
-	return '';
-}
+		validate() {
+			const n = this.name.trim();
+			if (n.length < 3 || n.length > 24) {
+				return 'Group name must be 3-24 characters';
+			}
+			if (!/^[A-Za-z0-9 _-]+$/.test(n)) {
+				return 'Group name can only contain letters, numbers, spaces, underscores and hyphens';
+			}
+			if (!/\S/.test(n)) {
+				return 'Group name must contain at least one non-space character';
+			}
+			return '';
+		},
 
-async function createGroup() {
-	const err = validate();
-	if (err) {
-		errormsg.value = err;
-		return;
-	}
-	if (creating.value) return;
+		async createGroup() {
+			const err = this.validate();
+			if (err) {
+				this.errormsg = err;
+				return;
+			}
+			if (this.creating) return;
 
-	creating.value = true;
-	errormsg.value = null;
-	try {
-		const chat = await createGroupRequest(name.value.trim(), props.members.map(m => m.id));
+			this.creating = true;
+			this.errormsg = null;
+			try {
+				const chat = await createGroupRequest(this.name.trim(), this.members.map(m => m.id));
 
-		if (imageFile.value) {
-			await updateAvatar({ kind: 'group', chatId: chat.id }, imageFile.value);
-		}
+				if (this.imageFile) {
+					await updateAvatar({ kind: 'group', chatId: chat.id }, this.imageFile);
+				}
 
-		refreshChats().catch(() => {});
-		navigateToChat(router, chat);
-		emit('done');
-	} catch (e) {
-		errormsg.value = getErrorMessage(e);
-	} finally {
-		creating.value = false;
-	}
-}
+				refreshChats().catch(() => {});
+				navigateToChat(this.$router, chat);
+				this.$emit('done');
+			} catch (e) {
+				this.errormsg = getErrorMessage(e);
+			} finally {
+				this.creating = false;
+			}
+		},
+	},
+};
 </script>
 
 <template>
@@ -84,7 +90,7 @@ async function createGroup() {
 			<div class="section-box">
 				<div class="section-title-row">
 					<span class="section-title">Members</span>
-					<IconButton icon="plus" size="small" filled @click="emit('add-members')" />
+					<IconButton icon="plus" size="small" filled @click="$emit('add-members')" />
 				</div>
 				<MemberChips :members="members" light @remove="removeMember" />
 			</div>
@@ -93,7 +99,7 @@ async function createGroup() {
 		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 
 		<div class="footer px-3 py-3">
-			<ConfirmBar confirm-text="Create group" confirm-icon="check" :confirm-disabled="creating || !name.trim()" @cancel="emit('cancel')" @confirm="createGroup" />
+			<ConfirmBar confirm-text="Create group" confirm-icon="check" :confirm-disabled="creating || !name.trim()" @cancel="$emit('cancel')" @confirm="createGroup" />
 		</div>
 	</div>
 </template>

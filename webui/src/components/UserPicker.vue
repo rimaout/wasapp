@@ -1,5 +1,4 @@
-<script setup>
-import { ref, computed } from 'vue';
+<script>
 import SearchBar from './ui/SearchBar.vue';
 import UserAvatar from './ui/UserAvatar.vue';
 import MemberChips from './ui/MemberChips.vue';
@@ -7,43 +6,65 @@ import { useUsers } from '../composables/useUsers.js';
 
 // Search + select users, shown as removable chips. Excludes the logged-in user
 // and any IDs passed in `excludeIds`.
-const props = defineProps({
-	modelValue:  { type: Array,   default: () => []          },
-	excludeIds:  { type: Array,   default: () => []          },
-	placeholder: { type: String,  default: 'Search users...' },
-	compact:     { type: Boolean, default: false             },
-	light:       { type: Boolean, default: false             },
-});
-const emit = defineEmits(['update:modelValue']);
+export default {
+	components: { SearchBar, UserAvatar, MemberChips },
+	props: {
+		modelValue:  { type: Array,   default: () => []          },
+		excludeIds:  { type: Array,   default: () => []          },
+		placeholder: { type: String,  default: 'Search users...' },
+		compact:     { type: Boolean, default: false             },
+		light:       { type: Boolean, default: false             },
+	},
+	emits: ['update:modelValue'],
 
-const query = ref('');
-const { users, loading, errormsg, fetchUsers, filteredUsers } = useUsers();
-fetchUsers();
+	// Shared users state lives in the useUsers composable (module-level refs);
+	// expose it here so the rest of the Options API can access it via `this`.
+	setup(props, { emit }) {
+		const { users, loading, errormsg, fetchUsers, filteredUsers } = useUsers();
+		return { users, loading, errormsg, fetchUsers, filteredUsers };
+	},
 
-const selectedIds = computed(() => new Set(props.modelValue.map(m => m.id)));
-const visibleUsers = computed(() => {
-	let list = filteredUsers(query.value, props.excludeIds);
-	return list.filter(u => !selectedIds.value.has(u.id));
-});
+	data() {
+		return {
+			query: '',
+		};
+	},
 
-function isSelected(user) {
-	return selectedIds.value.has(user.id);
-}
+	computed: {
+		selectedIds() {
+			return new Set(this.modelValue.map(m => m.id));
+		},
+		visibleUsers() {
+			let list = this.filteredUsers(this.query, this.excludeIds);
+			return list.filter(u => !this.selectedIds.has(u.id));
+		},
+	},
 
-function toggleUser(user) {
-	let list = props.modelValue.slice();
-	let idx = list.findIndex(m => m.id === user.id);
-	if (idx === -1) {
-		list.push({ id: user.id, name: user.name });
-	} else {
-		list.splice(idx, 1);
-	}
-	emit('update:modelValue', list);
-}
+	created() {
+		this.fetchUsers();
+	},
 
-function removeMember(member) {
-	emit('update:modelValue', props.modelValue.filter(m => m.id !== member.id));
-}
+	methods: {
+		isSelected(user) {
+			return this.selectedIds.has(user.id);
+		},
+
+		toggleUser(user) {
+			let list = this.modelValue.slice();
+			let idx = list.findIndex(m => m.id === user.id);
+			if (idx === -1) {
+				list.push({ id: user.id, name: user.name });
+			} else {
+				list.splice(idx, 1);
+			}
+			this.$emit('update:modelValue', list);
+		},
+
+		removeMember(member) {
+			this.$emit('update:modelValue', this.modelValue.filter(m => m.id !== member.id));
+		},
+	},
+};
 </script>
 
 <template>

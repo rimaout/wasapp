@@ -1,36 +1,49 @@
-<script setup>
-import { ref, computed } from 'vue';
+<script>
 import UserAvatar from './ui/UserAvatar.vue';
 import ActionMenu from './ui/ActionMenu.vue';
 import RenameActionScreen from './RenameActionScreen.vue';
 import ImageActionScreen from './ImageActionScreen.vue';
 import { getUserId, getUserName, setUserName, clearAuth } from '../services/auth.js';
 
-const userId = getUserId();
-const name = ref(getUserName() || 'User');
-const avatarVersion = ref(0);
+export default {
+	components: { UserAvatar, ActionMenu, RenameActionScreen, ImageActionScreen },
 
-const profileItems = computed(() => [
-	{ id: 'name', label: 'Change Profile Name', icon: 'edit-2', component: RenameActionScreen, props: { title: 'Change Profile Name', target: { kind: 'me', userId }, initialName: name.value } },
-	{ id: 'image', label: 'Change Profile Image', icon: 'image', component: ImageActionScreen, props: { title: 'Change Profile Image', target: { kind: 'me', userId } } },
-	{ id: 'logout', label: 'Logout', icon: 'log-out', danger: true, dangerText: 'Are you sure you want to log out?' },
-]);
+	data() {
+		return {
+			userId: getUserId(),
+			name: getUserName() || 'User',
+			avatarVersion: 0,
+		};
+	},
 
-function onSelect(item) {
-	if (item.id === 'logout') {
-		clearAuth();
-		window.location.hash = '#/login';
-	}
-}
+	computed: {
+		profileItems() {
+			return [
+				{ id: 'name', label: 'Change Profile Name', icon: 'edit-2', component: RenameActionScreen, props: { title: 'Change Profile Name', target: { kind: 'me', userId: this.userId }, initialName: this.name } },
+				{ id: 'image', label: 'Change Profile Image', icon: 'image', component: ImageActionScreen, props: { title: 'Change Profile Image', target: { kind: 'me', userId: this.userId } } },
+				{ id: 'logout', label: 'Logout', icon: 'log-out', danger: true, dangerText: 'Are you sure you want to log out?' },
+			];
+		},
+	},
 
-function onDone(payload) {
-	if (payload.action === 'rename') {
-		setUserName(payload.name);
-		name.value = payload.name;
-	} else if (payload.action === 'image') {
-		avatarVersion.value++;
-	}
-}
+	methods: {
+		onSelect(item) {
+			if (item.id === 'logout') {
+				clearAuth();
+				window.location.hash = '#/login';
+			}
+		},
+
+		onDone(payload) {
+			if (payload.action === 'rename') {
+				setUserName(payload.name);
+				this.name = payload.name;
+			} else if (payload.action === 'image') {
+				this.avatarVersion++;
+			}
+		},
+	},
+};
 </script>
 
 <template>

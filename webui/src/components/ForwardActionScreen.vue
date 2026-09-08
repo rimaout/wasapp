@@ -1,6 +1,4 @@
-<script setup>
-import { ref, computed, onMounted } from 'vue';
-import axios from '../services/axios.js';
+<script>
 import SearchBar from './ui/SearchBar.vue';
 import ChatAvatar from './ui/ChatAvatar.vue';
 import UserAvatar from './ui/UserAvatar.vue';
@@ -18,104 +16,119 @@ import { getErrorMessage } from '../services/utils.js';
  * @property {Object} message - the message being forwarded (needs `id`, `chatId`).
  * @property {string} [title='Forward message'] - heading shown at the top.
  */
-const props = defineProps({
-	message: { type: Object, required: true             },
-	title:   { type: String, default: 'Forward message' },
-});
-/**
- * Events:
- *   done({ action:'forward' }) - fired after the message is forwarded to all targets.
- *   cancel - fired when the user closes the picker.
- */
-const emit = defineEmits(['done', 'cancel']);
+export default {
+	components: { SearchBar, ChatAvatar, UserAvatar, ConfirmBar },
+	props: {
+		message: { type: Object, required: true             },
+		title:   { type: String, default: 'Forward message' },
+	},
+	/**
+	 * Events:
+	 *   done({ action:'forward' }) - fired after the message is forwarded to all targets.
+	 *   cancel - fired when the user closes the picker.
+	 */
+	emits: ['done', 'cancel'],
 
-const query    = ref('');
-const selected = ref([]);
-const sending  = ref(false);
-const errormsg = ref(null);
+	// Shared chats/users state comes from the composables (module-level refs);
+	// expose it here so the rest of the Options API can use it via `this`.
+	setup(props, { emit }) {
+		const { chats, refreshChats       } = useChats();
+		const { fetchUsers, filteredUsers } = useUsers();
+		return { chats, refreshChats, fetchUsers, filteredUsers };
+	},
 
-const { chats, refreshChats       } = useChats();
-const { fetchUsers, filteredUsers } = useUsers();
+	data() {
+		return {
+			query: '',
+			selected: [],
+			sending: false,
+			errormsg: null,
+		};
+	},
 
-const filteredChats = computed(() => {
-	let q = query.value.toLowerCase();
-	return chats.value.filter(c => {
-		if (c.id === props.message.chatId) return false;
-		if (q && !c.displayName.toLowerCase().includes(q)) return false;
-		return true;
-	});
-});
+	computed: {
+		filteredChats() {
+			let q = this.query.toLowerCase();
+			return this.chats.filter(c => {
+				if (c.id === this.message.chatId) return false;
+				if (q && !c.displayName.toLowerCase().includes(q)) return false;
+				return true;
+			});
+		},
+		visibleUsers() {
+			return this.filteredUsers(this.query);
+		},
+	},
 
-const visibleUsers = computed(() => {
-	return filteredUsers(query.value);
-});
+	mounted() {
+		this.refreshChats().catch(() => {});
+		this.fetchUsers();
+	},
 
-function isSelected(kind, id) {
-	return selected.value.some(s => s.kind === kind && s.id === id);
-}
+	methods: {
+		isSelected(kind, id) {
+			return this.selected.some(s => s.kind === kind && s.id === id);
+		},
 
-function toggleChat(chat) {
-	let list = selected.value.slice();
-	let idx = list.findIndex(s => s.kind === 'chat' && s.id === chat.id);
-	if (idx === -1) {
-		list.push({ kind: 'chat', id: chat.id, name: chat.displayName, chat });
-	} else {
-		list.splice(idx, 1);
-	}
-	selected.value = list;
-}
+		toggleChat(chat) {
+			let list = this.selected.slice();
+			let idx = list.findIndex(s => s.kind === 'chat' && s.id === chat.id);
+			if (idx === -1) {
+				list.push({ kind: 'chat', id: chat.id, name: chat.displayName, chat });
+			} else {
+				list.splice(idx, 1);
+			}
+			this.selected = list;
+		},
 
-function toggleUser(user) {
-	let list = selected.value.slice();
-	let idx = list.findIndex(s => s.kind === 'user' && s.id === user.id);
-	if (idx === -1) {
-		list.push({ kind: 'user', id: user.id, name: user.name, user });
-	} else {
-		list.splice(idx, 1);
-	}
-	selected.value = list;
-}
+		toggleUser(user) {
+			let list = this.selected.slice();
+			let idx = list.findIndex(s => s.kind === 'user' && s.id === user.id);
+			if (idx === -1) {
+				list.push({ kind: 'user', id: user.id, name: user.name, user });
+			} else {
+				list.splice(idx, 1);
+			}
+			this.selected = list;
+		},
 
-function removeItem(item) {
-	selected.value = selected.value.filter(s => !(s.kind === item.kind && s.id === item.id));
-}
+		removeItem(item) {
+			this.selected = this.selected.filter(s => !(s.kind === item.kind && s.id === item.id));
+		},
 
-async function resolveChatId(item) {
-	if (item.kind === 'chat') return item.id;
-	try {
-		const res = await axios.post('/users/' + item.id + '/chats');
-		return res.data.id;
-	} catch (e) {
-		if (e.response && e.response.status === 409 && e.response.data && e.response.data.chatId) {
-			return e.response.data.chatId;
-		}
-		throw e;
-	}
-}
+		async resolveChatId(item) {
+			if (item.kind === 'chat') return item.id;
+			try {
+				const res = await this.$axios.post('/users/' + item.id + '/chats');
+				return res.data.id;
+			} catch (e) {
+				if (e.response && e.response.status === 409 && e.response.data && e.response.data.chatId) {
+					return e.response.data.chatId;
+				}
+				throw e;
+			}
+		},
 
-async function forward() {
-	if (sending.value || selected.value.length === 0) return;
-	sending.value = true;
-	errormsg.value = null;
-	try {
-		let url = '/chats/' + props.message.chatId + '/messages/' + props.message.id + '/forwards';
-		for (const item of selected.value) {
-			const chatId = await resolveChatId(item);
-			await axios.post(url, { forwardTo: chatId });
-		}
-		refreshChats().catch(() => {});
-		emit('done', { action: 'forward' });
-	} catch (e) {
-		errormsg.value = getErrorMessage(e);
-	} finally {
-		sending.value = false;
-	}
-}
-
-onMounted(() => {
-	refreshChats().catch(() => {});
-	fetchUsers();
-});
+		async forward() {
+			if (this.sending || this.selected.length === 0) return;
+			this.sending = true;
+			this.errormsg = null;
+			try {
+				let url = '/chats/' + this.message.chatId + '/messages/' + this.message.id + '/forwards';
+				for (const item of this.selected) {
+					const chatId = await this.resolveChatId(item);
+					await this.$axios.post(url, { forwardTo: chatId });
+				}
+				this.refreshChats().catch(() => {});
+				this.$emit('done', { action: 'forward' });
+			} catch (e) {
+				this.errormsg = getErrorMessage(e);
+			} finally {
+				this.sending = false;
+			}
+		},
+	},
+};
 </script>
 
 <template>
@@ -155,7 +168,7 @@ onMounted(() => {
 </div>
 </div>
 <div class="forward-footer px-1 pt-0 pb-1">
-<ConfirmBar confirm-text="Forward" confirm-icon="corner-up-right" :cancel-disabled="sending" :confirm-disabled="sending || selected.length === 0" cancel-label="Cancel" @cancel="emit('cancel')" @confirm="forward" />
+<ConfirmBar confirm-text="Forward" confirm-icon="corner-up-right" :cancel-disabled="sending" :confirm-disabled="sending || selected.length === 0" cancel-label="Cancel" @cancel="$emit('cancel')" @confirm="forward" />
 </div>
 </div>
 </template>

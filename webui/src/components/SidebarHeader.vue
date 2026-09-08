@@ -1,11 +1,5 @@
-<script setup>
-import { computed } from 'vue';
+<script>
 import ActionMenu from './ui/ActionMenu.vue';
-
-const props = defineProps({
-	mode: { type: String, required: true },
-});
-const emit = defineEmits(['back', 'home', 'create-direct', 'create-group']);
 
 const TITLES = {
 	users: 'New direct chat',
@@ -13,27 +7,47 @@ const TITLES = {
 	'group-details': 'New group details',
 };
 
-const isChats = computed(() => props.mode === 'chats');
-const title = computed(() => TITLES[props.mode] || '');
+export default {
+	components: { ActionMenu },
+	props: {
+		mode: { type: String, required: true },
+	},
+	emits: ['back', 'home', 'create-direct', 'create-group'],
 
-const newChatItems = [
-	{ id: 'direct', label: 'Create Direct Chat', icon: 'message-circle' },
-	{ id: 'group', label: 'Create Group', icon: 'users'                 },
-];
+	data() {
+		return {
+			newChatItems: [
+				{ id: 'direct', label: 'Create Direct Chat', icon: 'message-circle' },
+				{ id: 'group', label: 'Create Group', icon: 'users'                 },
+			],
+		};
+	},
 
-function onNewChatSelect(item) {
-	emit(item.id === 'group' ? 'create-group' : 'create-direct');
-}
+	computed: {
+		isChats() {
+			return this.mode === 'chats';
+		},
+		title() {
+			return TITLES[this.mode] || '';
+		},
+	},
+
+	methods: {
+		onNewChatSelect(item) {
+			this.$emit(item.id === 'group' ? 'create-group' : 'create-direct');
+		},
+	},
+};
 </script>
 
 <template>
 	<div class="sidebar-header">
 		<template v-if="isChats">
-			<a href="#/chats" class="sidebar-logo fw-bold" @click="emit('home')">WASApp</a>
+			<a href="#/chats" class="sidebar-logo fw-bold" @click="$emit('home')">WASApp</a>
 			<ActionMenu class="ms-auto" trigger-button-icon="message-square-plus" placement="down-right" :items="newChatItems" trigger-button-filled @select="onNewChatSelect" />
 		</template>
 		<template v-else>
-			<button type="button" class="back-btn" @click="emit('back')">
+			<button type="button" class="back-btn" @click="$emit('back')">
 				<svg class="feather back-icon"><use href="/feather-sprite-v4.29.0.svg#arrow-left"/></svg>
 			</button>
 			<span class="fw-semibold header-title">{{ title }}</span>
