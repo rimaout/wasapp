@@ -6,7 +6,7 @@ import ImageActionScreen from './ImageActionScreen.vue';
 import { getUserId, getUserName, setUserName, clearAuth } from '../services/auth.js';
 
 export default {
-	components: { UserAvatar, ActionMenu, RenameActionScreen, ImageActionScreen },
+	components: { UserAvatar, ActionMenu },
 
 	data() {
 		return {
