@@ -248,7 +248,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatPreview'
+                $ref: '#/components/schemas/CreateChatResponse'
         '400':
           description: Bad request - Returns code `INVALID_INPUT` if the request body is missing/malformed, `INVALID_GROUP_NAME` if the group name is invalid, or `EMPTY_MEMBER_LIST` the members list is empty.
           content:
@@ -292,7 +292,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatPreview'
+                $ref: '#/components/schemas/CreateChatResponse'
         '400':
           description: Bad request - Returns code `INVALID_INPUT` if you try to create a chat with yourself.
           content:
@@ -368,7 +368,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ChatName'
+                $ref: '#/components/schemas/GroupNameResponse'
         "400":
           description: Bad request - Returns code `INVALID_INPUT` if the request body is missing/malformed or `INVALID_GROUP_NAME` the group name is invalid (must be 3-24 chars, alphanumeric + spaces/underscores/hyphens, at least one non-space).
           content:
@@ -1640,10 +1640,26 @@ components:
       type: object
       description: Authentication result containing the user identifier and bearer token.
       readOnly: true
-      required: [identifier, token]
+      required: [userId, token]
       properties:
-        identifier: { $ref: '#/components/schemas/UserId'      }
-        token:      { $ref: '#/components/schemas/BearerToken' }
+        userId: { $ref: '#/components/schemas/UserId'      }
+        token:  { $ref: '#/components/schemas/BearerToken' }
+
+    CreateChatResponse:
+      type: object
+      description: Chat created by the server, returned to the client that performed the creation.
+      required: [id, displayName, isGroupChat]
+      properties:
+        id:           { $ref: '#/components/schemas/ChatId'          }
+        displayName:  { $ref: '#/components/schemas/ChatDisplayName' }
+        isGroupChat:  { $ref: '#/components/schemas/IsGroupChat'     }
+
+    GroupNameResponse:
+      type: object
+      description: The new name assigned to the group.
+      required: [groupName]
+      properties:
+        groupName: { $ref: '#/components/schemas/ChatName' }
 
     UsersSearchResponse:  #todo: paging
       type: object
