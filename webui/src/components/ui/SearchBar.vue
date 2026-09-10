@@ -1,17 +1,27 @@
 <script>
 import { ref, watch } from 'vue';
 
-// Reusable Search Bar component with clear button, custom placeholder, and theme switching.
+/**
+ * SearchBar — a reusable search input component with a magnifying glass icon and clear button.
+ *
+ * Props:
+ *  - modelValue:  The text value bound via v-model from the parent component.
+ *  - placeholder: Placeholder text shown when the input is empty (default: 'Search chats...').
+ *  - compact:     Reduces vertical padding around the component when true (default: false).
+ *  - light:       Applies a lighter color palette when true (useful for dark backgrounds, default: false).
+ *
+ * Emits:
+ *  - update:modelValue: Emitted to the parent component whenever the input value changes.
+ */
 export default {
 	props: {
-		modelValue:  { type: String,  default: ''                }, // Text value bound via v-model from parent component
-		placeholder: { type: String,  default: 'Search chats...' }, // Default placeholder text shown when input is empty
-		compact:     { type: Boolean, default: false             }, // Reduces vertical padding around component when true
-		light:       { type: Boolean, default: false             }, // Applies lighter color palette when true (useful for dark backgrounds)
+		modelValue:  { type: String,  default: ''                },
+		placeholder: { type: String,  default: 'Search chats...' },
+		compact:     { type: Boolean, default: false             },
+		light:       { type: Boolean, default: false             },
 	},
 
-	emits: ['update:modelValue'], // Defines the custom event emitted to parent component when input value changes
-
+	emits: ['update:modelValue'],
 	setup(props, { emit }) {
 		// Local variable synced with input field
 		const query = ref(props.modelValue);

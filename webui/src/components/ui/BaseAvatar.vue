@@ -1,15 +1,24 @@
 <script>
 import { getAvatarColor, getAvatarLetter } from '../../services/utils.js';
 
-// Shared avatar rendering: loads an image from `imageUrl`, falling back
-// to a colored letter (or group icon) when no image is available.
+/**
+ * BaseAvatar — shared avatar rendering: loads an image from `imageUrl`, falling back
+ * to a colored letter (or group icon) when no image is available.
+ *
+ * Props:
+ *  - imageUrl:    URL to the avatar image (can be a blob URL)
+ *  - displayName: Name to display when no image is available (used to generate the letter and color)
+ *  - size:        Size of the avatar in pixels (width and height)
+ *  - isGroup:     Whether this is a group chat (show group icon instead of letter)
+ *  - version:     Used to trigger avatar reload when the avatar is updated
+ */
 export default {
 	props: {
-		imageUrl:    { type: String,  required: true }, // URL to the avatar image (can be a blob URL)
-		displayName: { type: String,  required: true }, // Name to display when no image is available (used to generate the letter and color)
-		size:        { type: Number,  default: 48    }, // Size of the avatar in pixels (width and height)
-		isGroup:     { type: Boolean, default: false }, // Whether this is a group chat (show group icon instead of letter)
-		version:     { type: Number,  default: 0     },	// Used to trigger avatar reload when the avatar is updated
+		imageUrl:    { type: String,  required: true },
+		displayName: { type: String,  required: true },
+		size:        { type: Number,  default: 48    },
+		isGroup:     { type: Boolean, default: false },
+		version:     { type: Number,  default: 0     },
 	},
 	data() {
 		// Internal Data for the component

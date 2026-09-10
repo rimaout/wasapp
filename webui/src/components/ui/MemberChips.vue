@@ -1,15 +1,25 @@
 <script>
 import UserAvatar from './UserAvatar.vue';
 
-// Displays selected members as chips with an avatar, display name, and optional remove button.
+/**
+ * MemberChips — displays a list of members as chips with avatars and names.
+ *
+ * Props:
+ *  - members:   Array of member objects containing user details (id, name)
+ *  - removable: Enables/disables the '×' remove button on each chip
+ *  - light:     Applies lighter color palette when true (useful for dark backgrounds)
+ *
+ * Emits:
+ *  - remove:    Emitted when a member's remove button is clicked, to notify the parent component.
+ */
 export default {
 	components: { UserAvatar },
 	props: {
-		members:   { type: Array,   required: true }, // Array of member objects containing user details (id, name)
-		removable: { type: Boolean, default: true  }, // Enables/disables the '×' remove button on each chip
-		light:     { type: Boolean, default: false }, // Applies lighter color palette when true (useful for dark backgrounds)
+		members:   { type: Array,   required: true },
+		removable: { type: Boolean, default: true  },
+		light:     { type: Boolean, default: false },
 	},
-	emits: ['remove'], // Declares custom events to emit back to parent component when actions occur
+	emits: ['remove'],
 };
 </script>
 

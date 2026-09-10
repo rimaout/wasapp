@@ -1,16 +1,19 @@
 <script>
 /**
  * ConfirmBar — a two-button footer: a square X (cancel) plus a confirm button
- * that fills the remaining width. Default styling is a green confirm; setting
- * `danger` swaps it to a red confirm (used inside confirm screens).
+ * that fills the remaining width.
  *
- * @property {string}  [confirmText='']        - label on the confirm button.
- * @property {string}  [confirmIcon='']        - optional feather icon name on the confirm button.
- * @property {boolean} [iconRight=false]       - put the confirm icon after the label.
- * @property {boolean} [confirmDisabled=false] - disable the confirm button.
- * @property {boolean} [cancelDisabled=false]  - disable the X (cancel) button.
- * @property {string}  [cancelLabel='Cancel']  - accessible label/tooltip for the X button.
- * @property {boolean} [danger=false]          - red confirm styling (vs. default green).
+ * Props:
+ *  - confirmText:     Label on the confirm button
+ *  - confirmIcon:     Optional feather icon name on the confirm button
+ *  - iconRight:       Put the confirm icon after the label (otherwise it is before the label)
+ *  - confirmDisabled: Disable the confirm button (for example when a form is invalid)
+ *  - cancelDisabled:  Disable the X (cancel) button
+ *  - danger:          Red confirm styling (vs. default green)
+ *
+ * Events:
+ *  - cancel:  Fired when the X button is clicked
+ *  - confirm: Fired when the confirm button is clicked
  */
 export default {
 	props: {
@@ -19,27 +22,29 @@ export default {
 		iconRight:       { type: Boolean, default: false    },
 		confirmDisabled: { type: Boolean, default: false    },
 		cancelDisabled:  { type: Boolean, default: false    },
-		cancelLabel:     { type: String,  default: 'Cancel' },
 		danger:          { type: Boolean, default: false    },
 	},
-
-	/**
-	 * Events:
-	 *   cancel  - fired when the X button is clicked.
-	 *   confirm - fired when the confirm button is clicked.
-	 */
 	emits: ['cancel', 'confirm'],
 };
 </script>
 
 <template>
 	<div class="confirm-bar" :class="{ danger }">
-		<button type="button" class="footer-x" :disabled="cancelDisabled" :aria-label="cancelLabel" :title="cancelLabel" @click="$emit('cancel')">
+
+		<!-- Cancel button (X) -->
+		<button type="button" class="footer-x" :disabled="cancelDisabled" @click="$emit('cancel')">
 			<svg class="feather footer-x-icon"><use href="/feather-sprite-v4.29.0.svg#x"/></svg>
 		</button>
-		<button type="button" class="confirm-btn" :disabled="confirmDisabled" :aria-label="confirmText || undefined" :title="confirmText || undefined" @click="$emit('confirm')">
+
+		<!-- Confirm button -->
+		<button type="button" class="confirm-btn" :disabled="confirmDisabled" :title="confirmText || undefined" @click="$emit('confirm')">
+			<!-- Confirm icon (optional) -->
 			<svg v-if="confirmIcon && !iconRight" class="feather confirm-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + confirmIcon"/></svg>
+
+			<!-- Confirm label (optional) -->
 			<span v-if="confirmText">{{ confirmText }}</span>
+
+			<!-- Confirm icon (optional, right-aligned) -->
 			<svg v-if="confirmIcon && iconRight" class="feather confirm-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + confirmIcon"/></svg>
 		</button>
 	</div>
