@@ -7,6 +7,7 @@ import { createGroup as createGroupRequest, updateAvatar } from '../services/api
 import { refreshChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';
 import { getErrorMessage } from '../services/utils.js';
+import { validateBaseName } from '../services/validators.js';
 
 export default {
 	components: { ImagePicker, MemberChips, IconButton, ConfirmBar },
@@ -34,17 +35,7 @@ export default {
 		},
 
 		validate() {
-			const n = this.name.trim();
-			if (n.length < 3 || n.length > 24) {
-				return 'Group name must be 3-24 characters';
-			}
-			if (!/^[A-Za-z0-9 _-]+$/.test(n)) {
-				return 'Group name can only contain letters, numbers, spaces, underscores and hyphens';
-			}
-			if (!/\S/.test(n)) {
-				return 'Group name must contain at least one non-space character';
-			}
-			return '';
+			return validateBaseName(this.name, 'Group name');
 		},
 
 		async createGroup() {
@@ -82,7 +73,7 @@ export default {
 		<div class="body flex-grow-1 px-3 py-3">
 			<div class="section-box">
 				<span class="section-title">Details</span>
-				<ImagePicker v-model="imageFile" :size="120" @error="onPickerError" />
+				<ImagePicker v-model:selected-image="imageFile" :size="120" @error="onPickerError" />
 				<button v-if="imageFile" type="button" class="remove-image-btn" @click="imageFile = null">Remove image</button>
 				<input type="text" class="form-control name-input" v-model="name" maxlength="24" placeholder="Group name" />
 			</div>

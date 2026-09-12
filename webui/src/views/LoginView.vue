@@ -1,6 +1,18 @@
 <script>
 import { setAuth, setUserName } from '../services/auth.js';
 import { getErrorMessage } from '../services/utils.js';
+import { validateBaseName } from '../services/validators.js';
+
+/**
+ * LoginView component handles user login by accepting a username and sending it to the server.
+ * It manages the login state, displays error messages, and redirects to the chat view upon successful login.
+ *
+ * Used in: App.vue as the initial view when the user is not logged in.
+ *
+ * Props: None
+ *
+ * Emits: None
+ */
 
 export default {
 	data() {
@@ -17,6 +29,11 @@ export default {
 				this.errormsg = 'Please enter a username';
 				return;
 			}
+			const err = validateBaseName(this.username, 'Username');
+			if (err) {
+				this.errormsg = err;
+				return;
+			}
 			this.loading = true;
 			try {
 				// Send a POST request to the /session endpoint with the username
@@ -26,6 +43,8 @@ export default {
 
 				// Extract the token from the response and remove the 'Bearer ' prefix
 				let token = response.data.token.replace('Bearer ', '');
+
+				// Store the token and userId in localStorage for future authenticated requests
 				setAuth(token, response.data.userId);
 				setUserName(this.username.trim());
 
@@ -45,6 +64,7 @@ export default {
 	<div class="login-view d-flex align-items-center justify-content-center">
 		<div class="login-box">
 			<div class="card card-body shadow p-4">
+
 				<div class="text-center mb-4">
 					<h1 class="display-5 fw-bold">WASApp</h1>
 					<p class="text-muted mb-0">Enter your username to sign in</p>

@@ -2,6 +2,7 @@
 import ConfirmBar from './ui/ConfirmBar.vue';
 import { updateName } from '../services/api.js';
 import { getErrorMessage } from '../services/utils.js';
+import { validateBaseName } from '../services/validators.js';
 
 /**
  * RenameActionScreen — an inline panel shown in place of the popup menu, used to
@@ -45,6 +46,15 @@ export default {
 	methods: {
 		async confirm() {
 			if (this.busy || !this.isValid) return;
+
+			// Validate the name and show the error without disabling the button
+			const label = this.target.kind === 'group' ? 'Group name' : 'Username';
+			const err = validateBaseName(this.name, label);
+			if (err) {
+				this.errormsg = err;
+				return;
+			}
+
 			this.busy = true;
 			this.errormsg = null;
 			try {
