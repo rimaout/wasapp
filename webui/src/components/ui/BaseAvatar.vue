@@ -20,13 +20,15 @@ export default {
 		isGroup:     { type: Boolean, default: false },
 		version:     { type: Number,  default: 0     },
 	},
+
 	data() {
 		// Internal Data for the component
 		return {
-			imgSrc: null,
-			showImage: false,
+			imgSrc: null,		// The blob URL of the loaded image (null if not loaded or failed)
+			showImage: false,   // Whether the image was successfully loaded and should be shown
 		};
 	},
+
 	computed: {
 		// Intaernal Data that is computed based on props and data (re-computed when props/data change)
 		style() {
@@ -46,6 +48,7 @@ export default {
 			return getAvatarColor(this.displayName);
 		},
 	},
+
 	methods: {
 		// Load the image from the server and create a blob URL for it.
 		// NOTE: a blob URL is a local URL that points to a blob (binary data) in memory, it must be revoked when no longer needed.
@@ -64,18 +67,19 @@ export default {
 			}
 		},
 	},
+
 	watch: {
 		// Reload when the image URL changes (switching to another chat) or when the version prop is bumped (avatar was re-uploaded).
 		imageUrl: 'loadImage',
 		version:  'loadImage',
 	},
+
 	mounted() {
-		// Load the image when the component is mounted.
-		this.loadImage();
+		this.loadImage(); // Load the image when the component is mounted
 	},
+
 	beforeUnmount() {
-		// Release the blob URL when the component is unmounted.
-		if (this.imgSrc) URL.revokeObjectURL(this.imgSrc);
+		if (this.imgSrc) URL.revokeObjectURL(this.imgSrc); // Release the blob URL when the component is unmounted.
 	},
 };
 </script>

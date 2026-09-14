@@ -7,6 +7,21 @@ const TITLES = {
 	'group-details': 'New group details',
 };
 
+/**
+ * SidebarHeader component displays the header of the sidebar, which can change based on the current mode of the sidebar.
+ * It shows different titles and actions depending on whether the user is in chats, users, group-members, or group-details mode.
+ *
+ * Used in: App.vue as the header of the sidebar.
+ *
+ * Props:
+ *  - mode (String): The current mode of the sidebar ('chats', 'users', 'group-members', 'group-details').
+ *
+ * Emits:
+ *  - 'back' - emitted when the back button is clicked (for user, group-members, or group-details modes)
+ *  - 'home' - emitted when the home link is clicked (for chats mode).
+ *  - 'create-direct' - emitted when the user selects to create a direct chat.
+ *  - 'create-group' - emitted when the user selects to create a group chat.
+ */
 export default {
 	components: { ActionMenu },
 	props: {
@@ -16,9 +31,10 @@ export default {
 
 	data() {
 		return {
+			// Itesm for the popup actionMenu component
 			newChatItems: [
 				{ id: 'direct', label: 'Create Direct Chat', icon: 'message-circle' },
-				{ id: 'group', label: 'Create Group', icon: 'users'                 },
+				{ id: 'group',  label: 'Create Group',       icon: 'users'          },
 			],
 		};
 	},
@@ -33,6 +49,8 @@ export default {
 	},
 
 	methods: {
+		// ---- ACTION HANDLERS ----
+		// Handle selection of a new chat type from the action menu
 		onNewChatSelect(item) {
 			this.$emit(item.id === 'group' ? 'create-group' : 'create-direct');
 		},
@@ -42,10 +60,16 @@ export default {
 
 <template>
 	<div class="sidebar-header">
+
+		<!-- CHATS MODE: Show the app logo and the new chat action menu -->
 		<template v-if="isChats">
+			<!-- Logo (link to home) -->
 			<a href="#/chats" class="sidebar-logo fw-bold" @click="$emit('home')">WASApp</a>
+			<!-- ActionMenu for creating new chats (direct or group) -->
 			<ActionMenu class="ms-auto" trigger-button-icon="message-square-plus" placement="down-right" :items="newChatItems" trigger-button-filled @select="onNewChatSelect" />
 		</template>
+
+		<!-- OTHER MODES: Show a back button and the title of the current mode -->
 		<template v-else>
 			<button type="button" class="back-btn" @click="$emit('back')">
 				<svg class="feather back-icon"><use href="/feather-sprite-v4.29.0.svg#arrow-left"/></svg>

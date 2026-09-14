@@ -24,6 +24,7 @@ export default {
 		cancelDisabled:  { type: Boolean, default: false    },
 		danger:          { type: Boolean, default: false    },
 	},
+
 	emits: ['cancel', 'confirm'],
 };
 </script>

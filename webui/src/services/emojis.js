@@ -13,7 +13,7 @@ export const EMOJIS = [
 	{ id: 9, glyph: '🤯' },
 ];
 
-export function emojiGlyph(emojiId) {
+export function getEmoji(emojiId) {
 	const e = EMOJIS.find(e => e.id === emojiId);
 	return e ? e.glyph : '';
 }

@@ -6,19 +6,16 @@ services:
       context: .
       dockerfile: Dockerfile.backend
     ports:
-      - "3000:3000"          # API at http://localhost:3000 (matches the frontend's hardcoded __API_URL__)
-    environment:
-      # Override the default DB path (/tmp/decaf.db)
-      # Note: /data is a volume mount point, so the SQLite file is inside a persistent volume
-      CFG_DB_FILENAME: /data/wasapp.db
-      # Override the default uplads path (/tmp/uploads)
-      # Notes:
-      #   - the uploads dir is where avatars images and message images are saved
-      #   - /data is a volume mount point, so the uplades dir is inside a persistent volume
-      CFG_UPLOADS_DIR: /data/uploads
+      - "3000:3000"
     volumes:
       # Bind mount: the DB is saved as a real folder on the host filesystem
       - ./data:/data
+    environment:
+      # Override the default DB path (/tmp/decaf.db)
+      CFG_DB_FILENAME: /data/wasapp.db
+      # Override the default uplads path (/tmp/uploads)
+      # Notes: the uploads dir is where avatars images and message images are saved
+      CFG_UPLOADS_DIR: /data/uploads
     restart: unless-stopped
 
   # --- FRONTEND ---

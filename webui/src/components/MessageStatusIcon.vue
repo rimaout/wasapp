@@ -1,11 +1,15 @@
 <script>
+
 /**
- * MessageStatusIcon — compact read-receipt icon for a message status.
- * 'DELIVERED' renders a single check; 'RECEIVED'/'READ' render a double check.
- * The icon inherits `currentColor`, so the parent controls its color (an
- * `is-read` class is added to the root for the read accent).
+ * MessageStatusIcon.vue - the icon changes based on the message status: "DELIVERED", "RECEIVED", or "READ"
  *
- * @property {'DELIVERED'|'RECEIVED'|'READ'} status - the message status.
+ * Used in:
+ *  - ChatListView.vue to show the status of the last message in a chat preview.
+ *  - MessageBubble.vue to show the status of a message in the chat view.
+ * Props:
+ *  - status (String): The status of the message, which can be "DELIVERED", "RECEIVED", or "READ".
+ *
+ * Emits: None
  */
 export default {
 	props: {
@@ -16,7 +20,9 @@ export default {
 
 <template>
 	<span class="status-icon" :class="{ 'is-received': status === 'RECEIVED', 'is-read': status === 'READ' }">
-		<i v-if="status === 'DELIVERED'" class="bi bi-check"></i>
+		<!-- Single checkmark icon from Bootstrap Icons for 'DELIVERED' status -->
+		<i v-if="status === 'DELIVERED'" class="bi  bi-check"></i>
+		<!-- Double checkmark icon from Bootstrap Icons for 'RECEIVED' status -->
 		<i v-else class="bi bi-check-all"></i>
 	</span>
 </template>

@@ -5,7 +5,6 @@ import { validateBaseName } from '../services/validators.js';
 
 /**
  * LoginView component handles user login by accepting a username and sending it to the server.
- * It manages the login state, displays error messages, and redirects to the chat view upon successful login.
  *
  * Used in: App.vue as the initial view when the user is not logged in.
  *

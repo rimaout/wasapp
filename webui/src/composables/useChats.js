@@ -2,8 +2,9 @@ import { ref } from 'vue';
 import axios from '../services/axios.js';
 import { getErrorMessage } from '../services/utils.js';
 
-// Shared chat state. Call refreshChats() to sync across components.
-
+/**
+ * Shared state for the list of chats, error messages, and version number.
+ */
 const chats    = ref([]);
 const errormsg = ref(null);
 const version  = ref(0);

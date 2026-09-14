@@ -4,8 +4,16 @@ import UserPicker from './UserPicker.vue';
 import ConfirmBar from './ui/ConfirmBar.vue';
 import { getErrorMessage } from '../services/utils.js';
 
-// Button in the chat header showing the member count; opens a popup with the
-// group member list and an "Add members" view (search + pick new members).
+/**
+ * ChatMembersPopup component - displays a button showing the number of members in a chat.
+ * When clicked, it opens a popup showing the list of members and an option to add new members.
+ *
+ * Used in: ChatView.vue to manage members of a chat.
+ *
+ * Props:
+ *  - chatId: The ID of the chat for which to display members.
+ */
+
 export default {
 	components: { MemberChips, UserPicker, ConfirmBar },
 	props: {
@@ -15,7 +23,7 @@ export default {
 	data() {
 		return {
 			open: false,
-			view: 'members', // 'members' | 'add'
+			view: 'members', // 'members' | 'add' - current view of the popup
 			members: [],
 			loading: false,
 			errormsg: null,
@@ -24,11 +32,15 @@ export default {
 	},
 
 	computed: {
+		// Return an array of existing member IDs to exclude them from the user picker
 		existingIds() {
 			return this.members.map(m => m.id);
 		},
+		// Return a label for the members button, showing the number of members or a loading state
 		countLabel() {
 			if (this.loading) return 'Members';
+
+			//
 			const n = this.members.length;
 			return n === 1 ? '1 Member' : n + ' Members';
 		},
@@ -47,31 +59,30 @@ export default {
 		async fetchMembers() {
 			this.loading = true;
 			this.errormsg = null;
+
+			// Fetch the list of members for the current chat from the server
 			try {
 				const res = await this.$axios.get('/chats/' + this.chatId + '/members');
 				this.members = res.data.membersList
-					.filter(m => !m.leaveTime)
+					.filter(m => !m.leaveTime) // Exclude members who have left the chat
 					.map(m => ({ id: m.userId, name: m.name }));
 			} catch (e) {
 				this.errormsg = getErrorMessage(e);
 			}
 			this.loading = false;
 		},
-
 		toggle() {
+			// Togle the popup open/close state
 			this.open = !this.open;
 		},
-
 		close() {
 			this.open = false;
-			this.view = 'members';
+			this.view = 'members'; // Reset to members view when closing
 		},
-
 		openAddView() {
-			this.selected = [];
+			this.selected = []; // Clear selected users when opening the add members view
 			this.view = 'add';
 		},
-
 		async confirmAdd() {
 			this.errormsg = null;
 			for (const user of this.selected) {
@@ -92,25 +103,45 @@ export default {
 
 <template>
 	<div class="members-popup">
+		<!-- Button to toggle the members popup -->
 		<button type="button" class="members-btn" @click="toggle">{{ countLabel }}</button>
+
+		<!-- Popup panel showing members or add members view -->
 		<template v-if="open">
+
+			<!-- Backdrop to close the popup when clicking outside -->
 			<div class="popup-backdrop" @click="close"></div>
+
+			<!-- Popup panel content -->
 			<div class="popup-panel">
+
+				<!-- Members view -->
 				<template v-if="view === 'members'">
+					<!-- Title for the members view -->
 					<div class="panel-title">Group members</div>
 
+					<!-- Show error message if any -->
 					<ErrorMsg v-if="errormsg" :msg="errormsg" />
+
+					<!-- Show loading spinner while fetching members -->
 					<LoadingSpinner v-if="loading" />
+
+					<!-- Show the list of members using MemberChips component -->
 					<MemberChips :members="members" :removable="false" light />
 
+					<!-- Button to open the add members view -->
 					<ConfirmBar confirm-text="Add members" confirm-icon="plus" cancel-label="Close" @cancel="close" @confirm="openAddView" />
 				</template>
 
+				<!-- Add members view -->
 				<template v-else>
+					<!-- Title for the add members view -->
 					<div class="panel-title">Add members</div>
 
-					<UserPicker v-model="selected" :exclude-ids="existingIds" compact light class="user-picker-wrap" />
+					<!-- UserPicker component to select users to add, excluding existing members -->
+					<UserPicker v-model:user-list="selected" :exclude-ids="existingIds" compact light class="user-picker-wrap" />
 
+					<!-- ConfirmBar component to confirm adding selected members or close the popup -->
 					<ConfirmBar class="confirm-bar-tight" confirm-text="Confirm" confirm-icon="check" cancel-label="Close" :confirm-disabled="selected.length === 0" @cancel="close" @confirm="confirmAdd" />
 				</template>
 			</div>

@@ -6,11 +6,19 @@ import { usePolling } from '../composables/usePolling.js';
 import { useChats } from '../composables/useChats.js';
 import { navigateToChat } from '../services/chatNavigation.js';
 
+/**
+ * ChatsListView component displays a list of chat conversations, allowing users to search, view, and navigate to individual chats.
+ *
+ * Props:
+ *  - searchQuery (String): The current search query used to filter the chat list.
+ *  - beforeUnmount: Stops polling when the component is destroyed.
+ */
 export default {
 	components: { ChatAvatar, MessageStatusIcon },
 	props: {
 		searchQuery: { type: String, default: '' },
 	},
+	// Get shared chats state and methods from useChats
 	setup() {
 		const { chats, errormsg, version, refreshChats } = useChats();
 		return { chats, errormsg, version, refreshChats };
@@ -53,19 +61,25 @@ export default {
 
 <template>
 	<div>
+		<!-- Error message display -->
 		<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
+
+		<!-- Loading spinner display when loading and no chats are present -->
 		<LoadingSpinner v-if="loading && chats.length === 0" />
 
+		<!-- Display message when no search results are found after a search-->
 		<div v-if="!loading && searchQuery && filteredChats.length === 0 && chats.length > 0" class="text-muted text-center py-5">
 			<p class="mb-2 fs-5">No results found</p>
 			<p>Try a different search or start a new chat</p>
 		</div>
 
+		<!-- Display message when there are no conversations yet -->
 		<div v-if="!loading && !searchQuery && chats.length === 0" class="text-muted text-center py-5">
 			<p class="mb-2 fs-5">No conversations yet</p>
 			<p>Start a new chat to begin messaging</p>
 		</div>
 
+		<!-- List of filtered chats -->
 		<div v-if="filteredChats.length > 0" class="list-group list-group-flush">
 			<a
 				v-for="chat in filteredChats"
@@ -75,31 +89,45 @@ export default {
 				@click.prevent="openChat(chat)"
 				href="#"
 			>
+			<!-- Note: by default, clicking on an <a> tag would navigate to the href. So we use
+						   @click.prevent to prevent the default navigation behavior and instead call the openChat() method.
+
+				 The href is set to a default value of "#" to prevent navigation, but the actual navigation is handled by the openChat() method when the chat is clicked.
+				-->
+
+				<!-- ChatAvatar Display -->
 				<ChatAvatar :chatId="chat.id" :displayName="chat.displayName" :size="48" :isGroup="chat.isGroupChat" :version="version" class="me-3" />
 
 				<div class="chat-info flex-grow-1 min-w-0">
 					<div class="d-flex justify-content-between align-items-baseline">
+
+						<!-- Chat Name Display -->
 						<span class="chat-name fw-semibold text-truncate">
 							{{ chat.displayName }}
 						</span>
+
 						<div class="d-flex align-items-center flex-shrink-0 ms-2">
-							<span
-								v-if="isMyMessage(chat.lastMessage.senderName)"
-								class="me-1 chat-check"
-							><MessageStatusIcon :status="chat.lastMessage.status" /></span>
+							<!-- Message Status Icon Display - for user's own messages (status icon is for sent/received/read badge) -->
+							<span v-if="isMyMessage(chat.lastMessage.senderName)" class="me-1 chat-check">
+								<MessageStatusIcon :status="chat.lastMessage.status" />
+							</span>
+
+							<!-- Last Message Time Display -->
 							<small class="chat-time">{{ formatPreviewTime(chat.lastMessage.sendTime) }}</small>
 						</div>
 					</div>
+
+					<!-- Last Message Snippet Display -->
 					<div class="d-flex justify-content-between align-items-center">
-						<small
-							class="chat-snippet text-truncate"
-							:class="{ 'text-muted fst-italic': chat.lastMessage.isDeleted }"
-						>
+						<small class="chat-snippet text-truncate" :class="{ 'text-muted fst-italic': chat.lastMessage.isDeleted }">
+							<!-- Display sender name for group chats, unless the last message is an init/join/leave message -->
 							<span v-if="chat.isGroupChat && !chat.lastMessage.isInitMessage && !chat.lastMessage.isJoinMessage && !chat.lastMessage.isLeaveMessage" class="text-muted">
 								{{ isMyMessage(chat.lastMessage.senderName) ? 'You' : chat.lastMessage.senderName }}:
 							</span>
+							<!-- Display the last message snippet -->
 							{{ getChatSnippet(chat) }}
 						</small>
+						<!-- Unread message count badge display -->
 						<span
 							v-if="chat.unreadCount > 0"
 							class="badge rounded-pill bg-primary unread-badge flex-shrink-0 ms-2"

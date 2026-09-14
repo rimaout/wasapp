@@ -14,11 +14,13 @@ import UserAvatar from './UserAvatar.vue';
  */
 export default {
 	components: { UserAvatar },
+
 	props: {
 		members:   { type: Array,   required: true },
 		removable: { type: Boolean, default: true  },
 		light:     { type: Boolean, default: false },
 	},
+
 	emits: ['remove'],
 };
 </script>

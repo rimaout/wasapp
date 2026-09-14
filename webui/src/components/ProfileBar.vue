@@ -5,19 +5,28 @@ import RenameActionScreen from './RenameActionScreen.vue';
 import ImageActionScreen from './ImageActionScreen.vue';
 import { getUserId, getUserName, setUserName, clearAuth } from '../services/auth.js';
 
+/**
+ * ProfileBar - a component that displays the user's profile information and provides options to change the profile name, image, or log out.
+ *
+ * Used in: App.vue as the bottom bar of the sidebar.
+ *
+ * Props: None
+ *
+ * Emits: None
+ */
 export default {
 	components: { UserAvatar, ActionMenu },
 
 	data() {
 		return {
 			userId: getUserId(),
-			name: getUserName() || 'User',
+			name: getUserName(),
 			avatarVersion: 0,
 		};
 	},
 
 	computed: {
-		profileItems() {
+		profileItems() { // Returns the list of profile action items for the action menu component
 			return [
 				{ id: 'name', label: 'Change Profile Name', icon: 'edit-2', component: RenameActionScreen, props: { title: 'Change Profile Name', target: { kind: 'me', userId: this.userId }, initialName: this.name } },
 				{ id: 'image', label: 'Change Profile Image', icon: 'image', component: ImageActionScreen, props: { title: 'Change Profile Image', target: { kind: 'me', userId: this.userId } } },
@@ -27,6 +36,10 @@ export default {
 	},
 
 	methods: {
+
+		// ------- ACTION HANDLERS -------
+
+		// Handles the selection of an action item from the profile action menu
 		onSelect(item) {
 			if (item.id === 'logout') {
 				clearAuth();
@@ -34,6 +47,7 @@ export default {
 			}
 		},
 
+		// Handles the completion of an action (rename or image change)
 		onDone(payload) {
 			if (payload.action === 'rename') {
 				setUserName(payload.name);
@@ -48,8 +62,13 @@ export default {
 
 <template>
 	<div class="profile-bar">
+		<!-- User avatar component that displays the user's profile image -->
 		<UserAvatar :userId="userId" :displayName="name" :size="40" :version="avatarVersion" />
+
+		<!-- Greeting message that shows the user's name -->
 		<span class="profile-greeting">Hi 👋 {{ name }}</span>
+
+		<!-- Action menu component that provides options to change profile name, image, or logout -->
 		<ActionMenu class="ms-auto" trigger-button-icon="settings" placement="top-right" :items="profileItems" @select="onSelect" @done="onDone" />
 	</div>
 </template>

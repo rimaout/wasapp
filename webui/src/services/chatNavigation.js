@@ -7,11 +7,12 @@ export function collapseSidebar() {
 	}
 }
 
-// Navigate to a chat, passing its name/group through query params
-// (there is no GET /chats/{id} endpoint yet).
+// navigateToChat - Navigates to the chat page for the given chat object, passing the chat name and group status as query parameters.
 export function navigateToChat(router, chat) {
 	router.push('/chats/' + chat.id +
 		'?name=' + encodeURIComponent(chat.displayName) +
 		'&group=' + (chat.isGroupChat ? '1' : '0'));
+
+	// Collapse the sidebar on mobile devices after navigation
 	collapseSidebar();
 }

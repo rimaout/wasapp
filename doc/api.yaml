@@ -783,7 +783,7 @@ paths:
     parameters:
       - $ref: '#/components/parameters/ChatId'
       - $ref: '#/components/parameters/MessageId'
-  
+
     delete:
       tags: ["Message Operations"]
       summary: Delete a specific message from the specified chat
@@ -802,7 +802,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Message'
-  
         "400":
           description: >-
             Bad Request - Returned when attempting an illegal operation on the message state:
@@ -812,14 +811,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  
         "401":
           description: Authentication required - Bearer token missing, malformed, or expired.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  
         "403":
           description: >-
             Forbidden - Returned when authorization checks fail:
@@ -829,7 +826,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  
         "404":
           description: >-
             Not Found:

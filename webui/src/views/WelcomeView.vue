@@ -1,6 +1,16 @@
 <script>
 import { getUserName } from '../services/auth.js';
 
+/**
+ * WelcomeView component displays a welcome message to the user.
+ *
+ * Used in: App.vue as the default view when no chat is selected.
+ *
+ * Props: None
+ *
+ * Emits: None
+ */
+
 export default {
 	computed: {
 		userName() {

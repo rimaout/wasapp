@@ -23,11 +23,9 @@ import ConfirmBar from './ConfirmBar.vue';
  * existing one) and add one item object in the caller — ActionMenu is untouched.
  *
  * Example items:
- *   { id:'reply',  label:'Reply',   icon:'corner-up-left' }
- *   { id:'delete', label:'Delete',  icon:'trash-2', danger:true,
- *     dangerText:'Are you sure you want to delete this message?' }
- *   { id:'forward', label:'Forward', icon:'share',
- *     component: ForwardActionScreen, props:{ message: msg } }
+ *   { id:'reply',   label:'Reply',   icon:'corner-up-left' }
+ *   { id:'delete',  label:'Delete',  icon:'trash-2', danger:true, dangerText:'Are you sure you want to delete this message?' }
+ *   { id:'forward', label:'Forward', icon:'share', component: ForwardActionScreen, props:{ message: msg } }
  */
 export default {
 	components: { IconButton, ConfirmBar },
@@ -35,22 +33,22 @@ export default {
 		items:                  { type: Array,   required: true        }, // array of menu items (simple / confirm / action screen)
 		placement:              { type: String,  default: 'down-right' }, // 'down-right' | 'down-left' | 'top-right' | 'top-left' used to position the menu relative to the trigger button
 		triggerButtonMode:      { type: String,  default: 'visible'    }, // 'visible' | 'hover' used to control when the trigger button is shown (hover mode is used for message menus that reveal the trigger button on hover)
-		triggerButtonVisible:   { type: Boolean, default: false        }, // ?
+		triggerButtonVisible:   { type: Boolean, default: false        },
 		triggerButtonIcon:      { type: String,  required: true        }, // feather icon name for the trigger button (e.g. 'more-vertical')
 		triggerButtonFilled:    { type: Boolean, default: false        }, // filled trigger background
 		triggerButtonSize:      { type: String,  default: 'default'    }, // 'default' | 'small'
 	},
 
 	// Events emitted to parent component
-	// 'select': Fired when a normal item is clicked or a danger item is confirmed
-	// 'done': Fired when a sub-component screen finishes its task
+	//  'select' - Fired when a normal item is clicked or a danger item is confirmed
+	//  'done':  - Fired when a sub-component screen finishes its task
 	emits: ['select', 'done'],
 
 	data() {
 		return {
 			open: false,
-			activeAction: null,
-			confirmItem: null,
+			activeAction: null,						// The currently active action screen (if any)
+			confirmItem: null,						// The currently active danger item (if any)
 			menuStyle: { visibility: 'hidden' },
 		};
 	},
@@ -62,7 +60,6 @@ export default {
 	},
 
 	watch: {
-		// Position (or reposition on morph) after the menu has been rendered.
 		open:          { handler: 'repositionMenu', flush: 'post' },
 		activeAction:  { handler: 'repositionMenu', flush: 'post' },
 		confirmItem:   { handler: 'repositionMenu', flush: 'post' },
@@ -112,6 +109,7 @@ export default {
 		},
 
 		positionMenu() {
+			//
 			if (!this.$refs.trigger || !this.$refs.menu) return;
 			const t  = this.$refs.trigger.getBoundingClientRect();
 			const mw = this.$refs.menu.offsetWidth;
@@ -145,13 +143,19 @@ export default {
 
 <template>
 	<div class="action-menu">
+		<!-- Trigger button -->
 		<div ref="trigger" class="action-menu-trigger" :class="{ hidden: !showTrigger }">
 			<IconButton :icon="triggerButtonIcon" :filled="triggerButtonFilled" :size="triggerButtonSize" @click="toggle" />
 		</div>
 
+		<!-- Floating menu (note: `Teleport to body` is used to avoid clipping by parent containers) -->
 		<Teleport to="body">
+			<!-- Backdrop to close the menu when clicking outside -->
 			<div v-if="open" class="menu-backdrop" @click="closeAll"></div>
+
+			<!-- Menu content -->
 			<div v-if="open" ref="menu" class="menu" :style="menuStyle">
+				<!-- Render the active action screen if one is selected -->
 				<component
 					v-if="activeAction"
 					:is="activeAction.item.component"
@@ -160,18 +164,23 @@ export default {
 					@cancel="closeAll"
 				/>
 
+				<!-- Render the confirmation screen if a danger item is selected (and no active action screen is selected) -->
 				<div v-else-if="confirmItem" class="confirm-screen">
 					<div class="danger-text">{{ confirmItem.dangerText }}</div>
 					<ConfirmBar danger confirm-text="Confirm" confirm-icon="check" cancel-label="Cancel" @cancel="closeAll" @confirm="onConfirm" />
 				</div>
 
+				<!-- Render the list of menu items if no action screen or confirmation screen is active -->
 				<template v-else>
 					<template v-for="item in items" :key="item.id">
 						<div v-if="item.danger" class="menu-divider"></div>
+
+						<!-- Render a button for each menu item, applying danger styling if applicable -->
 						<button type="button" class="menu-item" :class="{ danger: item.danger }" @click="choose(item)">
 							<svg class="feather menu-icon"><use :href="'/feather-sprite-v4.29.0.svg#' + item.icon"/></svg>
 							<span>{{ item.label }}</span>
 						</button>
+
 					</template>
 				</template>
 			</div>

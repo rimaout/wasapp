@@ -4,23 +4,24 @@
  * ImagePicker — a Vue 3 component for selecting and previewing an image file.
  *
  * Props:
- *  - modelValue: The selected File object (v-model binding).
- *  - previewUrl: Initial/fallback image URL when no local File object is selected.
- *  - radius:     CSS border-radius value controlling container shape (e.g., '50%' or '12px').
- *  - size:       Width and height of the component in pixels.
+ *  - selectedImage: The selected File object (v-model binding).
+ *  - previewUrl:    Initial/fallback image URL when no local File object is selected.
+ *  - radius:        CSS border-radius value controlling container shape (e.g., '50%' or '12px').
+ *  - size:          Width and height of the component in pixels.
  *
  * Emits:
- *  - update:modelValue: Emitted when a new file is selected, passing the File object to the parent.
- *  - error:             Emitted when validation fails (e.g., file size exceeds limit), passing an error message to the parent.
+ *  - update:selectedImage: Emitted when a new file is selected, passing the File object to the parent.
+ *  - error:                Emitted when validation fails (e.g., file size exceeds limit), passing an error message to the parent.
  */
 export default {
 	props: {
-		modelValue: { type: File,   default: null  },
-		previewUrl: { type: String, default: null  },
-		radius:     { type: String, default: '50%' },
-		size:       { type: Number, default: 96    },
+		selectedImage: { type: File,   default: null  },
+		previewUrl:    { type: String, default: null  },
+		radius:        { type: String, default: '50%' },
+		size:          { type: Number, default: 96    },
 	},
-	emits: ['update:modelValue', 'error'],
+
+	emits: ['update:selectedImage', 'error'],
 
 	data() {
 		return {
@@ -34,15 +35,15 @@ export default {
 		iconSize() {
 			return Math.round(this.size * 28 / 96); //Note: 28 is the default icon size for 96px component size
 		},
-		// Resolves display source priority: newly selected local file > initial preview URL > fallback null
+		// Display source priority: newly selected local file > initial preview URL > fallback null
 		displaySrc() {
 			return this.objectUrl || this.previewUrl || null;
 		},
 	},
 
 	watch: {
-		// Automatically manages blob URLs: revokes previous object URL and generates a new preview URL
-		modelValue(file) {
+		// Automatically manages blob URLs: removes previous object URL and generates a new preview URL
+		selectedImage(file) {
 			if (this.objectUrl) URL.revokeObjectURL(this.objectUrl);  // Cleanup previous object URL
 			this.objectUrl = file ? URL.createObjectURL(file) : null; // Generate new object URL for the selected file or reset to null if no file is selected
 		},
@@ -65,8 +66,8 @@ export default {
 				return;
 			}
 
-			// Emit the selected file to the parent component via v-model binding
-			this.$emit('update:modelValue', file);
+			// Emit the selected file to the parent component
+			this.$emit('update:selectedImage', file);
 		},
 	},
 

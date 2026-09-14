@@ -33,6 +33,7 @@ export function isMyMessageById(senderId) {
 	return senderId === getUserId();
 }
 
+// Returns a formatted string for the message time, e.g. "now", "5m", "10:30 AM", "Yesterday", "Mar 5", "Mar 5, 2023"
 export function formatPreviewTime(isoString) {
 	let date = new Date(isoString);
 	let now = new Date();
@@ -43,7 +44,7 @@ export function formatPreviewTime(isoString) {
 
 	let today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 	let msgDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-	let diffDays = Math.floor((today - msgDay) / 86400000);
+	let diffDays = Math.floor((today - msgDay) / 86400000); //86400000 ms in a day
 
 	if (diffDays === 0) {
 		return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -56,6 +57,7 @@ export function formatPreviewTime(isoString) {
 	return date.toLocaleDateString([], { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+// Returns a formatted string for the message time, e.g. "now", "5m", "10:30 AM" (without the day)
 export function formatMessageTime(isoString) {
 	let date = new Date(isoString);
 	let now = new Date();
@@ -73,7 +75,7 @@ export function formatDay(isoString) {
 	let now = new Date();
 	let today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 	let msgDay = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-	let diffDays = Math.floor((today - msgDay) / 86400000);
+	let diffDays = Math.floor((today - msgDay) / 86400000); //86400000 ms in a day
 
 	if (diffDays === 0) return 'Today';
 	if (diffDays === 1) return 'Yesterday';
@@ -92,6 +94,7 @@ export function isNewDay(prevMsg, currMsg) {
 		|| prev.getDate() !== curr.getDate();
 }
 
+// Returns a snippet of the last message in the chat, e.g. "You: Hello", "Alice: Hi", "Bob joined the group", etc.
 export function getChatSnippet(chat) {
 	let lm = chat.lastMessage;
 	if (lm.isInitMessage) {

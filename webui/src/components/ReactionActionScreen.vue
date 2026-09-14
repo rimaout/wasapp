@@ -19,12 +19,14 @@ export default {
 	 * Events:
 	 *   done({ action:'react' }) - fired after the reaction is added/removed.
 	 *   cancel - fired when the user closes the picker.
+     *
+     * Note: action:'react' is needed to distinguish this from other actions that may be emitted by the parent ActionMenu.
 	 */
 	emits: ['done', 'cancel'],
 
 	data() {
 		return {
-			EMOJIS, // Available emoji reactions (used in the template)
+			EMOJIS,
 			sending: false,
 			errormsg: null,
 		};
@@ -32,6 +34,7 @@ export default {
 
 	computed: {
 		myReactionId() {
+			// Find the logged-in user's reaction to this message, if exists, and return its emojiId; otherwise return null.
 			const me = getUserId();
 			const found = (this.message.reactionsList || []).find(r => r.userId === me);
 			return found ? found.emojiId : null;
@@ -43,10 +46,14 @@ export default {
 			return this.myReactionId === emojiId;
 		},
 
+		// ---- ACTION HANDLERS ----
 		async pick(emoji) {
+			// Prevent multiple simultaneous requests
 			if (this.sending) return;
 			this.sending = true;
 			this.errormsg = null;
+
+			// Send the reaction request to the server: if the emoji is already active, remove it; otherwise, add it.
 			try {
 				const base = '/chats/' + this.message.chatId + '/messages/' + this.message.id + '/reactions';
 				let res;
@@ -78,7 +85,7 @@ export default {
 				:disabled="sending"
 				@click="pick(emoji)"
 			>
-				<span class="emoji-glyph">{{ emoji.glyph }}</span>
+				<span class="emoji-icon">{{ emoji.glyph }}</span>
 			</button>
 		</div>
 
@@ -125,7 +132,7 @@ export default {
 	cursor: default;
 }
 
-.emoji-glyph {
+.emoji-icon {
 	font-size: 1.5rem;
 	line-height: 1;
 }

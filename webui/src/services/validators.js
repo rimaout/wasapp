@@ -1,12 +1,17 @@
-// Shared input validators. These mirror the backend rules in
-// service/api/helpers-validators.go so the client can give instant feedback.
-
-// Validates a name against the BaseName rules used for usernames and group names:
-// must be 3-24 characters, only alphanumeric + spaces/underscores/hyphens,
-// and must contain at least one non-space character.
-// @param {string} name  the value to validate
-// @param {string} label the noun used in the error message (e.g. 'Username')
-// @returns {string} '' when valid, otherwise a user-facing error message.
+/**
+ * Validates a base name according to the following rules:
+ * - Must be between 3 and 24 characters long.
+ * - Can only contain letters, numbers, spaces, underscores, and hyphens.
+ * - Must contain at least one non-space character.
+ *
+ * Inputs:
+ *  - name: The name to validate.
+ *  - label: Optional. The label to use in the error message. Defaults to 'Name'.
+ *
+ * Returns:
+ *  - An empty string if the name is valid.
+ *  - An error message string if the name is invalid.
+ */
 export function validateBaseName(name, label = 'Name') {
 	const n = (name || '').trim();
 	if (n.length < 3 || n.length > 24) {

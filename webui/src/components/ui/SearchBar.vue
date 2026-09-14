@@ -1,42 +1,43 @@
 <script>
-import { ref, watch } from 'vue';
-
 /**
  * SearchBar — a reusable search input component with a magnifying glass icon and clear button.
  *
  * Props:
- *  - modelValue:  The text value bound via v-model from the parent component.
+ *  - searchText:  The text value bound via v-model from the parent component.
  *  - placeholder: Placeholder text shown when the input is empty (default: 'Search chats...').
  *  - compact:     Reduces vertical padding around the component when true (default: false).
  *  - light:       Applies a lighter color palette when true (useful for dark backgrounds, default: false).
  *
  * Emits:
- *  - update:modelValue: Emitted to the parent component whenever the input value changes.
+ *  - update:searchText: Emitted to the parent component whenever the input value changes.
  */
 export default {
 	props: {
-		modelValue:  { type: String,  default: ''                },
+		searchText:  { type: String,  default: ''                },
 		placeholder: { type: String,  default: 'Search chats...' },
 		compact:     { type: Boolean, default: false             },
 		light:       { type: Boolean, default: false             },
 	},
 
-	emits: ['update:modelValue'],
-	setup(props, { emit }) {
-		// Local variable synced with input field
-		const query = ref(props.modelValue);
+	emits: ['update:searchText'],
 
+	data() {
+		return {
+			// Local variable synced with the input field
+			query: this.searchText,
+		};
+	},
+
+	watch: {
 		// Every time 'query' changes (as the user types), emit an event to the parent (update v-model binding)
-		watch(query, (newVal) => {
-			emit('update:modelValue', newVal);
-		});
+		query(newVal) {
+			this.$emit('update:searchText', newVal);
+		},
 
-		// If the parent updates 'modelValue' from the outside, sync local 'query'
-		watch(() => props.modelValue, (newVal) => {
-			query.value = newVal;
-		});
-
-		return { query };
+		// If the parent updates 'searchText' from the outside, sync local 'query'
+		searchText(newVal) {
+			this.query = newVal;
+		},
 	},
 };
 </script>

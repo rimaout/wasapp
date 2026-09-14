@@ -1,6 +1,10 @@
 import axios from "axios";
 import { getToken, clearAuth } from "./auth.js";
 
+/**
+ * Shared Axios instance for making API requests. Automatically adds the auth token to the Authorization
+ * header if it exists, and handles 401 Unauthorized responses by clearing the auth and redirecting to the login page.
+ */
 const instance = axios.create({
 	baseURL: __API_URL__,
 	timeout: 1000 * 5

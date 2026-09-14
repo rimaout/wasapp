@@ -11,6 +11,15 @@ import { refreshChats } from '../composables/useChats.js';
 import { leaveGroup } from '../services/api.js';
 import { formatDay, isNewDay, getErrorMessage } from '../services/utils.js';
 
+/**
+ * ChatView component displays the chat interface for a specific chat, allowing users to view messages, send new messages, and perform actions like replying or deleting messages.
+ *
+ * Used in: App.vue when the user navigates to a specific chat via the /chats/:chatId route.
+ *
+ * Props: None
+ *
+ * Emits: None
+ */
 export default {
 	components: { MessageBubble, MessageInput, ChatAvatar, ActionMenu, ChatMembersPopup },
 	data() {
@@ -36,6 +45,7 @@ export default {
 		chatName() {
 			return this.nameOverride || this.$route.query.name || 'Chat';
 		},
+		// Cheat option list used for the ActionMenu component in the chat header
 		chatOptions() {
 			return [
 				{ id: 'rename', label: 'Change Group Name', icon: 'type', component: RenameActionScreen, props: { title: 'Change Group Name', target: { kind: 'group', chatId: this.chatId }, initialName: this.chatName } },
@@ -50,9 +60,11 @@ export default {
 
 		async fetchMessages(scroll) {
 			try {
+				// Fetch messages for the current chat from the server
 				let response = await this.$axios.get('/chats/' + this.chatId + '/messages');
 				this.messages = response.data.messages.slice().reverse();
 
+				// Mark the chat as read on the server and refresh the chat list
 				this.$axios.post('/chats/' + this.chatId + '/read')
 				.then(() => refreshChats())
 				.catch(() => {});
@@ -65,33 +77,47 @@ export default {
 
 		async sendMessage() {
 			let text = this.newMsg.trim();
+
+			// Prevent sending empty messages or sending while a message is already being sent
 			if ((!text && this.newImages.length === 0) || this.sending) return;
 
 			this.sending = true;
 			try {
+				// Determine the appropriate URL for sending the message, depending on whether it's a reply or a new message
 				let base = '/chats/' + this.chatId + '/messages';
 				let url = this.replyTo ? base + '/' + this.replyTo.id + '/replies' : base;
 
 				if (this.newImages.length === 0) {
+					// If there are no images, send a text message
 					let formData = new FormData();
 					formData.append('text', text);
 					let response = await this.$axios.post(url, formData);
 					this.messages.push(response.data);
 					this.newMsg = '';
 				} else {
+					// If there are images, send each image as a separate message
 					while (this.newImages.length > 0) {
 						let image = this.newImages[0];
 						let isLast = this.newImages.length === 1;
 						let formData = new FormData();
-						if (isLast && text) formData.append('text', text);
-						formData.append('imageFile', image);
 
+						// If it's the last image and there's text, include the text in the last message
+						if (isLast && text) formData.append('text', text);
+
+						// Append the image file to the form data and send the message
+						formData.append('imageFile', image);
 						let response = await this.$axios.post(url, formData);
+
+						// Add the sent message to the messages array
 						this.messages.push(response.data);
+
+						// Remove the sent image from the newImages array and clear the text if it was included in the last message
 						this.newImages = this.newImages.slice(1);
 						if (isLast) this.newMsg = '';
 					}
 				}
+
+				// Clear the replyTo state and scroll to the bottom of the chat after sending the message
 				this.replyTo = null;
 				this.scrollToBottom();
 				refreshChats().catch(() => {});
@@ -161,6 +187,7 @@ export default {
 	},
 	watch: {
 		chatId() {
+			// Reset the state when the chatId changes
 			this.messages = [];
 			this.loading = true;
 			this.errormsg = null;
@@ -170,6 +197,7 @@ export default {
 		},
 	},
 	mounted() {
+		// Fetch messages when the component is mounted and start polling for new messages every 10 seconds
 		this.fetchMessages(true);
 		this.stopPolling = usePolling(() => this.fetchMessages(false), 10000);
 	},
@@ -181,31 +209,50 @@ export default {
 
 <template>
 	<div class="chat-view">
+
+		<!-- CHAT HEADER -->
 		<div class="chat-header">
-			<button class="chat-back-btn d-md-none" @click="$router.push('/chats')" aria-label="Back" title="Back">
+			<!-- Back button for mobile view -->
+			<button class="chat-back-btn d-md-none" @click="$router.push('/chats')" title="Back">
 				<svg class="feather"><use href="/feather-sprite-v4.29.0.svg#arrow-left"/></svg>
 			</button>
+
+			<!-- Chat avatar and name -->
 			<ChatAvatar :chatId="chatId" :displayName="chatName" :size="40" :isGroup="isGroup" :version="avatarVersion" />
 			<span class="chat-header-name">{{ chatName }}</span>
+
+			<!-- Members Menu: button to open popmenu for view and export members in group chat -->
 			<ChatMembersPopup v-if="isGroup" :chatId="chatId" />
+
+			<!-- Action Menu: button to open menu for editing group name, image or leave group -->
 			<ActionMenu v-if="isGroup" class="ms-auto" trigger-button-icon="more-vertical" placement="down-right" :items="chatOptions" trigger-button-filled @done="onChatAction" @select="onChatSelect" />
 		</div>
 
+		<!-- CHAT MESSAGES AREA -->
 		<div ref="messagesArea" class="chat-messages flex-grow-1">
+
+			<!-- Loading spinner and error message -->
 			<LoadingSpinner v-if="loading" />
 			<ErrorMsg v-if="errormsg" :msg="errormsg"></ErrorMsg>
 
+			<!-- Render each message in the chat -->
 			<template v-for="(msg, i) in messages" :key="msg.id">
+
+				<!-- Initial message rendering: shows the first message in the chat with a date divider -->
 				<template v-if="msg.isInitMessage">
 					<MessageBubble :message="msg" :isGroup="isGroup" :showAvatar="isGroup" @action="onMessageAction" />
 					<div class="date-divider">{{ formatDay(msg.sendTime) }}</div>
 				</template>
+
+				<!-- Join/Leave message rendering: shows a message when a user joins or leaves the chat, with a date divider if it's a new day -->
 				<template v-else-if="msg.isJoinMessage || msg.isLeaveMessage">
 					<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
 						{{ formatDay(msg.sendTime) }}
 					</div>
 					<MessageBubble :message="msg" :isGroup="isGroup" @action="onMessageAction" />
 				</template>
+
+				<!-- Regular message rendering: shows a standard message with a date divider if it's a new day -->
 				<template v-else>
 					<div v-if="i === 0 || isNewDay(messages[i - 1], msg)" class="date-divider">
 						{{ formatDay(msg.sendTime) }}
@@ -215,7 +262,8 @@ export default {
 			</template>
 		</div>
 
-		<MessageInput v-model="newMsg" v-model:images="newImages" :sending="sending" :chat-id="chatId" :reply-to="replyTo" @send="sendMessage" @error="onImageError" @clear-reply="replyTo = null" />
+		<!-- MESSAGE INPUT AREA -->
+		<MessageInput v-model:message-text="newMsg" v-model:images="newImages" :sending="sending" :chat-id="chatId" :reply-to="replyTo" @send="sendMessage" @error="onImageError" @clear-reply="replyTo = null" />
 	</div>
 </template>
 

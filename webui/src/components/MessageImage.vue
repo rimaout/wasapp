@@ -1,18 +1,30 @@
 <script>
-// Loads a message image as an authenticated blob (the message image endpoint
-// requires a Bearer token, so a plain <img src> cannot be used).
+/**
+ * MessageImage - A component that loads and displays an image from a chat message.
+ *
+ * Used in:
+ *  - MessageBubble.vue to display images in chat messages
+ *  - MessageInput.vue to display image previews when replying to a message.
+ *
+ * Props:
+ *  - chatId: The ID of the chat the image belongs to.
+ *  - imageId: The ID of the image to load.
+ *  - thumbnail: Whether to display the image as a thumbnail (small square, used for image previews in the chat list). Defaults to false.
+ *
+ * Emits: None
+ */
 export default {
 	props: {
-		chatId:    { type: String, required: true  },
-		imageId:   { type: String, required: true  },
+		chatId:    { type: String,  required: true },
+		imageId:   { type: String,  required: true },
 		thumbnail: { type: Boolean, default: false },
 	},
 
 	data() {
 		return {
-			loading: true,
-			src: null,
-			failed: false,
+			loading: true, // Whether the image is currently being loaded
+			src: null,     // The blob URL of the loaded image (null if not loaded or failed)
+			failed: false, // Whether the image failed to load
 		};
 	},
 
@@ -23,18 +35,21 @@ export default {
 	},
 
 	created() {
-		// Load the image when the component is created (equivalent of the previous immediate watcher)
-		this.load();
+		this.load(); // Load the image when the component is created
 	},
 
 	methods: {
 		async load() {
 			this.loading = true;
 			this.failed = false;
+
+			// Release the previous blob URL before loading a new image
 			if (this.src) {
 				URL.revokeObjectURL(this.src);
 				this.src = null;
 			}
+
+			// Request the image from the server as a blob (binary data)
 			try {
 				const res = await this.$axios.get('/chats/' + this.chatId + '/images/' + this.imageId, { responseType: 'blob' });
 				this.src = URL.createObjectURL(res.data);
@@ -46,15 +61,21 @@ export default {
 	},
 
 	beforeUnmount() {
-		if (this.src) URL.revokeObjectURL(this.src);
+		if (this.src) URL.revokeObjectURL(this.src); // Release the blob URL when the component is destroyed
 	},
 };
 </script>
 
 <template>
 	<div class="message-image" :class="{ thumbnail }">
+
+		<!-- Show a loading spinner while the image is being loaded -->
 		<LoadingSpinner v-if="loading" :loading="loading" />
+
+		<!-- Show the image if it was successfully loaded -->
 		<img v-else-if="src" :src="src" alt="Message image" class="message-image-img" />
+
+		<!-- Show a placeholder if the image failed to load -->
 		<span v-else-if="failed" class="message-image-failed">Image unavailable</span>
 	</div>
 </template>
