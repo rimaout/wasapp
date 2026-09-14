@@ -210,7 +210,7 @@ export default {
 		<div v-else class="message-row" @mouseenter="hovered = true" @mouseleave="hovered = false">
 
 			<!-- Action menu for the sender's own messages (show on hover) -->
-			<ActionMenu v-if="isMine" :items="actionItems" trigger-button-mode="hover" :trigger-button-visible="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-right" @select="onMenuSelect" @done="onActionDone" />
+			<ActionMenu v-if="isMine" :items="actionItems" trigger-button-mode="hover" :is-hovering="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-right" @select="onMenuSelect" @done="onActionDone" />
 
 			<div class="message-bubble" :class="[isMine ? 'me' : 'other', { 'has-avatar': hasAvatar, 'has-image': hasImage }]">
 
@@ -267,7 +267,7 @@ export default {
 			</div>
 
 			<!-- Action menu for other users' messages (show on hover) -->
-			<ActionMenu v-if="!isMine" :items="actionItems" trigger-button-mode="hover" :trigger-button-visible="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-left" @select="onMenuSelect" @done="onActionDone" />
+			<ActionMenu v-if="!isMine" :items="actionItems" trigger-button-mode="hover" :is-hovering="hovered" trigger-button-icon="more-vertical" trigger-button-size="small" trigger-button-filled placement="down-left" @select="onMenuSelect" @done="onActionDone" />
 		</div>
 
 		<!-- Reactions display -->

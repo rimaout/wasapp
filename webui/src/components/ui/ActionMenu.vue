@@ -33,7 +33,7 @@ export default {
 		items:                  { type: Array,   required: true        }, // array of menu items (simple / confirm / action screen)
 		placement:              { type: String,  default: 'down-right' }, // 'down-right' | 'down-left' | 'top-right' | 'top-left' used to position the menu relative to the trigger button
 		triggerButtonMode:      { type: String,  default: 'visible'    }, // 'visible' | 'hover' used to control when the trigger button is shown (hover mode is used for message menus that reveal the trigger button on hover)
-		triggerButtonVisible:   { type: Boolean, default: false        },
+		isHovering:             { type: Boolean, default: false        }, // whether the parent is hovering (used with triggerButtonMode 'hover' to reveal the trigger button)
 		triggerButtonIcon:      { type: String,  required: true        }, // feather icon name for the trigger button (e.g. 'more-vertical')
 		triggerButtonFilled:    { type: Boolean, default: false        }, // filled trigger background
 		triggerButtonSize:      { type: String,  default: 'default'    }, // 'default' | 'small'
@@ -55,7 +55,7 @@ export default {
 
 	computed: {
 		showTrigger() {
-			return this.triggerButtonMode !== 'hover' || this.triggerButtonVisible || this.open;
+			return this.triggerButtonMode !== 'hover' || this.isHovering || this.open;
 		},
 	},
 
@@ -69,17 +69,15 @@ export default {
 		repositionMenu() {
 			if (this.open) this.positionMenu();
 		},
-
 		closeAll() {
+			// Close the menu and reset any active action or confirmation state.
 			this.open = false;
 			this.activeAction = null;
 			this.confirmItem = null;
 		},
-
 		toggle() {
 			this.open = !this.open;
 		},
-
 		choose(item) {
 			// Items with a `component` morph into that action screen in place.
 			if (item.component) {
@@ -96,47 +94,75 @@ export default {
 			this.closeAll();
 			this.$emit('select', item);
 		},
-
 		onConfirm() {
+			// Emit the selected danger item after confirmation.
 			const item = this.confirmItem;
 			this.closeAll();
 			this.$emit('select', item);
 		},
-
 		onActionDone(payload) {
+			// Emit the `done` event from the active action screen, forwarding any payload.
 			this.$emit('done', payload);
 			this.closeAll();
 		},
-
 		positionMenu() {
-			//
+			// Safety check: check if the trigger and menu elements are available before proceeding with positioning
 			if (!this.$refs.trigger || !this.$refs.menu) return;
-			const t  = this.$refs.trigger.getBoundingClientRect();
-			const mw = this.$refs.menu.offsetWidth;
-			const mh = this.$refs.menu.offsetHeight;
 
-			const alignRight = this.placement.includes('right');
-			const preferTop  = this.placement.includes('top');
+			// Get measurements
+			const triggerRect = this.$refs.trigger.getBoundingClientRect();
+			const menuWidth = this.$refs.menu.offsetWidth;
+			const menuHeight = this.$refs.menu.offsetHeight;
 
-			let left = alignRight ? t.right - mw : t.left;
-			left = Math.max(8, Math.min(left, window.innerWidth - mw - 8));
+			// ----------------------------------------------------
+			// STEP 1: Calculate Left Position (Horizontal)
+			// ----------------------------------------------------
+			let left = triggerRect.left; // Default: align left edges
 
-			const style = { left: left + 'px', visibility: 'visible' };
+			if (this.placement.includes('right')) {
+				left = triggerRect.right - menuWidth; // Align right edges
+			}
 
-			// Flip vertically if the preferred direction does not fit.
-			const spaceBelow = window.innerHeight - t.bottom;
-			const spaceAbove = t.top;
+			// Keep menu inside screen bounds (8px margin)
+			const minLeft = 8;
+			const maxLeft = window.innerWidth - menuWidth - 8;
+
+			if (left < minLeft) left = minLeft; // Don't overflow left edge
+			if (left > maxLeft) left = maxLeft; // Don't overflow right edge
+
+			// ----------------------------------------------------
+			// STEP 2: Decide Open Direction (Up or Down)
+			// ----------------------------------------------------
+			const spaceBelow = window.innerHeight - triggerRect.bottom;
+			const spaceAbove = triggerRect.top;
+			const preferTop = this.placement.includes('top');
+
 			let openUp = preferTop;
-			if (preferTop && spaceAbove < mh + 8) openUp = false;
-			if (!preferTop && spaceBelow < mh + 8) openUp = true;
+
+			// Flip direction if space is too tight (needs menu height + 8px gap)
+			if (preferTop && spaceAbove < menuHeight + 8) {
+				openUp = false; // Force open downwards
+			}
+			if (!preferTop && spaceBelow < menuHeight + 8) {
+				openUp = true;  // Force open upwards
+			}
+
+			// ----------------------------------------------------
+			// STEP 3: Apply CSS Style Object
+			// ----------------------------------------------------
+			const style = {
+				visibility: 'visible',
+				left: left + 'px'
+			};
 
 			if (openUp) {
-				style.bottom = (window.innerHeight - t.top + 6) + 'px';
+				style.bottom = (window.innerHeight - triggerRect.top + 6) + 'px';
 			} else {
-				style.top = (t.bottom + 6) + 'px';
+				style.top = (triggerRect.bottom + 6) + 'px';
 			}
+
 			this.menuStyle = style;
-		},
+		}
 	},
 };
 </script>
