@@ -6,7 +6,7 @@ import { getToken, clearAuth } from "./auth.js";
  * header if it exists, and handles 401 Unauthorized responses by clearing the auth and redirecting to the login page.
  */
 const instance = axios.create({
-	baseURL: __API_URL__,
+	baseURL: `http://${window.location.hostname}:3000`,
 	timeout: 1000 * 5
 });
 
